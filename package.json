@@ -1,0 +1,11 @@
+{
+  "name": "dt_backend",
+  "version": "1.0.0",
+  "description": "Server and algorithms for DeltaTrades",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "David Irvin & Ash Thomas",
+  "license": "ISC"
+}
