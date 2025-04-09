@@ -1,11 +1,23 @@
 {
-  "name": "dt_backend",
-  "version": "1.0.0",
-  "description": "Server and algorithms for DeltaTrades",
-  "main": "index.js",
-  "scripts": {
-    "test": "test"
-  },
-  "author": "David Irvin & Ash Thomas",
-  "license": "ISC"
+	"name": "dt_backend",
+	"version": "1.0.0",
+	"description": "Server and algorithms for DeltaTrades",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"start": "tsc && node dist/index.js",
+		"dev": "tsx src/index.ts",
+		"test": "test"
+	},
+	"dependencies": {
+		"tsx": "^4.19.3",
+		"ws": "^8.13.0"
+	},
+	"devDependencies": {
+		"@types/ws": "^8.18.1",
+		"ts-node-dev": "^2.0.0",
+		"typescript": "^5.3.3"
+	},
+	"author": "David Irvin & Ash Thomas",
+	"license": "ISC"
 }
