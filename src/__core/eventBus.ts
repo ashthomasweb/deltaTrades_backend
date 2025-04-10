@@ -1,7 +1,7 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'events'
 
 export class EventBus extends EventEmitter {
   constructor() {
-    super();
+    super()
   }
 }
