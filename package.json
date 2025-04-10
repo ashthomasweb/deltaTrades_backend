@@ -10,6 +10,8 @@
 		"test": "test"
 	},
 	"dependencies": {
+		"axios": "^1.8.4",
+		"dotenv": "^16.4.7",
 		"tsx": "^4.19.3",
 		"ws": "^8.13.0"
 	},
@@ -25,6 +27,6 @@
 	"author": "David Irvin & Ash Thomas",
 	"license": "ISC",
 	"engines": {
-  		"node": "20.16.0"
+		"node": "20.16.0"
 	}
 }

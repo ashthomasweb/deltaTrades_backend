@@ -8,6 +8,8 @@ export class WebSocketServer {
   constructor(private bus: EventBus) {
     this.wss = new WSS({ port: 8080 })
 
+    const historicalService = new HistoricalService(bus)
+
     this.wss.on('connection', (ws: WebSocket) => {
       ws.send(JSON.stringify({ msg: 'Established' }))
       this.bus.on('price:update', (data) =>
@@ -15,19 +17,40 @@ export class WebSocketServer {
       )
 
       ws.on('message', (message) => {
-        console.log('recieved msg')
+        console.log('WS received msg: ', message)
         try {
           const parsed = JSON.parse(message.toString())
           if (parsed.type === 'getHistorical') {
-            const mockHistoricalData = [
-              { symbol: 'SPY', prices: [430, 432, 435, 437] },
-            ]
-            ws.send(
-              JSON.stringify({
-                type: 'historical',
-                data: mockHistoricalData,
-              }),
-            )
+
+            const historicalRequest = {
+              function: 'TIME_SERIES_INTRADAY',
+              symbol: 'TSLA',
+              interval: '60min',
+              month: '2025-03',
+              outputsize: 'partial',
+              apikey: process.env.ALPHA_VANTAGE_KEY,
+            }
+            historicalService.fetch(historicalRequest)
+
+            this.bus.once('historical:data', (data) => {
+              ws.send(
+                JSON.stringify({
+                  type: 'historical',
+                  data,
+                })
+              )
+            })
+
+            // const mockHistoricalData = [
+            //   { symbol: 'SPY', prices: [430, 432, 435, 437] },
+            // ]
+
+            // ws.send(
+            //   JSON.stringify({
+            //     type: 'historical',
+            //     data: mockHistoricalData,
+            //   }),
+            // )
           }
         } catch (err) {
           console.error('Error handling WS message:', err)
