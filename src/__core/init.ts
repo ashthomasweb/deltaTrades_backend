@@ -22,8 +22,9 @@ export function initApp() {
     outputsize: 'compact',
     apikey: process.env.ALPHA_VANTAGE_KEY,
   }
-  historical.fetch(historicalRequest)
-  // realTime.connect()
+  // historical.fetch(historicalRequest)
+
+  realTime.startStream()
 
   Logger.info('DeltaTrades backend initialized.')
 }
