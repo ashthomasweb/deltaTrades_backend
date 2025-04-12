@@ -1,16 +1,3 @@
-// import { EventBus } from '../../__core/eventBus'
-
-// export class RealTimeService {
-//   constructor(private bus: EventBus) {}
-
-//   connect() {
-//     setInterval(() => {
-//       const data = { symbol: 'SPY', price: Math.random() * 500 }
-//       this.bus.emit('price:update', data)
-//     }, 1000)
-//   }
-// }
-
 import axios from 'axios'
 import { config } from '../../__core/config'
 
@@ -46,15 +33,18 @@ export class RealTimeService {
 
   async initTradierWS() {
     const tradierStream = new WebSocket(config.REALTIME_WS_BASE_URL)
+    let streamPollInterval = 30_000 // TODO: v1 had an interval set to 30sec... But the api returns on every new tick. API changed?
 
     const symbols = ["TSLA"]
     const linebreak = true
     const sessionid = this.sessionid
+    const filter = ['summary']
 
     const streamRequestPayload = JSON.stringify({
       symbols,
       sessionid,
       linebreak,
+      filter
     })
 
     tradierStream.on('open', () => {
@@ -69,25 +59,11 @@ export class RealTimeService {
 
     tradierStream.on('error', (error) => {
       console.error(error)
-      // console.log(data)
     })
 
     tradierStream.on("close", () => {
       console.log("Tradier stream closed")
-      // clearInterval(tradeDataInterval)
       tradierStream.terminate()
     })
   }
-
-  // start(symbol: string) {
-  //   Logger.info(`Starting real-time feed for ${symbol}`)
-  //   setInterval(async () => {
-  //     try {
-  //       const data = await marketDataAdapter.fetchRealtime(symbol)
-  //       this.bus.emit('price:update', data)
-  //     } catch (error) {
-  //       Logger.error(`Real-time fetch failed: ${error}`)
-  //     }
-  //   }, 3000)
-  // }
 }
