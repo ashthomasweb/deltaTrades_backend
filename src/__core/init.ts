@@ -14,16 +14,7 @@ export function initApp() {
   const historical = new HistoricalService(eventBus)
   const wsServer = new WebSocketServer(eventBus)
 
-  const historicalRequest = {
-    function: 'TIME_SERIES_INTRADAY',
-    symbol: 'TSLA',
-    interval: '60min',
-    month: '2022-10',
-    outputsize: 'compact',
-    apikey: process.env.ALPHA_VANTAGE_KEY,
-  }
-  historical.fetch(historicalRequest)
-  // realTime.connect()
+  realTime.startStream()
 
   Logger.info('DeltaTrades backend initialized.')
 }
