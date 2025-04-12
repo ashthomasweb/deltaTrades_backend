@@ -106,6 +106,9 @@ export class WebSocketServer {
   }
 
   close() {
+    this.wss.clients.forEach((client) => {
+      client.close()
+    })
     this.wss.close()
   }
 }

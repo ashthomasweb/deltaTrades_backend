@@ -45,7 +45,6 @@ describe('WebSocketServer', () => {
 
   afterEach(async () => {
     server.close()
-    client.close()
     vi.restoreAllMocks()
   })
 
