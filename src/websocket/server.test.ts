@@ -41,7 +41,7 @@ describe('WebSocketServer', () => {
     client.send('invalid message')
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     server.close()
   })
 
@@ -74,7 +74,7 @@ describe('WebSocketServer', () => {
     )
   })
 
-  it('should handle errors gracefully', () => {
+  it('should handle invalid client messages gracefully', () => {
     expect(console.error).toHaveBeenCalledWith(
       'Error handling WS message:',
       expect.any(SyntaxError),
