@@ -9,8 +9,8 @@ describe('WebSocketServer', () => {
   const eventBus = new EventBus()
   let server: WebSocketServer
   let client: WebSocket
-  let wsServerOn: MockInstance
-  let wsServerSend: MockInstance
+  let wssOn: MockInstance
+  let wssSend: MockInstance
   const mockHistoricalData = [
     {
       symbol: 'TSLA',
@@ -19,9 +19,8 @@ describe('WebSocketServer', () => {
   ]
 
   beforeEach(async () => {
-    // Spy on WebSocketServer and WebSocket methods
-    wsServerOn = vi.spyOn(WSS.prototype, 'on')
-    wsServerSend = vi.spyOn(WebSocket.prototype, 'send')
+    wssOn = vi.spyOn(WSS.prototype, 'on')
+    wssSend = vi.spyOn(WebSocket.prototype, 'send')
     vi.spyOn(HistoricalService.prototype, 'fetch').mockImplementation(
       async () => {
         eventBus.emit('historical:data', mockHistoricalData)
@@ -33,11 +32,10 @@ describe('WebSocketServer', () => {
     vi.spyOn(Logger, 'info').mockImplementation(vi.fn())
 
     server = new WebSocketServer(eventBus)
-    await vi.waitFor(() => {
-      expect(server.listening).toBe(true)
-    })
+    await vi.waitFor(() => expect(server.listening).toBe(true))
+
     client = new WebSocket('ws://localhost:8080')
-    await new Promise((resolve) => client.on('open', () => resolve(null)))
+    await new Promise((resolve) => client.on('open', resolve))
     client.send(JSON.stringify({ type: 'getHistorical' }))
     client.send(JSON.stringify({ type: 'otherRequest' }))
     client.send('invalid message')
@@ -55,17 +53,15 @@ describe('WebSocketServer', () => {
   })
 
   it('should listen for client connections', () => {
-    expect(wsServerOn).toHaveBeenCalledWith('connection', expect.any(Function))
+    expect(wssOn).toHaveBeenCalledWith('connection', expect.any(Function))
   })
 
   it('should send initial message on client connection', () => {
-    expect(wsServerSend).toHaveBeenCalledWith(
-      JSON.stringify({ msg: 'Established' }),
-    )
+    expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ msg: 'Established' }))
   })
 
-  it("should resond with historical data on 'getHistorical' message", () => {
-    expect(wsServerSend).toHaveBeenCalledWith(
+  it("should respond with historical data on 'getHistorical' message", () => {
+    expect(wssSend).toHaveBeenCalledWith(
       JSON.stringify({ type: 'historical', data: mockHistoricalData }),
     )
   })
@@ -73,7 +69,7 @@ describe('WebSocketServer', () => {
   it("should send price updates to clients on 'price:update' event", () => {
     const priceUpdate = { symbol: 'TSLA', price: 720 }
     eventBus.emit('price:update', priceUpdate)
-    expect(wsServerSend).toHaveBeenCalledWith(
+    expect(wssSend).toHaveBeenCalledWith(
       JSON.stringify({ type: 'price', data: priceUpdate }),
     )
   })
