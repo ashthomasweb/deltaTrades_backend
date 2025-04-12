@@ -1,0 +1,10 @@
+name: Main test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  main-test:
+    uses: ./github/workflows/run-test.yml

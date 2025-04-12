@@ -1,25 +1,12 @@
-name: PR Test
-
-concurrency:
-  group: ${{ github.head_ref }}
-  cancel-in-progress: ${{ github.event_name == "pull_request" }}
+name: Test Suite
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-  push:
-    branches:
-      - main
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   RunVitest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Repository
