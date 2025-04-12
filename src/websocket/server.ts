@@ -15,7 +15,7 @@ const useMockCompact = {
 
 export class WebSocketServer {
   private wss: WSS
-  public listening = false
+  private _listening = false
 
   constructor(private bus: EventBus) {
     this.wss = new WSS({ port: 8080 })
@@ -24,7 +24,7 @@ export class WebSocketServer {
 
     this.wss.on('listening', () => {
       Logger.info('WebSocket server is listening on port 8080')
-      this.listening = true
+      this._listening = true
     })
 
     this.wss.on('connection', (ws: WebSocket) => {
@@ -101,8 +101,12 @@ export class WebSocketServer {
 
     this.wss.on('close', () => {
       Logger.info('WebSocket server closed')
-      this.listening = false
+      this._listening = false
     })
+  }
+
+  get listening() {
+    return this._listening
   }
 
   close() {
