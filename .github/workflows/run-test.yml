@@ -1,0 +1,24 @@
+name: Test Suite
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  RunVitest:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.16.0
+
+      - name: Setup local packages
+        run: npm install
+
+      - name: Execute test script
+        run: npm run test
