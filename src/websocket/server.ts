@@ -98,6 +98,11 @@ export class WebSocketServer {
         }
       })
     })
+
+    this.wss.on('close', () => {
+      Logger.info('WebSocket server closed')
+      this.listening = false
+    })
   }
 
   close() {

@@ -3,8 +3,9 @@ import { EventBus } from '../__core/eventBus'
 import { WebSocketServer } from './server'
 import { WebSocketServer as WSS, WebSocket } from 'ws'
 import { HistoricalService } from '../services/data/historicalService'
+import { Logger } from '../__core/logger'
 
-describe('server', () => {
+describe('WebSocketServer', () => {
   const eventBus = new EventBus()
   let server: WebSocketServer
   let client: WebSocket
@@ -26,28 +27,33 @@ describe('server', () => {
         eventBus.emit('historical:data', mockHistoricalData)
       },
     )
-    vi.spyOn(console, 'error')
 
-    // Create server and client
+    vi.spyOn(console, 'error').mockImplementation(vi.fn())
+    vi.spyOn(console, 'log').mockImplementation(vi.fn())
+    vi.spyOn(Logger, 'info').mockImplementation(vi.fn())
+
     server = new WebSocketServer(eventBus)
     await vi.waitFor(() => {
       expect(server.listening).toBe(true)
     })
     client = new WebSocket('ws://localhost:8080')
-    client.on('open', () => {
-      client.send(JSON.stringify({ type: 'getHistorical' }))
-      client.send(JSON.stringify({ type: 'otherRequest' }))
-      client.send('invalid message')
-    })
+    await new Promise((resolve) => client.on('open', () => resolve(null)))
+    client.send(JSON.stringify({ type: 'getHistorical' }))
+    client.send(JSON.stringify({ type: 'otherRequest' }))
+    client.send('invalid message')
   })
 
-  afterEach(() => {
-    vi.restoreAllMocks()
+  afterEach(async () => {
     server.close()
+    client.close()
+    vi.restoreAllMocks()
   })
 
   it('should create a WebSocket server', () => {
     expect(server).toBeDefined()
+    expect(Logger.info).toHaveBeenCalledWith(
+      'WebSocket server is listening on port 8080',
+    )
   })
 
   it('should listen for client connections', () => {
