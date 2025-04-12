@@ -1,5 +1,5 @@
 export const Logger = {
-  info: (msg: string) => console.log(`[INFO] ${msg}`),
-  error: (msg: string) => console.error(`[ERROR] ${msg}`),
-  debug: (msg: string) => console.debug(`[DEBUG] ${msg}`),
+  info: (...msgs: any[]) => console.log('[INFO]', ...msgs),
+  error: (...msgs: any[]) => console.error('[ERROR]', ...msgs),
+  debug: (...msgs: any[]) => console.debug('[DEBUG]', ...msgs),
 }
