@@ -7,4 +7,4 @@ on:
 
 jobs:
   main-test:
-    uses: ./github/workflows/run-test.yml
+    uses: ./.github/workflows/run-test.yml
