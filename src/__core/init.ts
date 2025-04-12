@@ -4,9 +4,11 @@ import { RealTimeService } from '../services/data/realTimeService'
 import { HistoricalService } from '../services/data/historicalService'
 import { WebSocketServer } from '../websocket/server'
 import { Logger } from './logger'
+import { initDB } from '../database/dbClient'
 
-export function initApp() {
+export async function initApp() {
   Logger.info('Initializing DeltaTrades backend...')
+  await initDB()
 
   const eventBus = new EventBus()
 
