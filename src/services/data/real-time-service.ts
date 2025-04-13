@@ -1,9 +1,10 @@
-import axios from 'axios'
-import { config } from '../../__core/config'
+/* src/services/brokerage/real-time-service.ts */
 
-import { marketDataAdapter } from './_marketDataAdapter'
-import { EventBus } from '../../__core/eventBus'
+import { config } from '../../__core/config'
+import { EventBus } from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
+// import { marketDataAdapter } from './_market-data-adapter'
+import axios from 'axios'
 import WebSocket from 'ws'
 
 export class RealTimeService {
@@ -18,6 +19,7 @@ export class RealTimeService {
 
   async getSessionId() {
     const options = {
+      // TODO: Could be moved to a config file
       headers: {
         Authorization: `Bearer ${config.REALTIME_API_KEY}`,
         Accept: 'application/json',
@@ -31,18 +33,20 @@ export class RealTimeService {
       )
       this.sessionid = response.data.stream.sessionid
     } catch (error) {
-      console.error('Failed to create Tradier stream \r\n', error)
+      Logger.error('Failed to create Tradier stream \r\n', error)
     }
   }
 
   async initTradierWS() {
     const tradierStream = new WebSocket(config.REALTIME_WS_BASE_URL)
-    let streamPollInterval = 30_000 // TODO: v1 had an interval set to 30sec... But the api returns on every new tick. API changed?
+    let streamPollInterval = 30_000 // TODO: Investigate - v1 had an interval set to 30sec... But the api returns on every new tick. API changed? Manual rate limiting?
+    const sessionid = this.sessionid
 
+    // TODO: These request specific params need to be controllable from the frontend, and persist after being set
     const symbols = ['TSLA']
     const linebreak = true
-    const sessionid = this.sessionid
     const filter = ['summary']
+    // END
 
     const streamRequestPayload = JSON.stringify({
       symbols,
@@ -52,21 +56,22 @@ export class RealTimeService {
     })
 
     tradierStream.on('open', () => {
-      console.log('Tradier Stream Open')
+      Logger.info('Tradier Stream Open')
       tradierStream.send(streamRequestPayload)
     })
 
     tradierStream.on('message', (data) => {
-      console.log('Tradier WS response:')
-      console.log(JSON.parse(data.toString()))
+      Logger.info('Tradier WS response:')
+      Logger.info(JSON.parse(data.toString()))
+      // TODO: use the marketDataAdapter to request realTime data with received params
     })
 
     tradierStream.on('error', (error) => {
-      console.error(error)
+      Logger.error(error)
     })
 
     tradierStream.on('close', () => {
-      console.log('Tradier stream closed')
+      Logger.info('Tradier stream closed')
       tradierStream.terminate()
     })
   }

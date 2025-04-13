@@ -1,3 +1,5 @@
+/* src/__core/config.ts */
+
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -15,3 +17,9 @@ export const config = {
   /* MongoDB */
   MONGO_URL: process.env.MONGO_URL || '',
 }
+
+/**
+ * NOTE: Perhaps we should have a text file that we use to keep root level logs for the rate-limit per day
+ * on AlphaVantage. We could have a data:count pair, which is used to log out the count as we are making
+ * requests.
+ */

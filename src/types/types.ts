@@ -1,3 +1,5 @@
+/* src/types/types.ts */
+
 export interface DataPacket {
   contractType: string
   tickerSymbol: string

@@ -1,3 +1,5 @@
+/* src/index.ts */
+
 import { initApp } from './__core/init'
 import { Logger } from './__core/logger'
 

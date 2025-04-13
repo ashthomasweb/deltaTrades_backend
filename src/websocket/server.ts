@@ -1,15 +1,19 @@
-import WebSocket, { WebSocketServer as WSS } from 'ws'
-import { EventBus } from '../__core/eventBus'
-import { HistoricalService } from '../services/data/historicalService'
-import { Logger } from '../__core/logger'
+/* src/websocket/server.ts */
 
+import { EventBus } from '../__core/event-bus'
+import { Logger } from '../__core/logger'
+import { historicalActions } from '../services/data/historical-actions'
+import { HistoricalService } from '../services/data/historical-service'
+import WebSocket, { WebSocketServer as WSS } from 'ws'
+
+// TODO: Create mockConfig file and object to gather 'use' condition, path, and label for clear logging
 const useMockFull = {
-  use: true,
+  use: false,
   path: './src/mockData/TSLA-1min-03-25-full.json',
 }
 
 const useMockCompact = {
-  use: false,
+  use: true,
   path: './src/mockData/TSLA-1min-03-25-compact.json',
 }
 
@@ -28,70 +32,49 @@ export class WebSocketServer {
     })
 
     this.wss.on('connection', (ws: WebSocket) => {
+      // TODO: Extract event-based 'ws' functions away - perhaps a class that accepts 'ws' and 'bus' in the contructor, and is imported
+      // Send data upon 'once' event
+      const sendOnceData = (event: string, type: string) => {
+        this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
+      }
+
       ws.send(JSON.stringify({ msg: 'Established' }))
+
       this.bus.on('price:update', (data) =>
         ws.send(JSON.stringify({ type: 'price', data })),
       )
 
       ws.on('message', (message) => {
-        // console.log('WS received msg: ', JSON.parse(message.toString()))
         try {
-          const parsed = JSON.parse(message.toString())
-          if (parsed.type === 'getHistorical') {
-            if (useMockCompact.use || useMockFull.use) {
-              historicalService.fetchMock(
-                useMockFull.use ? useMockFull.path : useMockCompact.path,
-              )
+          Logger.info(
+            'Websocket received message:',
+            JSON.parse(message.toString()),
+          )
+          const parsedMsg = JSON.parse(message.toString())
+          const useMockData = useMockCompact.use || useMockFull.use
 
-              this.bus.once('historical:data', (data) => {
-                ws.send(
-                  JSON.stringify({
-                    type: 'historical',
-                    data,
-                  }),
-                )
-              })
-            } else {
-              console.log('ATTN! Using rate-limited historical endpoint!')
-              const historicalRequest = {
-                function: 'TIME_SERIES_INTRADAY',
-                symbol: parsed.symbol,
-                interval: '1min',
-                month: '2025-03',
-                outputsize: 'compact',
-                apikey: process.env.ALPHA_VANTAGE_KEY,
+          switch (parsedMsg.type) {
+            case 'getHistorical':
+              // TODO: Elegantly handle the mock conditions. Recommend requesting mock/non-mock data, and which dataset directly from frontend.
+              // This will enable the server to remain running - potentially trading - while research/testing is being performed.
+              if (useMockData) {
+                const mockPath = useMockCompact
+                  ? useMockCompact.path
+                  : useMockFull.path
+                historicalActions.sendMock(historicalService, mockPath)
+                sendOnceData('historical:data', 'historical')
+              } else {
+                historicalActions.sendRequested(historicalService, parsedMsg)
+                sendOnceData('historical:data', 'historical')
               }
-              historicalService.fetch(historicalRequest)
+              break
 
-              this.bus.once('historical:data', (data) => {
-                // console.log(data)
-                ws.send(
-                  JSON.stringify({
-                    type: 'historical',
-                    data,
-                  }),
-                )
-              })
-            }
-            this.bus.once('historical:data', (data) => {
-              ws.send(
-                JSON.stringify({
-                  type: 'historical',
-                  data,
-                }),
-              )
-            })
+            case 'monitorRealTime':
+              // TODO: Tap into existing stream
+              break
 
-            // const mockHistoricalData = [
-            //   { symbol: 'SPY', prices: [430, 432, 435, 437] },
-            // ]
-
-            // ws.send(
-            //   JSON.stringify({
-            //     type: 'historical',
-            //     data: mockHistoricalData,
-            //   }),
-            // )
+            default:
+              break
           }
         } catch (err) {
           console.error('Error handling WS message:', err)

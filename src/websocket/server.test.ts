@@ -1,9 +1,11 @@
-import { MockInstance, vi } from 'vitest'
-import { EventBus } from '../__core/eventBus'
-import { WebSocketServer } from './server'
-import { WebSocketServer as WSS, WebSocket } from 'ws'
-import { HistoricalService } from '../services/data/historicalService'
+/* src/websocket/server.test.ts */
+
+import { EventBus } from '../__core/event-bus'
 import { Logger } from '../__core/logger'
+import { HistoricalService } from '../services/data/historical-service'
+import { WebSocketServer } from './server'
+import { MockInstance, vi } from 'vitest'
+import { WebSocketServer as WSS, WebSocket } from 'ws'
 
 describe('WebSocketServer', () => {
   const eventBus = new EventBus()
