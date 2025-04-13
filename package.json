@@ -1,37 +1,41 @@
 {
-	"name": "dt_backend",
-	"version": "1.0.0",
-	"description": "Server and algorithms for DeltaTrades",
-	"type": "module",
-	"main": "dist/index.js",
-	"scripts": {
-		"start": "tsc && node dist/index.js",
-		"dev": "tsx src/index.ts",
-		"test": "vitest run --coverage"
-	},
-	"dependencies": {
-		"axios": "^1.8.4",
-		"dotenv": "^16.4.7",
-		"fs": "^0.0.1-security",
-		"mongoose": "^8.13.2",
-		"tsx": "^4.19.3",
-		"ws": "^8.13.0"
-	},
-	"devDependencies": {
-		"@types/jest": "^29.5.14",
-		"@types/ws": "^8.18.1",
-		"@vitest/coverage-istanbul": "^3.1.1",
-		"eslint": "^9.24.0",
-		"eslint-config-prettier": "^10.1.1",
-		"eslint-plugin-prettier": "^5.2.6",
-		"prettier": "^3.5.3",
-		"ts-node-dev": "^2.0.0",
-		"typescript": "^5.3.3",
-		"vitest": "^3.1.1"
-	},
-	"author": "David Irvin & Ash Thomas",
-	"license": "ISC",
-	"engines": {
-		"node": "20.16.0"
-	}
+  "name": "dt_backend",
+  "version": "1.0.0",
+  "description": "Server and algorithms for DeltaTrades",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc && node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint .",
+    "test": "vitest run --coverage",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "fs": "^0.0.1-security",
+    "mongoose": "^8.13.2",
+    "tsx": "^4.19.3",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@vitest/coverage-istanbul": "^3.1.1",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.6",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^3.1.1"
+  },
+  "author": "David Irvin & Ash Thomas",
+  "license": "ISC",
+  "engines": {
+    "node": "20.16.0"
+  }
 }

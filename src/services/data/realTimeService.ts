@@ -20,11 +20,15 @@ export class RealTimeService {
     const options = {
       headers: {
         Authorization: `Bearer ${config.REALTIME_API_KEY}`,
-        Accept: "application/json"
+        Accept: 'application/json',
       },
     }
     try {
-      const response = await axios.post(config.REALTIME_SESSION_URL, {}, options)
+      const response = await axios.post(
+        config.REALTIME_SESSION_URL,
+        {},
+        options,
+      )
       this.sessionid = response.data.stream.sessionid
     } catch (error) {
       console.error('Failed to create Tradier stream \r\n', error)
@@ -35,7 +39,7 @@ export class RealTimeService {
     const tradierStream = new WebSocket(config.REALTIME_WS_BASE_URL)
     let streamPollInterval = 30_000 // TODO: v1 had an interval set to 30sec... But the api returns on every new tick. API changed?
 
-    const symbols = ["TSLA"]
+    const symbols = ['TSLA']
     const linebreak = true
     const sessionid = this.sessionid
     const filter = ['summary']
@@ -44,7 +48,7 @@ export class RealTimeService {
       symbols,
       sessionid,
       linebreak,
-      filter
+      filter,
     })
 
     tradierStream.on('open', () => {
@@ -61,8 +65,8 @@ export class RealTimeService {
       console.error(error)
     })
 
-    tradierStream.on("close", () => {
-      console.log("Tradier stream closed")
+    tradierStream.on('close', () => {
+      console.log('Tradier stream closed')
       tradierStream.terminate()
     })
   }

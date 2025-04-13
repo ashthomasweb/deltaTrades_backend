@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { config } from '../../__core/config'
-import {promises as fs} from 'fs'
+import { promises as fs } from 'fs'
 
 export const marketDataAdapter = {
   async fetchHistorical(params: any) {
