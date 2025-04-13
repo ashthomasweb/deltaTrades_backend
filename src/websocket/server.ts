@@ -30,7 +30,9 @@ export class WebSocketServer {
     })
 
     this.wss.on('connection', (ws: WebSocket) => {
-      const sendOnce = (event: string, type: string) => {
+      // TODO: Extract event-based 'ws' functions away - perhaps a class that accepts 'ws' and 'bus' in the contructor, and is imported
+      // Send data upon 'once' event
+      const sendOnceData = (event: string, type: string) => {
         this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
       }
 
@@ -47,35 +49,17 @@ export class WebSocketServer {
         )
         try {
           const parsedMsg = JSON.parse(message.toString())
+          const useMockData = useMockCompact.use || useMockFull.use
 
           switch (parsedMsg.type) {
             case 'getHistorical':
-              if (useMockCompact.use || useMockFull.use) {
-
+              if (useMockData) {
                 const mockPath = useMockCompact ? useMockCompact.path : useMockFull.path
                 historicalActions.sendMock(historicalService, mockPath)
-                sendOnce('historical:data', 'historical')
-
-
-                // Logger.info(
-                //   `Requesting MOCK-DATA from ${useMockCompact ? useMockCompact.path : useMockFull.path}`,
-                // )
-
-                // historicalService.fetchMock(
-                //   useMockFull.use ? useMockFull.path : useMockCompact.path,
-                // )
-
-                // this.bus.once('historical:data', (data) => {
-                //   ws.send(
-                //     JSON.stringify({
-                //       type: 'historical',
-                //       data,
-                //     }),
-                //   )
-                // })
+                sendOnceData('historical:data', 'historical')
               } else {
                 historicalActions.sendRequested(historicalService, parsedMsg)
-                sendOnce('historical:data', 'historical')
+                sendOnceData('historical:data', 'historical')
               }
               break
 
