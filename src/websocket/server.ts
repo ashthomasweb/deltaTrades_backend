@@ -1,8 +1,10 @@
-import WebSocket, { WebSocketServer as WSS } from 'ws'
-import { EventBus } from '../__core/eventBus'
-import { HistoricalService } from '../services/data/historicalService'
+/* src/websocket/server.ts */
+
+import { EventBus } from '../__core/event-bus'
 import { Logger } from '../__core/logger'
-import { historicalActions } from '../services/data/historicalActions'
+import { historicalActions } from '../services/data/historical-actions'
+import { HistoricalService } from '../services/data/historical-service'
+import WebSocket, { WebSocketServer as WSS } from 'ws'
 
 // TODO: Create mockConfig file and object to gather 'use' condition, path, and label for clear logging
 const useMockFull = {
@@ -33,7 +35,7 @@ export class WebSocketServer {
       // TODO: Extract event-based 'ws' functions away - perhaps a class that accepts 'ws' and 'bus' in the contructor, and is imported
       // Send data upon 'once' event
       const sendOnceData = (event: string, type: string) => {
-        this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
+          this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
       }
 
       ws.send(JSON.stringify({ msg: 'Established' }))
@@ -43,16 +45,18 @@ export class WebSocketServer {
       )
 
       ws.on('message', (message) => {
-        Logger.info(
-          'Websocket received message:',
-          JSON.parse(message.toString()),
-        )
         try {
+          Logger.info(
+            'Websocket received message:',
+            JSON.parse(message.toString()),
+          )
           const parsedMsg = JSON.parse(message.toString())
           const useMockData = useMockCompact.use || useMockFull.use
 
           switch (parsedMsg.type) {
             case 'getHistorical':
+              // TODO: Elegantly handle the mock conditions. Recommend requesting mock/non-mock data, and which dataset directly from frontend.
+              // This will enable the server to remain running - potentially trading - while research/testing is being performed.
               if (useMockData) {
                 const mockPath = useMockCompact
                   ? useMockCompact.path
@@ -63,6 +67,10 @@ export class WebSocketServer {
                 historicalActions.sendRequested(historicalService, parsedMsg)
                 sendOnceData('historical:data', 'historical')
               }
+              break
+
+            case 'monitorRealTime':
+              // TODO: Tap into existing stream
               break
 
             default:

@@ -1,6 +1,8 @@
-import { marketDataAdapter } from './_marketDataAdapter'
-import { EventBus } from '../../__core/eventBus'
+/* src/services/brokerage/historical-actions.ts */
+
+import { EventBus } from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
+import { marketDataAdapter } from './_market-data-adapter'
 import { buildParamString } from '../../utils/api'
 
 export class HistoricalService {
@@ -18,10 +20,9 @@ export class HistoricalService {
   }
 
   async fetchMock(filepath: string) {
-    // Logger.info(`Fetching historical data for ${params.symbol}`)
+    // Logger.info(`Fetching historical data for ${params.symbol}`) // TODO: Implement once mock request is controllable from frontend
     try {
       const data = await marketDataAdapter.fetchMock(filepath)
-      // console.log(data)
       this.bus.emit('historical:data', data)
     } catch (error) {
       Logger.error(`Historical fetch failed: ${error}`)

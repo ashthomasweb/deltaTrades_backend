@@ -1,3 +1,5 @@
+/* src/database/models/data-packet.ts */
+
 import { InferSchemaType, Schema, model } from 'mongoose'
 
 const OrderInfoSchema = new Schema(

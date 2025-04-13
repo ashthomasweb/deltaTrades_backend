@@ -1,7 +1,8 @@
-/* src/core/init.ts */
-import { EventBus } from './eventBus'
-import { RealTimeService } from '../services/data/realTimeService'
-import { HistoricalService } from '../services/data/historicalService'
+/* src/__core/init.ts */
+
+import { EventBus } from './event-bus'
+import { RealTimeService } from '../services/data/real-time-service'
+import { HistoricalService } from '../services/data/historical-service'
 import { WebSocketServer } from '../websocket/server'
 import { Logger } from './logger'
 // import { initDB } from '../database/dbClient'

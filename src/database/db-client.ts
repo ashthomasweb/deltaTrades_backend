@@ -1,6 +1,8 @@
-import mongoose from 'mongoose'
+/* src/database/db-client.ts */
+
 import { Logger } from '../__core/logger'
 import { config } from '../__core/config'
+import mongoose from 'mongoose'
 
 export async function initDB() {
   try {
