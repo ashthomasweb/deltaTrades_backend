@@ -88,8 +88,6 @@ export class WebSocketServer {
     })
   }
 
-  sendOnce = () => {}
-
   get listening() {
     return this._listening
   }
