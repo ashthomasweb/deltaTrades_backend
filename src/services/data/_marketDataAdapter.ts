@@ -21,7 +21,6 @@ export const marketDataAdapter = {
     try {
       const jsonString = await fs.readFile(filepath, 'utf8')
       const data = JSON.parse(jsonString)
-      // console.log('File data:', data)
       return data[0].data
     } catch (err) {
       console.error('Failed to read or parse mock file:', err)
