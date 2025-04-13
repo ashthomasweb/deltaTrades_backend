@@ -19,7 +19,8 @@ export const marketDataAdapter = {
     return response.data
   },
 
-  async fetchMock(filepath: string) { // TODO: Mock data will need to have a data contract assigned to it - so anything saved as a mock dataset will need to be run through the not-yet-built DataAdapter class
+  async fetchMock(filepath: string) {
+    // TODO: Mock data will need to have a data contract assigned to it - so anything saved as a mock dataset will need to be run through the not-yet-built DataAdapter class
     try {
       const jsonString = await fs.readFile(filepath, 'utf8')
       const data = JSON.parse(jsonString)

@@ -4,6 +4,6 @@
  * Algo                 : Volume + Change Over Time
  * Success Rate         : N/A
  * Implemented On       : N/A
-*/
+ */
 
 // Go ninja, Go ninja, Go ninja, Go! Go! Go! Go! Go!

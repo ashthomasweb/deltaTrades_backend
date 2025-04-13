@@ -13,4 +13,4 @@ export class EventBus extends EventEmitter {
  * I'm wondering if we could create it as a Singleton here, and export -> import the instance
  * in various modules around the app. Currently, the webSocket server requires it as a parameter.
  * The more we encapsulate logic, the trickier it will be if we need to pass the instance around.
-**/
+ **/

@@ -35,7 +35,7 @@ export class WebSocketServer {
       // TODO: Extract event-based 'ws' functions away - perhaps a class that accepts 'ws' and 'bus' in the contructor, and is imported
       // Send data upon 'once' event
       const sendOnceData = (event: string, type: string) => {
-          this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
+        this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
       }
 
       ws.send(JSON.stringify({ msg: 'Established' }))

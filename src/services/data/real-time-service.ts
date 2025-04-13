@@ -18,7 +18,8 @@ export class RealTimeService {
   }
 
   async getSessionId() {
-    const options = { // TODO: Could be moved to a config file
+    const options = {
+      // TODO: Could be moved to a config file
       headers: {
         Authorization: `Bearer ${config.REALTIME_API_KEY}`,
         Accept: 'application/json',
