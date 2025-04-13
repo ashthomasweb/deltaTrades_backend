@@ -54,7 +54,9 @@ export class WebSocketServer {
           switch (parsedMsg.type) {
             case 'getHistorical':
               if (useMockData) {
-                const mockPath = useMockCompact ? useMockCompact.path : useMockFull.path
+                const mockPath = useMockCompact
+                  ? useMockCompact.path
+                  : useMockFull.path
                 historicalActions.sendMock(historicalService, mockPath)
                 sendOnceData('historical:data', 'historical')
               } else {
