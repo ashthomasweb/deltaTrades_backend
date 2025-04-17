@@ -1,5 +1,6 @@
 /* src/websocket/server.ts */
 
+import { truncate } from 'fs'
 import { EventBus } from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import { historicalActions } from '../services/data/historical-actions'
@@ -13,7 +14,7 @@ const useMockFull = {
 }
 
 const useMockCompact = {
-  use: true,
+  use: false,
   path: './src/mockData/TSLA-1min-03-25-compact.json',
 }
 

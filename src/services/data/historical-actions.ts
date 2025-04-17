@@ -19,9 +19,9 @@ export const historicalActions = {
     const historicalRequest = {
       function: 'TIME_SERIES_INTRADAY',
       symbol: parsedMsg.symbol,
-      interval: '1min',
-      month: '2025-03',
-      outputsize: 'compact',
+      interval: parsedMsg.interval,
+      month: parsedMsg.endDate.substring(0,7),
+      outputsize: parsedMsg.isCompact ? 'compact' : 'full',
       apikey: process.env.ALPHA_VANTAGE_KEY,
     }
     // END
