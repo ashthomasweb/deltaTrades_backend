@@ -19,6 +19,7 @@ class DataAdapter {
   outputType!: OutputFormat | undefined
   normalizedData: NormalizedData | any
   requestParams: Partial<RequestParams>
+  options: any
 
   constructor(
     requestParams: Partial<RequestParams>,
@@ -29,6 +30,7 @@ class DataAdapter {
     this.inputSource = requestParams.dataSource
     this.requestParams = requestParams
     this.normalizedData = null
+    this.options = options
     this.init(data, options)
   }
 
@@ -63,7 +65,7 @@ class DataAdapter {
 
   // Normalized to Chart
   genericToChartFormat() {
-    return convertNormalizedToChart(this.normalizedData)
+    return convertNormalizedToChart(this.normalizedData, this.options)
   }
 
   // Normalized to Queue
@@ -135,7 +137,7 @@ const convertNormalizedToChart = (
       data.data[i].volume,
     ])
     frontEndPacket.chartData.volumes.push([
-      i,
+      options.count,
       data.data[i].volume,
       data.data[i].open < data.data[i].close ? 1 : -1,
     ])

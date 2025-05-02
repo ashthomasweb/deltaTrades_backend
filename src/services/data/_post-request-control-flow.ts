@@ -6,6 +6,7 @@ import { RequestParams } from '../../types/types'
 export default function postRequestControlFlow(
   data: any,
   requestParams: Partial<RequestParams>,
+  count: number,
 ) {
   const type = requestParams.type
 
@@ -43,6 +44,7 @@ export default function postRequestControlFlow(
       const options = {
         tickerSymbol: requestParams.symbol,
         interval: requestParams.interval,
+        count,
       }
       const realTimeDataAdapter = new DataAdapter(requestParams, data, options)
 
