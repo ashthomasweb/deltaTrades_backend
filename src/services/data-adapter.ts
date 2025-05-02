@@ -137,7 +137,7 @@ const convertNormalizedToChart = (
       data.data[i].volume,
     ])
     frontEndPacket.chartData.volumes.push([
-      options.count,
+      options?.count || i,
       data.data[i].volume,
       data.data[i].open < data.data[i].close ? 1 : -1,
     ])
