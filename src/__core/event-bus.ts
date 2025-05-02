@@ -2,12 +2,13 @@
 
 import { EventEmitter } from 'events'
 
-export class EventBus extends EventEmitter {
+class EventBus extends EventEmitter {
   constructor() {
     super()
   }
 }
 
+export default new EventBus()
 /**
  * NOTE: Currently (4-12-25), this is being instantiated with 'new' in the app initialization.
  * I'm wondering if we could create it as a Singleton here, and export -> import the instance
