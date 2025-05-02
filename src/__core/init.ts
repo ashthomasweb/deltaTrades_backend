@@ -1,23 +1,22 @@
 /* src/__core/init.ts */
 
-import { EventBus } from './event-bus'
-import { RealTimeService } from '../services/data/real-time-service'
-import { HistoricalService } from '../services/data/historical-service'
 import { WebSocketServer } from '../websocket/server'
+import { Queue } from '../algorithms/algo-engine'
+import { DataBaseClient } from '../database/db-client'
 import { Logger } from './logger'
-// import { initDB } from '../database/dbClient'
+import { runOnInit } from '../utils/run-on-init'
 
 export async function initApp() {
   Logger.info('Initializing DeltaTrades backend...')
-  // await initDB() // TODO: Create DT MongoDB instance - turning off for now during app cleanup
 
-  const eventBus = new EventBus()
+  const dbClient = new DataBaseClient()
+  // await dbClient.initDB() // TODO: Create DT MongoDB instance - turning off for now during app cleanup
 
-  const realTime = new RealTimeService(eventBus)
-  const historical = new HistoricalService(eventBus)
-  const wsServer = new WebSocketServer(eventBus)
-
-  // realTime.startStream() // ATTN: Turning off until we get real-time data into pipeline
+  // TODO: Create input mechanism to receive data requests from the queue... perhaps pipe directly into the preRequestControlFlow?
+  const wsServer = new WebSocketServer()
+  const queue = new Queue()
 
   Logger.info('DeltaTrades backend initialized.')
+
+  // runOnInit() // **Optional** Run functions related to development cycle - Contains no actual business logic
 }

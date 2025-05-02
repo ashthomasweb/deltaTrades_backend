@@ -12,14 +12,21 @@ export const marketDataAdapter = {
     return response.data
   },
 
-  async fetchRealtime(params: any) {
+  async fetchRealtime(paramString: any) {
     const response = await axios.get(
-      `${config.HISTORICAL_API_BASE_URL}${params}`,
+      `${config.REALTIME_REQUEST_BASE_URL}${paramString}`,
+      {
+        headers: {
+          Authorization: `Bearer ${config.REALTIME_API_KEY}`,
+          Accept: 'application/json',
+        },
+      },
     )
     return response.data
   },
 
   async fetchMock(filepath: string) {
+    // TODO: Rename to 'fetchHistoricalMock' ??
     // TODO: Mock data will need to have a data contract assigned to it - so anything saved as a mock dataset will need to be run through the not-yet-built DataAdapter class
     try {
       const jsonString = await fs.readFile(filepath, 'utf8')

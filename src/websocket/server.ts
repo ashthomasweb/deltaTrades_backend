@@ -1,30 +1,19 @@
 /* src/websocket/server.ts */
 
-import { EventBus } from '../__core/event-bus'
+import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
-import { historicalActions } from '../services/data/historical-actions'
-import { HistoricalService } from '../services/data/historical-service'
 import WebSocket, { WebSocketServer as WSS } from 'ws'
-
-// TODO: Create mockConfig file and object to gather 'use' condition, path, and label for clear logging
-const useMockFull = {
-  use: false,
-  path: './src/mockData/TSLA-1min-03-25-full.json',
-}
-
-const useMockCompact = {
-  use: true,
-  path: './src/mockData/TSLA-1min-03-25-compact.json',
-}
+import preRequestControlFlow from '../services/data/_pre-request-control-flow'
+import { RequestParams } from '../types/types'
 
 export class WebSocketServer {
   private wss: WSS
   private _listening = false
+  private bus: any
 
-  constructor(private bus: EventBus) {
+  constructor() {
     this.wss = new WSS({ port: 8080 })
-
-    const historicalService = new HistoricalService(bus)
+    this.bus = EventBus
 
     this.wss.on('listening', () => {
       Logger.info('WebSocket server is listening on port 8080')
@@ -32,50 +21,31 @@ export class WebSocketServer {
     })
 
     this.wss.on('connection', (ws: WebSocket) => {
-      // TODO: Extract event-based 'ws' functions away - perhaps a class that accepts 'ws' and 'bus' in the contructor, and is imported
+      /* EventBus helper functions */
       // Send data upon 'once' event
-      const sendOnceData = (event: string, type: string) => {
+      const sendOnceData = (event: string, type: string | undefined) => {
         this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
       }
 
-      ws.send(JSON.stringify({ msg: 'Established' }))
+      const sendOnData = (event: string, type: string | undefined) => {
+        this.bus.on(event, (data) => ws.send(JSON.stringify({ type, data })))
+      }
+      /* END */
 
-      this.bus.on('price:update', (data) =>
-        ws.send(JSON.stringify({ type: 'price', data })),
-      )
+      ws.send(JSON.stringify({ msg: 'Established' }))
 
       ws.on('message', (message) => {
         try {
-          Logger.info(
-            'Websocket received message:',
-            JSON.parse(message.toString()),
+          const requestParams: Partial<RequestParams> = JSON.parse(
+            message.toString(),
           )
-          const parsedMsg = JSON.parse(message.toString())
-          const useMockData = useMockCompact.use || useMockFull.use
+          Logger.info('Websocket received message:', requestParams)
 
-          switch (parsedMsg.type) {
-            case 'getHistorical':
-              // TODO: Elegantly handle the mock conditions. Recommend requesting mock/non-mock data, and which dataset directly from frontend.
-              // This will enable the server to remain running - potentially trading - while research/testing is being performed.
-              if (useMockData) {
-                const mockPath = useMockCompact
-                  ? useMockCompact.path
-                  : useMockFull.path
-                historicalActions.sendMock(historicalService, mockPath)
-                sendOnceData('historical:data', 'historical')
-              } else {
-                historicalActions.sendRequested(historicalService, parsedMsg)
-                sendOnceData('historical:data', 'historical')
-              }
-              break
+          preRequestControlFlow(requestParams)
 
-            case 'monitorRealTime':
-              // TODO: Tap into existing stream
-              break
-
-            default:
-              break
-          }
+          sendOnceData('historical:data', requestParams.type)
+          sendOnData('realTime:data', requestParams.type)
+          // sendOnceData('realTime:data', requestParams.type)
         } catch (err) {
           console.error('Error handling WS message:', err)
         }

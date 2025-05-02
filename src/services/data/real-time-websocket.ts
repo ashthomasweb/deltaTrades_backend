@@ -1,18 +1,22 @@
 /* src/services/brokerage/real-time-service.ts */
 
 import { config } from '../../__core/config'
-import { EventBus } from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
-// import { marketDataAdapter } from './_market-data-adapter'
 import axios from 'axios'
 import WebSocket from 'ws'
+import EventBus from '../../__core/event-bus'
 
-export class RealTimeService {
+export class RealTimeWebSocket {
   sessionid: string = ''
+  params: Record<string, string | undefined> = {}
+  private bus: any
 
-  constructor(private bus: EventBus) {}
+  constructor() {
+    this.bus = EventBus
+  }
 
-  async startStream() {
+  async startStream(params: Record<string, string | undefined>) {
+    this.params = params
     await this.getSessionId()
     this.initTradierWS()
   }
@@ -43,9 +47,9 @@ export class RealTimeService {
     const sessionid = this.sessionid
 
     // TODO: These request specific params need to be controllable from the frontend, and persist after being set
-    const symbols = ['TSLA']
+    const symbols = [this.params.symbol]
     const linebreak = true
-    const filter = ['summary']
+    const filter: string[] = ['summary']
     // END
 
     const streamRequestPayload = JSON.stringify({
@@ -57,13 +61,16 @@ export class RealTimeService {
 
     tradierStream.on('open', () => {
       Logger.info('Tradier Stream Open')
-      tradierStream.send(streamRequestPayload)
+      setInterval(() => {
+        tradierStream.send(streamRequestPayload)
+      }, 1000)
     })
 
     tradierStream.on('message', (data) => {
       Logger.info('Tradier WS response:')
-      Logger.info(JSON.parse(data.toString()))
-      // TODO: use the marketDataAdapter to request realTime data with received params
+      const responseData = JSON.parse(data.toString())
+      Logger.info(responseData)
+      this.bus.emit('realTime:data', responseData)
     })
 
     tradierStream.on('error', (error) => {
