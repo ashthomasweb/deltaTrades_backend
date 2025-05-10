@@ -3,16 +3,17 @@ import EventBus from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
 import { RequestParams } from '../../types/types'
 
-export default function postRequestControlFlow(
+export default function postRequestRouter(
   data: any,
   requestParams: Partial<RequestParams>,
-  count: number,
+  chartId?: number | string,
+  count?: number,
 ) {
   const type = requestParams.type
 
   switch (type) {
     case 'historical':
-      Logger.info('Historical postRCF')
+      Logger.info('Historical postRequestRouter')
 
       const historicalDataAdapter = new DataAdapter(requestParams, data)
 
@@ -39,7 +40,7 @@ export default function postRequestControlFlow(
       break
 
     case 'real-time':
-      Logger.info('RealTime postRCF')
+      Logger.info('RealTime postRequestRouter', count)
 
       const options = {
         tickerSymbol: requestParams.symbol,
@@ -52,6 +53,7 @@ export default function postRequestControlFlow(
         EventBus.emit(
           'realTime:data',
           realTimeDataAdapter.returnFormattedData('chart'),
+          chartId,
         )
       }
 

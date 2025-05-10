@@ -37,16 +37,16 @@ class DataAdapter {
   // Initialize on new class instance
   private init(data: any, options = null) {
     if (this.inputSource === 'alpha-vantage') {
-      this.alphaVantageToGeneric(data, options)
+      this.alphaVantageToNormalized(data, options)
     }
     if (this.inputSource === 'tradier') {
-      this.tradierToGeneric(data, options)
+      this.tradierToNormalized(data, options)
     }
   }
 
   // Raw AlphaVantage Data to Normalized
-  private alphaVantageToGeneric(data: any, options?: any) {
-    this.normalizedData = convertAVtoGeneric(data, {
+  private alphaVantageToNormalized(data: any, options?: any) {
+    this.normalizedData = convertAVtoNormalized(data, {
       inputSource: this.inputSource,
       inputType: this.inputType,
       originator: this.requestParams.originator,
@@ -54,8 +54,8 @@ class DataAdapter {
   }
 
   // Raw Tradier Data to Normalized
-  private tradierToGeneric(data: any, options?: any) {
-    this.normalizedData = convertTradiertoGeneric(data, {
+  private tradierToNormalized(data: any, options?: any) {
+    this.normalizedData = convertTradiertoNormalized(data, {
       inputSource: this.inputSource,
       inputType: this.inputType,
       originator: this.requestParams.originator,
@@ -64,21 +64,21 @@ class DataAdapter {
   }
 
   // Normalized to Chart
-  genericToChartFormat() {
+  normalizedToChartFormat() {
     return convertNormalizedToChart(this.normalizedData, this.options)
   }
 
   // Normalized to Queue
-  genericToQueueFormat() {
-    return convertNormalizedToDataPacket(this.normalizedData)
+  normalizedToQueueFormat() {
+    return convertNormalizedToTransactionPacket(this.normalizedData)
   }
 
   // Return - exposed method called from outside this class
   returnFormattedData(outputType: OutputFormat) {
     if (outputType === 'chart') {
-      return this.genericToChartFormat()
+      return this.normalizedToChartFormat()
     } else if (outputType === 'queue') {
-      return this.genericToQueueFormat()
+      return this.normalizedToQueueFormat()
     } else if (outputType === 'normalized') {
       return this.normalizedData
     }
@@ -87,8 +87,8 @@ class DataAdapter {
 
 export default DataAdapter
 
-const convertNormalizedToDataPacket = (data: any, options?: any) => {
-  let newDataPacket = {
+const convertNormalizedToTransactionPacket = (data: any, options?: any) => {
+  let newTransactionPacket = {
     contractType: undefined,
     tickerSymbol: data.metaData.tickerSymbol,
     expiryDate: undefined,
@@ -108,7 +108,7 @@ const convertNormalizedToDataPacket = (data: any, options?: any) => {
     orderInfo: undefined,
     isTest: options?.isTest || false,
   }
-  return newDataPacket
+  return newTransactionPacket
 }
 
 const convertNormalizedToChart = (
@@ -146,11 +146,11 @@ const convertNormalizedToChart = (
   return frontEndPacket
 }
 
-const convertAVtoGeneric = (
+const convertAVtoNormalized = (
   data: any,
   options: any = null,
 ): Partial<NormalizedData> | undefined => {
-  // Logger.info('DataAdapter convertAVtoGeneric')
+  // Logger.info('DataAdapter convertAVtoNormalized')
   const output: Partial<NormalizedData> = {
     id: Math.floor(Math.random() * 10e18),
     creationMeta: { ...getTimestampMeta() },
@@ -202,11 +202,11 @@ const convertAVtoGeneric = (
   return output
 }
 
-const convertTradiertoGeneric = (
+const convertTradiertoNormalized = (
   rawData: any,
   options: any = null,
 ): Partial<NormalizedData> => {
-  // Logger.info('DataAdapter convertTradiertoGeneric')
+  // Logger.info('DataAdapter convertTradiertoNormalized')
   let dataset
   if (rawData.series.data instanceof Array) {
     dataset = rawData.series.data

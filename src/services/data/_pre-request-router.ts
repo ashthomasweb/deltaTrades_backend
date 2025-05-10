@@ -1,9 +1,9 @@
 import { Logger } from '../../__core/logger'
 import { RequestParams } from '../../types/types'
 import { historicalActions } from './historical-actions'
-import { realTimeActions } from './real-time-actions'
+import { realTimeActions, RealTimeHandlerRegistry } from './real-time-actions'
 
-export default function preRequestControlFlow(
+export default function preRequestRouter(
   requestParams: Partial<RequestParams>,
 ) {
   const type = requestParams.type
@@ -28,6 +28,10 @@ export default function preRequestControlFlow(
         realTimeActions.sendRequested(requestParams)
       }
       break
+
+    case 'closeRequest':
+      Logger.info('close request preRCF')
+      RealTimeHandlerRegistry.stop(requestParams.chartId!)
 
     default:
       break

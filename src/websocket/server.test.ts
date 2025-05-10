@@ -28,11 +28,12 @@ describe('WebSocketServer', () => {
         eventBus.emit('historical:data', mockHistoricalData)
       },
     )
-    vi.spyOn(HistoricalService.prototype, 'fetchMock').mockImplementation(
-      async () => {
-        eventBus.emit('historical:data', mockHistoricalData)
-      },
-    )
+    vi.spyOn(
+      HistoricalService.prototype,
+      'fetchHistoricalSavedData',
+    ).mockImplementation(async () => {
+      eventBus.emit('historical:data', mockHistoricalData)
+    })
 
     vi.spyOn(console, 'error').mockImplementation(vi.fn())
     vi.spyOn(console, 'log').mockImplementation(vi.fn())

@@ -1,10 +1,10 @@
-/* src/services/data/market-data-adapter.ts */
+/* src/services/data/market-data-fetcher.ts */
 
 import { config } from '../../__core/config'
 import { promises as fs } from 'fs'
 import axios from 'axios'
 
-export const marketDataAdapter = {
+export const marketDataFetcher = {
   async fetchHistorical(params: any) {
     const response = await axios.get(
       `${config.HISTORICAL_API_BASE_URL}${params}`,
@@ -25,9 +25,7 @@ export const marketDataAdapter = {
     return response.data
   },
 
-  async fetchMock(filepath: string) {
-    // TODO: Rename to 'fetchHistoricalMock' ??
-    // TODO: Mock data will need to have a data contract assigned to it - so anything saved as a mock dataset will need to be run through the not-yet-built DataAdapter class
+  async fetchHistoricalSavedData(filepath: string) {
     try {
       const jsonString = await fs.readFile(filepath, 'utf8')
       const data = JSON.parse(jsonString)

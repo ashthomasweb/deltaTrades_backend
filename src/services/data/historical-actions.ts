@@ -1,8 +1,8 @@
 /* src/services/brokerage/historical-actions.ts */
 
 import { Logger } from '../../__core/logger'
-import { marketDataAdapter } from './_market-data-adapter'
-import postRequestControlFlow from './_post-request-control-flow'
+import { marketDataFetcher } from './_market-data-fetcher'
+import postRequestRouter from './_post-request-router'
 import { buildParamString } from '../../utils/api'
 import { RequestParams } from '../../types/types'
 
@@ -13,10 +13,10 @@ export const historicalActions = {
     const localStoredDataRootPath = './src/mockData/'
 
     try {
-      const data = await marketDataAdapter.fetchMock(
+      const data = await marketDataFetcher.fetchHistoricalSavedData(
         `${localStoredDataRootPath}${requestParams.savedData}`,
       )
-      postRequestControlFlow(data, requestParams)
+      postRequestRouter(data, requestParams)
     } catch (error) {
       Logger.error(`Historical fetch failed: ${error}`)
     }
@@ -38,8 +38,8 @@ export const historicalActions = {
     const paramString = buildParamString(historicalRequest)
 
     try {
-      const data = await marketDataAdapter.fetchHistorical(paramString)
-      postRequestControlFlow(data, requestParams)
+      const data = await marketDataFetcher.fetchHistorical(paramString)
+      postRequestRouter(data, requestParams)
     } catch (error) {
       Logger.error(`Historical fetch failed: ${error}`)
     }

@@ -1,6 +1,6 @@
 /* src/types/types.ts */
 
-export interface DataPacket {
+export interface TransactionPacket {
   contractType: string | undefined
   tickerSymbol: string
   expiryDate: string | undefined
@@ -133,8 +133,9 @@ export interface RequestParams {
   beginDate: string | undefined
   originator: string | undefined
   returnToFE: boolean | undefined
+  chartId: string | undefined
 }
 
-export type SourceType = 'historical' | 'real-time' | undefined
+export type SourceType = 'historical' | 'real-time' | 'closeRequest' | undefined // TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE
 export type DataSource = 'alpha-vantage' | 'tradier' | undefined
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined

@@ -3,7 +3,7 @@
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import WebSocket, { WebSocketServer as WSS } from 'ws'
-import preRequestControlFlow from '../services/data/_pre-request-control-flow'
+import preRequestRouter from '../services/data/_pre-request-router'
 import { RequestParams } from '../types/types'
 
 export class WebSocketServer {
@@ -28,7 +28,9 @@ export class WebSocketServer {
       }
 
       const sendOnData = (event: string, type: string | undefined) => {
-        this.bus.on(event, (data) => ws.send(JSON.stringify({ type, data })))
+        this.bus.on(event, (data, id) =>
+          ws.send(JSON.stringify({ type, data, id })),
+        )
       }
       /* END */
 
@@ -41,11 +43,10 @@ export class WebSocketServer {
           )
           Logger.info('Websocket received message:', requestParams)
 
-          preRequestControlFlow(requestParams)
+          preRequestRouter(requestParams)
 
           sendOnceData('historical:data', requestParams.type)
           sendOnData('realTime:data', requestParams.type)
-          // sendOnceData('realTime:data', requestParams.type)
         } catch (err) {
           console.error('Error handling WS message:', err)
         }

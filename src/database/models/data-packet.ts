@@ -32,7 +32,7 @@ const OrderInfoSchema = new Schema(
   { _id: false },
 )
 
-const dataPacketSchema = new Schema({
+const transactionPacketSchema = new Schema({
   contractType: {
     type: String,
     required: true,
@@ -102,6 +102,6 @@ const dataPacketSchema = new Schema({
   },
 })
 
-export default model('DataPacket', dataPacketSchema)
+export default model('TransactionPacket', transactionPacketSchema)
 
-export type DataPacket = InferSchemaType<typeof dataPacketSchema>
+export type TransactionPacket = InferSchemaType<typeof transactionPacketSchema>

@@ -1,113 +1,244 @@
 /* src/services/brokerage/real-time-actions.ts */
 
 import { Logger } from '../../__core/logger'
-import postRequestControlFlow from './_post-request-control-flow'
-import { marketDataAdapter } from './_market-data-adapter'
+import postRequestRouter from './_post-request-router'
+import { marketDataFetcher } from './_market-data-fetcher'
 import { buildParamString } from '../../utils/api'
 import { RequestParams } from '../../types/types'
-import { request } from 'express'
+import {
+  getEastern930Timestamp,
+  getEasternTimestamps,
+} from '../../utils/date-time'
 
 export const realTimeActions = {
-  sendMockIntervalTick: (requestParams: Partial<RequestParams>) => {
-    Logger.info(`realTimeActions sendMockIntervalTick`)
-
-    for (let i = 0; i < 10; i++) {
-      const realTimeRequest = {
-        symbol: requestParams.symbol,
-        interval: '1min',
-        start: `2025-04-25 15:0${i.toString()}`,
-        end: `2025-04-25 15:0${i.toString()}`,
-        session_filter: 'open',
-      }
-
-      const paramString = buildParamString(realTimeRequest)
-
-      setTimeout(async () => {
-        try {
-          const data = await marketDataAdapter.fetchRealtime(paramString)
-          postRequestControlFlow(data, requestParams)
-        } catch (error) {
-          Logger.error(`Realtime fetch failed: ${error}`)
-        }
-      }, i * 2000)
-    }
+  sendMockIntervalTick: async (requestParams: Partial<RequestParams>) => {
+    Logger.info(`realTimeActions sendMockIntervalTick`, requestParams)
+    RealTimeHandlerRegistry.start(
+      requestParams.chartId?.toString()!,
+      requestParams,
+    ) // TODO: normalize the id coming from FE and the registry expected type to string/number.
   },
   sendRequested: async (requestParams: Partial<RequestParams>) => {
-    Logger.info('realTimeActions sendRequested')
+    Logger.info('realTimeActions sendRequested', requestParams)
+    RealTimeHandlerRegistry.start(
+      requestParams.chartId?.toString()!,
+      requestParams,
+    ) // TODO: normalize the id coming from FE and the registry expected type to string/number.
+  },
+}
 
-    let count = 0
+// Handler subclasses must instantiate these methods
+interface RequestHandler {
+  buildTimestamps(): void
+  startCycle(): void
+  stopCycle(): void
+}
 
+abstract class BaseRequestHandler implements RequestHandler {
+  private count: number = 0
+  private numberOfRequests: number = 0
+  private paramString: string = ''
+  protected leadingTimestamp: string = ''
+  protected backFilledStart?: string
+  protected intervalId: ReturnType<typeof setInterval> | null = null
+  protected requestParams: Partial<RequestParams> = {}
+
+  constructor(requestParams: Partial<RequestParams>) {
+    this.requestParams = requestParams
+  }
+
+  abstract buildTimestamps(): void
+
+  abstract startCycle(): void
+
+  stopCycle() {
+    if (this.intervalId !== null) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    }
+  }
+
+  private buildTradierParams() {
+    const result = {
+      symbol: this.requestParams.symbol,
+      interval: '1min',
+      start: this.count === 0 ? this.backFilledStart : this.leadingTimestamp,
+      end: this.leadingTimestamp,
+      session_filter: 'open',
+    }
+
+    this.paramString = buildParamString(result)
+  }
+
+  async handleRequest() {
+    this.buildTimestamps()
+    this.buildTradierParams()
+    try {
+      const data = await marketDataFetcher.fetchRealtime(this.paramString)
+      postRequestRouter(
+        data,
+        this.requestParams,
+        this.requestParams.chartId,
+        this.getCount(),
+      )
+      if (this.getCount() === 0) {
+        this.setCount(data.series.data.length - 1)
+      }
+    } catch (error) {
+      Logger.error(`Realtime fetch failed: ${error}`)
+    }
+
+    this.increment()
+  }
+
+  private increment() {
+    this.count++
+    this.numberOfRequests++
+  }
+
+  private setCount(input: number) {
+    this.count = input
+  }
+
+  private getCount() {
+    return this.count
+  }
+
+  getRequests() {
+    return this.numberOfRequests
+  }
+}
+
+// Subclass for true 'RealTime' requests
+class RealTimeRequestHandler extends BaseRequestHandler {
+  buildTimestamps() {
+    this.leadingTimestamp = getEasternTimestamps(new Date())[0]
+    this.backFilledStart =
+      this.requestParams.backfill !== null
+        ? getEastern930Timestamp(
+            new Date().toISOString(),
+            this.requestParams.backfill,
+          )
+        : this.leadingTimestamp
+  }
+
+  startCycle() {
     const currentSeconds = new Date().getSeconds() * 1000
     const APIUpdateBuffer = 4000
 
-    function getEasternTimeTimestamps(subtractHours?: number) {
-      const now = new Date()
-
-      // Use Intl.DateTimeFormat with America/New_York to get EST/EDT time
-      const format = (date: Date) => {
-        const formatter = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'America/New_York',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        })
-
-        const parts = formatter.formatToParts(date)
-        const lookup = (type: string) =>
-          parts.find((p) => p.type === type)?.value
-
-        return `${lookup('year')}-${lookup('month')}-${lookup('day')} ${lookup('hour')}:${lookup('minute')}`
-      }
-
-      const oneMinuteAgo = new Date(
-        subtractHours !== undefined
-          ? now.getTime() - 60 * 1000 - 60 * 1000 * 60 * subtractHours
-          : now.getTime() - 60 * 1000,
-      )
-      const rightNow = new Date(
-        subtractHours !== undefined
-          ? now.getTime() - 60 * 1000 * 60 * subtractHours
-          : now,
-      )
-
-      return [format(oneMinuteAgo), format(rightNow)]
-    }
-
-    async function makeRequest(requestParams: Partial<RequestParams>) {
-      const [pastTimestamp, currentTimestamp] = getEasternTimeTimestamps(5)
-
-      const realTimeRequest = {
-        symbol: requestParams.symbol,
-        interval: '1min',
-        start: currentTimestamp,
-        end: currentTimestamp,
-        session_filter: 'open',
-      }
-
-      const paramString = buildParamString(realTimeRequest)
-      console.log(realTimeRequest)
-
-      try {
-        const data = await marketDataAdapter.fetchRealtime(paramString)
-        postRequestControlFlow(data, requestParams, count)
-      } catch (error) {
-        Logger.error(`Realtime fetch failed: ${error}`)
-      }
-      count++
-    }
-
-    makeRequest(requestParams) // Call on initial request
+    this.handleRequest() // Call on initial request
     setTimeout(
       async () => {
-        makeRequest(requestParams) // Call at bottom of next minute + buffer length
-        setInterval(async () => {
-          makeRequest(requestParams) // Call every 60 seconds afterwards (includes buffer)
+        this.handleRequest() // Call at bottom of next minute + buffer length
+        this.intervalId = setInterval(async () => {
+          this.handleRequest() // Call every 60 seconds afterwards (includes buffer)
         }, 60000)
       },
       60000 - currentSeconds + APIUpdateBuffer,
     )
-  },
+  }
+}
+
+// Subclass for Tradier 'previousDay' requests
+class PreviousDayRequestHandler extends BaseRequestHandler {
+  buildTimestamps() {
+    const requestParamIsEasternTime = true
+    this.leadingTimestamp = getEasternTimestamps(
+      new Date(this.requestParams.beginDate!),
+      this.getRequests(),
+      requestParamIsEasternTime,
+    )[1]
+
+    this.backFilledStart =
+      this.requestParams.backfill !== null
+        ? getEastern930Timestamp(
+            this.requestParams.beginDate!,
+            this.requestParams.backfill,
+          )
+        : this.requestParams.beginDate
+  }
+
+  // Previous day requests don't need the 'bottom of the minute' logic at this time. Accepts an interval length for adding to the chart
+  startCycle(mockIntervalInMs: number = 3000) {
+    this.handleRequest() // Call on initial request
+    this.intervalId = setInterval(async () => {
+      this.handleRequest() // Call at passed interval afterwards
+    }, mockIntervalInMs)
+  }
+}
+
+type HandlerTypes = 'realTime' | 'previousDay' | undefined // TODO: Across app standardize terms such as 'realTime vs. real-time', 'previousDay vs. getPrevious' ...
+
+class RequestHandlerFactory {
+  static create(
+    type: HandlerTypes,
+    params: Partial<RequestParams>,
+  ): RequestHandler {
+    switch (type) {
+      case 'realTime':
+        return new RealTimeRequestHandler(params)
+
+      case 'previousDay':
+        return new PreviousDayRequestHandler(params)
+
+      default:
+        throw new Error(`Handler type: ${type} not defined.`)
+    }
+  }
+}
+
+/**
+ * Used in the creation/destruction of independent request handlers.
+ * Enables multiple charts to run simultaneously and be controlled independently.
+ *  Calls Factory based on params.
+ *
+ */
+export class RealTimeHandlerRegistry {
+  private static handlers: Map<string, RequestHandler> = new Map()
+
+  // Start or replace a handler for a given chart ID
+  static start(chartId: string, params: Partial<RequestParams>) {
+    // If existing → stop and remove it
+    const existingHandler = this.handlers.get(chartId)
+    if (existingHandler) {
+      existingHandler.stopCycle()
+      this.handlers.delete(chartId)
+    }
+
+    // Create new handler // TODO: Clean this up - could be more elegant - will bloat if more handlers are added
+    let type: HandlerTypes
+    if (params.getPrevious === 'on') {
+      type = 'previousDay'
+    } else if (params.getPrevious === null) {
+      type = 'realTime'
+    }
+    const handler = RequestHandlerFactory.create(type, params)
+    handler.startCycle()
+
+    // Store in registry
+    this.handlers.set(chartId, handler)
+  }
+
+  // Stop and remove a handler by chart ID
+  static stop(chartId: string) {
+    const handler = this.handlers.get(chartId)
+    if (handler) {
+      handler.stopCycle()
+      this.handlers.delete(chartId)
+    }
+  }
+
+  // Stop all handlers
+  static stopAll() {
+    this.handlers.forEach((handler) => {
+      handler.stopCycle()
+    })
+
+    this.handlers.clear()
+  }
+
+  // Check if handler exists for chart
+  static has(chartId: string): boolean {
+    return this.handlers.has(chartId)
+  }
 }

@@ -12,7 +12,7 @@ export async function initApp() {
   const dbClient = new DataBaseClient()
   // await dbClient.initDB() // TODO: Create DT MongoDB instance - turning off for now during app cleanup
 
-  // TODO: Create input mechanism to receive data requests from the queue... perhaps pipe directly into the preRequestControlFlow?
+  // TODO: Create input mechanism to receive data requests from the queue... perhaps pipe directly into the preRequestRouter?
   const wsServer = new WebSocketServer()
   const queue = new Queue()
 
