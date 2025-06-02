@@ -5,25 +5,16 @@ import postRequestRouter from './_post-request-router'
 import { marketDataFetcher } from './_market-data-fetcher'
 import { buildParamString } from '../../utils/api'
 import { RequestParams } from '../../types/types'
-import {
-  getEastern930Timestamp,
-  getEasternTimestamps,
-} from '../../utils/date-time'
+import { getEastern930Timestamp, getEasternTimestamps } from '../../utils/date-time'
 
 export const realTimeActions = {
   sendMockIntervalTick: async (requestParams: Partial<RequestParams>) => {
-    Logger.info(`realTimeActions sendMockIntervalTick`, requestParams)
-    RealTimeHandlerRegistry.start(
-      requestParams.chartId?.toString()!,
-      requestParams,
-    ) // TODO: normalize the id coming from FE and the registry expected type to string/number.
+    // Logger.info(`realTimeActions sendMockIntervalTick`, requestParams)
+    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams) // TODO: normalize the id coming from FE and the registry expected type to string/number.
   },
   sendRequested: async (requestParams: Partial<RequestParams>) => {
-    Logger.info('realTimeActions sendRequested', requestParams)
-    RealTimeHandlerRegistry.start(
-      requestParams.chartId?.toString()!,
-      requestParams,
-    ) // TODO: normalize the id coming from FE and the registry expected type to string/number.
+    // Logger.info('realTimeActions sendRequested', requestParams)
+    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams) // TODO: normalize the id coming from FE and the registry expected type to string/number.
   },
 }
 
@@ -75,12 +66,7 @@ abstract class BaseRequestHandler implements RequestHandler {
     this.buildTradierParams()
     try {
       const data = await marketDataFetcher.fetchRealtime(this.paramString)
-      postRequestRouter(
-        data,
-        this.requestParams,
-        this.requestParams.chartId,
-        this.getCount(),
-      )
+      postRequestRouter(data, this.requestParams, this.requestParams.chartId, this.getCount())
       if (this.getCount() === 0) {
         this.setCount(data.series.data.length - 1)
       }
@@ -115,10 +101,7 @@ class RealTimeRequestHandler extends BaseRequestHandler {
     this.leadingTimestamp = getEasternTimestamps(new Date())[0]
     this.backFilledStart =
       this.requestParams.backfill !== null
-        ? getEastern930Timestamp(
-            new Date().toISOString(),
-            this.requestParams.backfill,
-          )
+        ? getEastern930Timestamp(new Date().toISOString(), this.requestParams.backfill)
         : this.leadingTimestamp
   }
 
@@ -151,10 +134,7 @@ class PreviousDayRequestHandler extends BaseRequestHandler {
 
     this.backFilledStart =
       this.requestParams.backfill !== null
-        ? getEastern930Timestamp(
-            this.requestParams.beginDate!,
-            this.requestParams.backfill,
-          )
+        ? getEastern930Timestamp(this.requestParams.beginDate!, this.requestParams.backfill)
         : this.requestParams.beginDate
   }
 
@@ -170,10 +150,7 @@ class PreviousDayRequestHandler extends BaseRequestHandler {
 type HandlerTypes = 'realTime' | 'previousDay' | undefined // TODO: Across app standardize terms such as 'realTime vs. real-time', 'previousDay vs. getPrevious' ...
 
 class RequestHandlerFactory {
-  static create(
-    type: HandlerTypes,
-    params: Partial<RequestParams>,
-  ): RequestHandler {
+  static create(type: HandlerTypes, params: Partial<RequestParams>): RequestHandler {
     switch (type) {
       case 'realTime':
         return new RealTimeRequestHandler(params)
@@ -202,6 +179,7 @@ export class RealTimeHandlerRegistry {
     const existingHandler = this.handlers.get(chartId)
     if (existingHandler) {
       existingHandler.stopCycle()
+
       this.handlers.delete(chartId)
     }
 

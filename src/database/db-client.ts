@@ -4,6 +4,10 @@ import { Logger } from '../__core/logger'
 import { config } from '../__core/config'
 import mongoose from 'mongoose'
 import EventBus from '../__core/event-bus'
+import fs from 'fs'
+import path, { dirname } from 'path'
+import { NormalizedData } from '../types/types'
+import { fileURLToPath } from 'url'
 
 export class DataBaseClient {
   private bus: any
@@ -14,8 +18,21 @@ export class DataBaseClient {
   }
 
   init() {
-    this.bus.on('historical:data:db', (data: any) => {
-      Logger.info('DB received data', data)
+    this.bus.on('historical:data:db', (data: NormalizedData) => {
+      Logger.info('DB received data', data.id, data.creationMeta, data.metaData, data.data.slice(0, 10))
+
+      const __filename = fileURLToPath(import.meta.url)
+      const __dirname = dirname(__filename)
+      const DATA_DIR = path.resolve(__dirname, '../storedData')
+      const FILE_PATH = `${DATA_DIR}/${data.metaData.tickerSymbol}-${data.metaData.interval}-${data.metaData.historicalMeta?.endDate.substring(0, 7)}-full.json`
+
+      fs.writeFile(FILE_PATH, JSON.stringify(data, null, 2), (error) => {
+        if (error) {
+          console.error('Failed to save historical batch data:', error)
+        } else {
+          console.log('Historical batch data saved to', FILE_PATH)
+        }
+      })
     })
     this.bus.on('realTime:data:db', (data: any) => {
       Logger.info('DB received data', data)

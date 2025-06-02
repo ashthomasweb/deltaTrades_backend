@@ -28,9 +28,7 @@ export class WebSocketServer {
       }
 
       const sendOnData = (event: string, type: string | undefined) => {
-        this.bus.on(event, (data, id) =>
-          ws.send(JSON.stringify({ type, data, id })),
-        )
+        this.bus.on(event, (data, id) => ws.send(JSON.stringify({ type, data, id })))
       }
       /* END */
 
@@ -38,15 +36,14 @@ export class WebSocketServer {
 
       ws.on('message', (message) => {
         try {
-          const requestParams: Partial<RequestParams> = JSON.parse(
-            message.toString(),
-          )
+          const requestParams: Partial<RequestParams> = JSON.parse(message.toString())
           Logger.info('Websocket received message:', requestParams)
 
           preRequestRouter(requestParams)
 
           sendOnceData('historical:data', requestParams.type)
           sendOnData('realTime:data', requestParams.type)
+          sendOnData('algo1Analysis:data', 'algo1Analysis')
         } catch (err) {
           console.error('Error handling WS message:', err)
         }

@@ -2,10 +2,7 @@
 
 class DebugService {
   constructor() {
-    console.log(
-      '***\n%cTRACE: init DebugService',
-      'color: green; font-weight: 900',
-    )
+    console.log('***\n%cTRACE: init DebugService', 'color: green; font-weight: 900')
   }
 
   init() {

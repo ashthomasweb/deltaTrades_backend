@@ -1,15 +1,42 @@
-import { marketDataFetcher } from '../services/data/_market-data-fetcher'
+// import { marketDataFetcher } from '../services/data/_market-data-fetcher'
 // import DataAdapter from '../services/data-adapter'
 import { Logger } from '../__core/logger'
+import { algo1 } from '../algorithms/algo-test-1'
+import fs from 'fs'
+import path from 'path'
 
 export const runOnInit = async () => {
-  Logger.info('DEV CYCLE TEMP FUNCTIONS:')
-  // ATTENTION!
+  Logger.info('DEV CYCLE runOnInit()')
+  //---------------------------------------------------------------------//
+  // ATTENTION!!
   // DO NOT PLACE ANY APPLICATION CRITICAL BUSINESS LOGIC IN THIS FILE.
   // FOR DEVELOPMENT CYCLE PURPOSES ONLY
+  //---------------------------------------------------------------------//
 
-  let mockFilePath = './src/mockData/TSLA-1min-03-25-compact.json'
-  const data = await marketDataFetcher.fetchHistoricalSavedData(mockFilePath)
+  algo1()
 
-  Logger.info('END - DEV CYCLE TEMP FUNCTIONS')
+  // Get all stored data filenames - copy paste from console to FE /src/config/stored-data-paths.ts
+  function readDirectoryFileNames(directoryPath: string) {
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        console.error('Error reading directory:', err)
+        return
+      }
+
+      const fileNames = files.filter((file) => {
+        const filePath = path.join(directoryPath, file)
+        return fs.statSync(filePath).isFile()
+      })
+
+      console.log('Files in directory:')
+      fileNames.forEach((fileName) => console.log(fileName))
+    })
+  }
+
+  // Example usage:
+  const directoryPath = '../dt_backend/src/storedData' // Replace with the path to your directory
+  // readDirectoryFileNames(directoryPath)
+
+  //---------------------------------------------------------------------//
+  Logger.info('END - DEV CYCLE runOnInit()')
 }

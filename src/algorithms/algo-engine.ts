@@ -1,6 +1,8 @@
 /* src/algorithms/algo-engine.ts */
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
+import { TransactionPacket, RequestParams } from '../types/types'
+import { algo1 } from './algo-test-1'
 
 export class Queue {
   private bus: any
@@ -17,11 +19,14 @@ export class Queue {
   }
 
   init() {
-    this.bus.on('historical:data:queue', (data: any) => {
-      Logger.info('Q received data', data)
+    // let chartId
+    this.bus.on('historical:data:queue', (data: TransactionPacket) => {
+      Logger.info('AlgoEngine received data\n', 'id:', data.tickerSymbol, data.inputType, ...data.queue.slice(0, 2))
+      const algoResult = algo1(data)
+      this.bus.emit('algo1Analysis:data', algoResult)
     })
-    this.bus.on('realTime:data:queue', (data: any) => {
-      Logger.info('Q received data', data, data.queue[0])
+    this.bus.on('realTime:data:queue', (data: TransactionPacket, id: RequestParams['chartId']) => {
+      Logger.info('AlgoEngine received data\n', 'id:', id, data.tickerSymbol, data.inputType, ...data.queue.slice(0, 2))
     })
   }
 

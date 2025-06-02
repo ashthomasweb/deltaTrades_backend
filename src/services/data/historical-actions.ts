@@ -10,7 +10,7 @@ export const historicalActions = {
   sendMock: async (requestParams: Partial<RequestParams>) => {
     Logger.info(`historicalActions sendMock - ${requestParams.savedData}`)
 
-    const localStoredDataRootPath = './src/mockData/'
+    const localStoredDataRootPath = './src/storedData/'
 
     try {
       const data = await marketDataFetcher.fetchHistoricalSavedData(
@@ -22,7 +22,7 @@ export const historicalActions = {
     }
   },
   sendRequested: async (requestParams: Partial<RequestParams>) => {
-    Logger.info('ATTN! Using rate-limited historical endpoint!') // TODO: Log the count somehow - see comment in /__core/config
+    Logger.info('ATTN! Using rate-limited historical endpoint!') // TODO: Log the count somehow
     Logger.info('historicalActions sendRequested')
 
     const historicalRequest = {
