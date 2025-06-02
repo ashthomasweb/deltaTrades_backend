@@ -30,11 +30,7 @@ export class RealTimeWebSocket {
       },
     }
     try {
-      const response = await axios.post(
-        config.REALTIME_SESSION_URL,
-        {},
-        options,
-      )
+      const response = await axios.post(config.REALTIME_SESSION_URL, {}, options)
       this.sessionid = response.data.stream.sessionid
     } catch (error) {
       Logger.error('Failed to create Tradier stream \r\n', error)

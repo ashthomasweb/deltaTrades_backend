@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { defineConfig } from 'eslint/config'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import globals from 'globals'
@@ -18,10 +17,22 @@ const compat = new FlatCompat({
 
 export default defineConfig([
   {
-    extends: compat.extends(
-      'eslint:recommended',
-      'plugin:prettier/recommended',
-    ),
+    // ignores: ["src/storedData/*"]
+  },
+  {
+    files: ['src/websocket/server.test.ts'],
+    languageOptions: {
+      parser: tsParser,
+      globals: {
+        ...globals.node,
+        ...globals.vitest,
+      },
+    },
+  },
+  {
+    extends: compat.extends('eslint:recommended', 'plugin:prettier/recommended'),
+
+    files: ['**/*.ts'],
 
     plugins: {
       '@typescript-eslint': typescriptEslint,
@@ -30,6 +41,7 @@ export default defineConfig([
     languageOptions: {
       globals: {
         ...globals.node,
+        ...globals.vitest,
       },
 
       parser: tsParser,
@@ -37,7 +49,12 @@ export default defineConfig([
 
     rules: {
       semi: ['error', 'never'],
-      indent: ['error', 2],
+      // "indent": ['error', 2],
+      'no-unused-vars': ['off'],
+      'no-case-declarations': ['warn'],
+      'no-fallthrough': ['warn'],
+      'no-undef': ['warn'],
+      'max-len': ['warn', 120],
 
       'prettier/prettier': [
         'error',
@@ -45,6 +62,8 @@ export default defineConfig([
           semi: false,
           tabWidth: 2,
           singleQuote: true,
+          endOfLine: 'auto',
+          printWidth: 120,
         },
       ],
     },

@@ -1,2 +1,2 @@
 npm run lint
-npx prettier . -c
+npx prettier . --write --ignore-path .prettierignore

@@ -21,11 +21,7 @@ class DataAdapter {
   requestParams: Partial<RequestParams>
   options: any
 
-  constructor(
-    requestParams: Partial<RequestParams>,
-    data: any,
-    options: any = null,
-  ) {
+  constructor(requestParams: Partial<RequestParams>, data: any, options: any = null) {
     this.inputType = requestParams.type
     this.inputSource = requestParams.dataSource
     this.requestParams = requestParams
@@ -41,6 +37,9 @@ class DataAdapter {
     }
     if (this.inputSource === 'tradier') {
       this.tradierToNormalized(data, options)
+    }
+    if (this.inputSource === 'storedData') {
+      this.normalizedData = data
     }
   }
 
@@ -87,13 +86,13 @@ class DataAdapter {
 
 export default DataAdapter
 
-const convertNormalizedToTransactionPacket = (data: any, options?: any) => {
+export const convertNormalizedToTransactionPacket = (data: any, options?: any) => {
   let newTransactionPacket = {
     contractType: undefined,
     tickerSymbol: data.metaData.tickerSymbol,
     expiryDate: undefined,
     createdAt: data.creationMeta.createdAtUTC,
-    queue: [data.data],
+    queue: [...data.data],
     optionChain: undefined,
     analysisPacket: undefined,
     completed: undefined,
@@ -111,10 +110,7 @@ const convertNormalizedToTransactionPacket = (data: any, options?: any) => {
   return newTransactionPacket
 }
 
-const convertNormalizedToChart = (
-  data: any,
-  options?: any,
-): FrontEndChartPacket => {
+const convertNormalizedToChart = (data: any, options?: any): FrontEndChartPacket => {
   let frontEndPacket = {
     id: data.id,
     creationMeta: data.creationMeta,
@@ -146,10 +142,7 @@ const convertNormalizedToChart = (
   return frontEndPacket
 }
 
-const convertAVtoNormalized = (
-  data: any,
-  options: any = null,
-): Partial<NormalizedData> | undefined => {
+const convertAVtoNormalized = (data: any, options: any = null): Partial<NormalizedData> | undefined => {
   // Logger.info('DataAdapter convertAVtoNormalized')
   const output: Partial<NormalizedData> = {
     id: Math.floor(Math.random() * 10e18),
@@ -168,8 +161,7 @@ const convertAVtoNormalized = (
     inputSource: options.inputSource,
     originator: options.originator,
     historicalMeta: {
-      datasetSize:
-        requestMetaData['5. Output Size'] === 'Compact' ? 'compact' : 'full',
+      datasetSize: requestMetaData['5. Output Size'] === 'Compact' ? 'compact' : 'full',
       endDate: requestMetaData['3. Last Refreshed'],
       beginDate: dateArray[0],
     },
@@ -187,14 +179,8 @@ const convertAVtoNormalized = (
       volume: +dataArray[i]['5. volume'],
     }
     if (i > 0) {
-      data.percentChange = findPercentChange(
-        dataArray[i]['1. open'],
-        dataArray[i - 1]['1. open'],
-      )
-      data.absoluteChange = findAbsoluteChange(
-        dataArray[i]['1. open'],
-        dataArray[i - 1]['1. open'],
-      )
+      data.percentChange = findPercentChange(dataArray[i]['1. open'], dataArray[i - 1]['1. open'])
+      data.absoluteChange = findAbsoluteChange(dataArray[i]['1. open'], dataArray[i - 1]['1. open'])
     }
     output.data.push(data)
   }
@@ -202,17 +188,12 @@ const convertAVtoNormalized = (
   return output
 }
 
-const convertTradiertoNormalized = (
-  rawData: any,
-  options: any = null,
-): Partial<NormalizedData> => {
+const convertTradiertoNormalized = (rawData: any, options: any = null): Partial<NormalizedData> => {
   // Logger.info('DataAdapter convertTradiertoNormalized')
   let dataset
   if (rawData.series.data instanceof Array) {
     dataset = rawData.series.data
-  } else if (
-    Object.prototype.toString.call(rawData.series.data) === '[object Object]'
-  ) {
+  } else if (Object.prototype.toString.call(rawData.series.data) === '[object Object]') {
     dataset = [rawData.series.data]
   }
 
@@ -245,14 +226,8 @@ const convertTradiertoNormalized = (
       volume: dataset[i].volume,
     }
     if (i > 0) {
-      data.percentChange = findPercentChange(
-        dataset[i].open,
-        dataset[i - 1].open,
-      )
-      data.absoluteChange = findAbsoluteChange(
-        dataset[i].open,
-        dataset[i - 1].open,
-      )
+      data.percentChange = findPercentChange(dataset[i].open, dataset[i - 1].open)
+      data.absoluteChange = findAbsoluteChange(dataset[i].open, dataset[i - 1].open)
     }
     output.data.push(data)
   }
@@ -262,11 +237,12 @@ const convertTradiertoNormalized = (
 
 function findPercentChange(currentValue: string, previousValue: string) {
   const difference = findAbsoluteChange(currentValue, previousValue)
-  return (difference / parseFloat(previousValue)) * 100
+  const percentChange = (difference / parseFloat(previousValue)) * 100
+  return +percentChange.toFixed(3)
 }
 
 function findAbsoluteChange(currentValue: string, previousValue: string) {
-  return parseFloat(currentValue) - parseFloat(previousValue)
+  return +(parseFloat(currentValue) - parseFloat(previousValue)).toFixed(3)
 }
 
 export function getTimestampMeta() {

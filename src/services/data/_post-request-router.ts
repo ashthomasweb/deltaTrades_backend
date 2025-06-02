@@ -12,36 +12,27 @@ export default function postRequestRouter(
   const type = requestParams.type
 
   switch (type) {
-    case 'historical':
+    case 'historical': {
       Logger.info('Historical postRequestRouter')
 
       const historicalDataAdapter = new DataAdapter(requestParams, data)
 
       if (requestParams.returnToFE) {
-        EventBus.emit(
-          'historical:data',
-          historicalDataAdapter.returnFormattedData('chart'),
-        )
+        EventBus.emit('historical:data', historicalDataAdapter.returnFormattedData('chart'))
       }
 
       if (requestParams.sendToQueue === 'on') {
-        EventBus.emit(
-          'historical:data:queue',
-          historicalDataAdapter.returnFormattedData('queue'),
-        )
+        EventBus.emit('historical:data:queue', historicalDataAdapter.returnFormattedData('queue'))
       }
 
       if (requestParams.storeData === 'on') {
-        EventBus.emit(
-          'historical:data:db',
-          historicalDataAdapter.returnFormattedData('normalized'),
-        )
+        EventBus.emit('historical:data:db', historicalDataAdapter.returnFormattedData('normalized'))
       }
       break
+    }
 
-    case 'real-time':
-      Logger.info('RealTime postRequestRouter', count)
-
+    case 'real-time': {
+      // Logger.info('RealTime postRequestRouter', count)
       const options = {
         tickerSymbol: requestParams.symbol,
         interval: requestParams.interval,
@@ -51,6 +42,7 @@ export default function postRequestRouter(
 
       if (requestParams.returnToFE) {
         EventBus.emit(
+          // TODO: Pray and harden these types for emit-type // Pray??
           'realTime:data',
           realTimeDataAdapter.returnFormattedData('chart'),
           chartId,
@@ -58,19 +50,29 @@ export default function postRequestRouter(
       }
 
       if (requestParams.sendToQueue === 'on') {
-        EventBus.emit(
-          'realTime:data:queue',
-          realTimeDataAdapter.returnFormattedData('queue'),
-        )
+        EventBus.emit('realTime:data:queue', realTimeDataAdapter.returnFormattedData('queue'), chartId)
       }
 
       if (requestParams.storeData === 'on') {
-        EventBus.emit(
-          'realTime:data:db',
-          realTimeDataAdapter.returnFormattedData('normalized'),
-        )
+        EventBus.emit('realTime:data:db', realTimeDataAdapter.returnFormattedData('normalized'))
       }
       break
+    }
+
+    case 'storedData': {
+      Logger.info('StoredData postRequestRouter', count)
+      const storedDataAdapter = new DataAdapter(requestParams, data)
+
+      if (requestParams.returnToFE) {
+        EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
+      }
+
+      if (requestParams.sendToQueue === 'on') {
+        EventBus.emit('historical:data:queue', storedDataAdapter.returnFormattedData('queue'))
+      }
+
+      break
+    }
 
     default:
       break

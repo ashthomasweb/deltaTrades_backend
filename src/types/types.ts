@@ -62,12 +62,12 @@ export interface MetaData {
 }
 
 export interface NormalizedDataShape {
-  timestamp?: number | string | undefined
-  open?: number
-  close?: number
-  high?: number
-  low?: number
-  volume?: number
+  timestamp: string | undefined
+  open: number
+  close: number
+  high: number
+  low: number
+  volume: number
   percentChange?: number | null
   absoluteChange?: number | null
   vwap?: number | null
@@ -95,24 +95,14 @@ export interface ChartDataShape {
 
 export type TimeStamp = string // TODO: Make more explicit once timestamp format is finalized
 
-export type CandleStickValues = [
-  CSValueOpen,
-  CSValueClose,
-  CSValueLow,
-  CSValueHigh,
-  CSValueVolume,
-]
+export type CandleStickValues = [CSValueOpen, CSValueClose, CSValueLow, CSValueHigh, CSValueVolume]
 export type CSValueOpen = number
 export type CSValueClose = number
 export type CSValueLow = number
 export type CSValueHigh = number
 export type CSValueVolume = number
 
-export type CandleStickVolume = [
-  VolumeIndex,
-  CSValueVolume,
-  VolumeColorNumericBoolean,
-]
+export type CandleStickVolume = [VolumeIndex, CSValueVolume, VolumeColorNumericBoolean]
 export type VolumeIndex = number
 export type VolumeColorNumericBoolean = 1 | -1
 
@@ -136,6 +126,19 @@ export interface RequestParams {
   chartId: string | undefined
 }
 
-export type SourceType = 'historical' | 'real-time' | 'closeRequest' | undefined // TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE
-export type DataSource = 'alpha-vantage' | 'tradier' | undefined
+// TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE
+export type SourceType = 'historical' | 'real-time' | 'closeRequest' | 'storedData' | undefined
+
+export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData' | undefined
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
+
+// export type Tick = {
+//   timestamp: string
+//   open: number
+//   close: number
+//   high: number
+//   low: number
+//   volume: number
+//   percentChange: number
+//   absoluteChange: number
+// }

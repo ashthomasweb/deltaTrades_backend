@@ -6,22 +6,17 @@ import axios from 'axios'
 
 export const marketDataFetcher = {
   async fetchHistorical(params: any) {
-    const response = await axios.get(
-      `${config.HISTORICAL_API_BASE_URL}${params}`,
-    )
+    const response = await axios.get(`${config.HISTORICAL_API_BASE_URL}${params}`)
     return response.data
   },
 
   async fetchRealtime(paramString: any) {
-    const response = await axios.get(
-      `${config.REALTIME_REQUEST_BASE_URL}${paramString}`,
-      {
-        headers: {
-          Authorization: `Bearer ${config.REALTIME_API_KEY}`,
-          Accept: 'application/json',
-        },
+    const response = await axios.get(`${config.REALTIME_REQUEST_BASE_URL}${paramString}`, {
+      headers: {
+        Authorization: `Bearer ${config.REALTIME_API_KEY}`,
+        Accept: 'application/json',
       },
-    )
+    })
     return response.data
   },
 
@@ -29,7 +24,7 @@ export const marketDataFetcher = {
     try {
       const jsonString = await fs.readFile(filepath, 'utf8')
       const data = JSON.parse(jsonString)
-      return data[0].data
+      return data
     } catch (err) {
       console.error('Failed to read or parse mock file:', err)
       throw err

@@ -1,4 +1,6 @@
+/* eslint-disable no-undef */
 /* src/websocket/server.test.ts */
+/* eslint-env node, vitest */
 
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
@@ -23,15 +25,10 @@ describe('WebSocketServer', () => {
   beforeEach(async () => {
     wssOn = vi.spyOn(WSS.prototype, 'on')
     wssSend = vi.spyOn(WebSocket.prototype, 'send')
-    vi.spyOn(HistoricalService.prototype, 'fetch').mockImplementation(
-      async () => {
-        eventBus.emit('historical:data', mockHistoricalData)
-      },
-    )
-    vi.spyOn(
-      HistoricalService.prototype,
-      'fetchHistoricalSavedData',
-    ).mockImplementation(async () => {
+    vi.spyOn(HistoricalService.prototype, 'fetch').mockImplementation(async () => {
+      eventBus.emit('historical:data', mockHistoricalData)
+    })
+    vi.spyOn(HistoricalService.prototype, 'fetchHistoricalSavedData').mockImplementation(async () => {
       eventBus.emit('historical:data', mockHistoricalData)
     })
 
@@ -55,9 +52,7 @@ describe('WebSocketServer', () => {
 
   it('should create a WebSocket server', () => {
     expect(server).toBeDefined()
-    expect(Logger.info).toHaveBeenCalledWith(
-      'WebSocket server is listening on port 8080',
-    )
+    expect(Logger.info).toHaveBeenCalledWith('WebSocket server is listening on port 8080')
   })
 
   it('should listen for client connections', () => {
@@ -69,23 +64,16 @@ describe('WebSocketServer', () => {
   })
 
   it("should respond with historical data on 'getHistorical' message", () => {
-    expect(wssSend).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'historical', data: mockHistoricalData }),
-    )
+    expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ type: 'historical', data: mockHistoricalData }))
   })
 
   it("should send price updates to clients on 'price:update' event", () => {
     const priceUpdate = { symbol: 'TSLA', price: 720 }
     eventBus.emit('price:update', priceUpdate)
-    expect(wssSend).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'price', data: priceUpdate }),
-    )
+    expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ type: 'price', data: priceUpdate }))
   })
 
   it('should handle invalid client messages gracefully', () => {
-    expect(console.error).toHaveBeenCalledWith(
-      'Error handling WS message:',
-      expect.any(SyntaxError),
-    )
+    expect(console.error).toHaveBeenCalledWith('Error handling WS message:', expect.any(SyntaxError))
   })
 })

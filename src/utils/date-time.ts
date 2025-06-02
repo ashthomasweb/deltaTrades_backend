@@ -38,10 +38,7 @@ export const getEasternTimestamps = (
   return [format(oneMinuteAgo), format(leadingInterval)]
 }
 
-export const getEastern930Timestamp = (
-  baseTimestamp: string,
-  daysBack: string = '0',
-) => {
+export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string = '0') => {
   const [datePart] = baseTimestamp.split('T')
 
   // Create a date object in Eastern Time (at midnight)

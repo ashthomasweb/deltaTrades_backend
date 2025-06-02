@@ -12,7 +12,7 @@ export const config = {
 
   /* AlphaVantage Historical HTTP */
   HISTORICAL_API_BASE_URL: 'https://www.alphavantage.co/query?',
-  HISTORICAL_API_KEY: process.env.ALPHA_VANTAGE_KEY2 || '',
+  HISTORICAL_API_KEY: process.env.ALPHA_VANTAGE_KEY || '',
 
   /* MongoDB */
   MONGO_URL: process.env.MONGO_URL || '',

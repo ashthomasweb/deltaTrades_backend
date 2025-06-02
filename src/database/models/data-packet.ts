@@ -104,4 +104,4 @@ const transactionPacketSchema = new Schema({
 
 export default model('TransactionPacket', transactionPacketSchema)
 
-export type TransactionPacket = InferSchemaType<typeof transactionPacketSchema>
+export type TransactionPacketModel = InferSchemaType<typeof transactionPacketSchema>
