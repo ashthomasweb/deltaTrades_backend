@@ -28,8 +28,12 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
 
     case 'storedData':
       if (requestParams.savedData !== 'none') {
-        historicalActions.sendMock(requestParams)
+        historicalActions.sendStored(requestParams)
       }
+      break
+
+    case 'analysis':
+      historicalActions.sendStored(requestParams)
       break
 
     default:

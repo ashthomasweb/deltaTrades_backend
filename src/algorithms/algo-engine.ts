@@ -28,6 +28,17 @@ export class Queue {
     this.bus.on('realTime:data:queue', (data: TransactionPacket, id: RequestParams['chartId']) => {
       Logger.info('AlgoEngine received data\n', 'id:', id, data.tickerSymbol, data.inputType, ...data.queue.slice(0, 2))
     })
+    this.bus.on('analysis:data:queue', (queueData: TransactionPacket, chartData: any, requestParams: any) => {
+      Logger.info(
+        'AlgoEngine received data\n',
+        'id:',
+        queueData.tickerSymbol,
+        queueData.inputType,
+        ...queueData.queue.slice(0, 2),
+      )
+      const algoResult = algo1(requestParams, queueData)
+      this.bus.emit('analysisResults:data', algoResult, chartData)
+    })
   }
 
   enqueue(element: any) {

@@ -7,8 +7,8 @@ import { buildParamString } from '../../utils/api'
 import { RequestParams } from '../../types/types'
 
 export const historicalActions = {
-  sendMock: async (requestParams: Partial<RequestParams>) => {
-    Logger.info(`historicalActions sendMock - ${requestParams.savedData}`)
+  sendStored: async (requestParams: Partial<RequestParams>) => {
+    Logger.info(`historicalActions sendStored - ${requestParams.savedData}`)
 
     const localStoredDataRootPath = './src/storedData/'
 
