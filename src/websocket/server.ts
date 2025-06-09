@@ -10,10 +10,12 @@ export class WebSocketServer {
   private wss: WSS
   private _listening = false
   private bus: any
+  private clients: Set<WebSocket>
 
   constructor() {
     this.wss = new WSS({ port: 8080 })
     this.bus = EventBus
+    this.clients = new Set()
 
     this.wss.on('listening', () => {
       Logger.info('WebSocket server is listening on port 8080')
@@ -21,16 +23,7 @@ export class WebSocketServer {
     })
 
     this.wss.on('connection', (ws: WebSocket) => {
-      /* EventBus helper functions */
-      // Send data upon 'once' event
-      const sendOnceData = (event: string, type: string | undefined) => {
-        this.bus.once(event, (data) => ws.send(JSON.stringify({ type, data })))
-      }
-
-      const sendOnData = (event: string, type: string | undefined) => {
-        this.bus.on(event, (data, id) => ws.send(JSON.stringify({ type, data, id })))
-      }
-      /* END */
+      this.clients.add(ws)
 
       ws.send(JSON.stringify({ msg: 'Established' }))
 
@@ -40,10 +33,6 @@ export class WebSocketServer {
           Logger.info('Websocket received message:', requestParams)
 
           preRequestRouter(requestParams)
-
-          sendOnceData('historical:data', requestParams.type)
-          sendOnData('realTime:data', requestParams.type)
-          sendOnData('algo1Analysis:data', 'algo1Analysis')
         } catch (err) {
           console.error('Error handling WS message:', err)
         }
@@ -54,6 +43,44 @@ export class WebSocketServer {
       Logger.info('WebSocket server closed')
       this._listening = false
     })
+
+    /* Listeners to return data to frontend */
+    this.bus.on('realTime:data', (data: any, id: number) => {
+      const message = JSON.stringify({ type: 'realTime', data, id })
+      this.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message)
+        }
+      })
+    })
+
+    this.bus.on('algo1Analysis:data', (data: any, id: number) => {
+      const message = JSON.stringify({ type: 'algo1Analysis', data, id })
+      this.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message)
+        }
+      })
+    })
+
+    this.bus.on('historical:data', (data: any) => {
+      const message = JSON.stringify({ type: 'historical', data })
+      this.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message)
+        }
+      })
+    })
+
+    this.bus.on('analysisResults:data', (algoResults: any, chartData: any) => {
+      const message = JSON.stringify({ type: 'analysis', algoResults, data: { ...chartData } })
+      this.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(message)
+        }
+      })
+    })
+    /* END frontend return events */
   }
 
   get listening() {
