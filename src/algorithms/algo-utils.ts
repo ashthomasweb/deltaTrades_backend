@@ -6,6 +6,7 @@
 
 import { Logger } from '../__core/logger'
 import { NormalizedDataShape as Tick } from '../types/types'
+import { isNoisyWindow1 } from './noise-window-utils'
 
 /* General Utils */
 
@@ -91,6 +92,7 @@ export const isDirectionTolerant = (data: any, nextTick: any, tolerance: number,
 }
 
 export const detectSingleDirection = (data: any, minimumSequenceLength: number, tolerance?: number) => {
+  console.log(minimumSequenceLength, tolerance)
   let result = []
   let directionArray = [data[0]]
   let lastDirectionalIndex = 0
@@ -292,7 +294,6 @@ interface MAOptions {
 }
 
 export const calculateMA = (data: Tick[], numOfTicks: number, options: MAOptions) => {
-  // eslint-disable-next-line no-unused-vars
   const avgTypeFns: Record<AvgType, (tick: Tick) => number> = {
     default: (tick: Tick) => tick.close,
     typicalPrice: (tick: Tick) => (tick.high + tick.low + tick.close) / 3,
