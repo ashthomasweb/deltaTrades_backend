@@ -67,6 +67,7 @@ export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string =
   date930.setDate(date930.getDate() - daysPrevious)
 
   // Format final timestamp
+  // eslint-disable-next-line max-len
   const formatted = `${date930.getFullYear()}-${String(date930.getMonth() + 1).padStart(2, '0')}-${String(date930.getDate()).padStart(2, '0')} ${String(date930.getHours()).padStart(2, '0')}:${String(date930.getMinutes()).padStart(2, '0')}`
 
   return formatted

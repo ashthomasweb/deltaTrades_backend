@@ -5,12 +5,12 @@ import { promises as fs } from 'fs'
 import axios from 'axios'
 
 export const marketDataFetcher = {
-  async fetchHistorical(params: any) {
+  async fetchHistorical(params: string) {
     const response = await axios.get(`${config.HISTORICAL_API_BASE_URL}${params}`)
     return response.data
   },
 
-  async fetchRealtime(paramString: any) {
+  async fetchRealtime(paramString: string) {
     const response = await axios.get(`${config.REALTIME_REQUEST_BASE_URL}${paramString}`, {
       headers: {
         Authorization: `Bearer ${config.REALTIME_API_KEY}`,
