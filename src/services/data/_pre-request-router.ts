@@ -27,6 +27,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       break
 
     case 'storedData':
+      // TODO: Whis is this checking?? Shouldn't it always have a selection with this type?
       if (requestParams.savedData !== 'none') {
         historicalActions.sendStored(requestParams)
       }

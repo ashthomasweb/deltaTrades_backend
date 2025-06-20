@@ -21,10 +21,6 @@ export default function postRequestRouter(
         EventBus.emit('historical:data', historicalDataAdapter.returnFormattedData('chart'))
       }
 
-      if (requestParams.sendToQueue === 'on') {
-        EventBus.emit('historical:data:queue', historicalDataAdapter.returnFormattedData('queue'))
-      }
-
       if (requestParams.storeData === 'on') {
         EventBus.emit('historical:data:db', historicalDataAdapter.returnFormattedData('normalized'))
       }
@@ -32,7 +28,7 @@ export default function postRequestRouter(
     }
 
     case 'real-time': {
-      // Logger.info('RealTime postRequestRouter', count)
+      Logger.info('RealTime postRequestRouter', count)
       const options = {
         tickerSymbol: requestParams.symbol,
         interval: requestParams.interval,
@@ -41,12 +37,7 @@ export default function postRequestRouter(
       const realTimeDataAdapter = new DataAdapter(requestParams, data, options)
 
       if (requestParams.returnToFE) {
-        EventBus.emit(
-          // TODO: Pray and harden these types for emit-type // Pray??
-          'realTime:data',
-          realTimeDataAdapter.returnFormattedData('chart'),
-          chartId,
-        )
+        EventBus.emit('realTime:data', realTimeDataAdapter.returnFormattedData('chart'), chartId)
       }
 
       if (requestParams.sendToQueue === 'on') {
@@ -64,17 +55,8 @@ export default function postRequestRouter(
       const storedDataAdapter = new DataAdapter(requestParams, data)
 
       if (requestParams.returnToFE) {
-        // TODO: Problematic - sending an event each creates a double render cycle on the frontend,
-        // breaking user-selected chart state (zoom) persistence
         EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
       }
-
-      if (requestParams.sendToQueue === 'on') {
-        // TODO: Problematic - sending an event each creates a double render cycle on the frontend,
-        // breaking user-selected chart state (zoom) persistence
-        EventBus.emit('historical:data:queue', storedDataAdapter.returnFormattedData('queue'))
-      }
-
       break
     }
 

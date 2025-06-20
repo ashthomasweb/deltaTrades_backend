@@ -5,11 +5,12 @@ import { Logger } from '../../__core/logger'
 import axios from 'axios'
 import WebSocket from 'ws'
 import EventBus from '../../__core/event-bus'
+import EventEmitter from 'events'
 
 export class RealTimeWebSocket {
   sessionid: string = ''
   params: Record<string, string | undefined> = {}
-  private bus: any
+  private bus: EventEmitter
 
   constructor() {
     this.bus = EventBus
@@ -39,7 +40,9 @@ export class RealTimeWebSocket {
 
   async initTradierWS() {
     const tradierStream = new WebSocket(config.REALTIME_WS_BASE_URL)
-    let streamPollInterval = 30_000 // TODO: Investigate - v1 had an interval set to 30sec... But the api returns on every new tick. API changed? Manual rate limiting?
+    // TODO: Investigate - v1 had an interval set to 30sec... But the api returns on every new tick.
+    // API changed? Manual rate limiting?
+    let streamPollInterval = 30_000
     const sessionid = this.sessionid
 
     // TODO: These request specific params need to be controllable from the frontend, and persist after being set
