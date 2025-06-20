@@ -13,7 +13,7 @@ export const runOnInit = async () => {
   // FOR DEVELOPMENT CYCLE PURPOSES ONLY
   //---------------------------------------------------------------------//
 
-  algo1()
+  // algo1()
 
   // Get all stored data filenames - copy paste from console to FE /src/config/stored-data-paths.ts
   function readDirectoryFileNames(directoryPath: string) {

@@ -10,11 +10,15 @@ import { getEastern930Timestamp, getEasternTimestamps } from '../../utils/date-t
 export const realTimeActions = {
   sendMockIntervalTick: async (requestParams: Partial<RequestParams>) => {
     // Logger.info(`realTimeActions sendMockIntervalTick`, requestParams)
-    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams) // TODO: normalize the id coming from FE and the registry expected type to string/number.
+
+    // TODO: normalize the id coming from FE and the registry expected type to string/number.
+    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams)
   },
   sendRequested: async (requestParams: Partial<RequestParams>) => {
     // Logger.info('realTimeActions sendRequested', requestParams)
-    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams) // TODO: normalize the id coming from FE and the registry expected type to string/number.
+
+    // TODO: normalize the id coming from FE and the registry expected type to string/number.
+    RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams)
   },
 }
 
@@ -138,7 +142,8 @@ class PreviousDayRequestHandler extends BaseRequestHandler {
         : this.requestParams.beginDate
   }
 
-  // Previous day requests don't need the 'bottom of the minute' logic at this time. Accepts an interval length for adding to the chart
+  // Previous day requests don't need the 'bottom of the minute' logic at this time.
+  // Accepts an interval length for adding to the chart
   startCycle(mockIntervalInMs: number = 3000) {
     this.handleRequest() // Call on initial request
     this.intervalId = setInterval(async () => {
@@ -147,7 +152,8 @@ class PreviousDayRequestHandler extends BaseRequestHandler {
   }
 }
 
-type HandlerTypes = 'realTime' | 'previousDay' | undefined // TODO: Across app standardize terms such as 'realTime vs. real-time', 'previousDay vs. getPrevious' ...
+// TODO: Across app standardize terms such as 'realTime vs. real-time', 'previousDay vs. getPrevious' ...
+type HandlerTypes = 'realTime' | 'previousDay' | undefined
 
 class RequestHandlerFactory {
   static create(type: HandlerTypes, params: Partial<RequestParams>): RequestHandler {

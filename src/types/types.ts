@@ -5,7 +5,7 @@ export interface TransactionPacket {
   tickerSymbol: string
   expiryDate: string | undefined
   createdAt: Date
-  queue: any[] // Unsure of the shape of this
+  queue: any // Unsure of the shape of this
   optionChain: OptionContract[] | undefined
   analysisPacket: Record<string, any> | undefined
   completed: boolean | undefined
@@ -31,11 +31,18 @@ export interface OrderInfo {
   brokerMessage?: string
 }
 
+// TODO: This is a temporary shape...
+export type QueueType = {
+  elements: ExtTick[] | Tick[] | null
+  head: number
+  tail: number
+}
+
 export interface NormalizedData {
   id: number
   creationMeta: CreationMeta
   metaData: MetaData
-  data: NormalizedDataShape[]
+  data: Tick[]
 }
 
 export interface CreationMeta {
@@ -61,7 +68,7 @@ export interface MetaData {
   }
 }
 
-export interface NormalizedDataShape {
+export interface Tick {
   timestamp: string | undefined
   open: number
   close: number
@@ -72,6 +79,23 @@ export interface NormalizedDataShape {
   absoluteChange?: number | null
   vwap?: number | null
 }
+
+export interface ExtTick extends Tick {
+  originalIndex: number | undefined
+  isPrevGreen: boolean | null
+  isGreen: boolean
+  isNextGreen: boolean | null
+  movingAvg: number | undefined
+  isBodyCrossing: boolean | undefined
+  isWickCrossing: boolean | undefined
+  crossesBodyAtPercent?: number | null
+  isCandleFull80: boolean
+  candleBodyFullness: number
+  candleBodyDistPercentile: number | undefined
+  candleVolumeDistPercentile: number | undefined
+}
+
+export type TickArray = Tick[] | ExtTick[]
 
 interface OptionContract {
   strikePrice: number
@@ -124,6 +148,7 @@ export interface RequestParams {
   originator: string | undefined
   returnToFE: boolean | undefined
   chartId: string | undefined
+  algoParams: Record<string, any>
 }
 
 // TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE
@@ -142,3 +167,9 @@ export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
 //   percentChange: number
 //   absoluteChange: number
 // }
+
+export type ChartData = {
+  categoryData: string[]
+  values: number[][]
+  volumes: number[][]
+}

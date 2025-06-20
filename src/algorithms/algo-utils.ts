@@ -5,18 +5,18 @@
 /* ------------------------------------------------ */
 
 import { Logger } from '../__core/logger'
-import { NormalizedDataShape as Tick } from '../types/types'
+import { ExtTick, Tick as Tick, TickArray } from '../types/types'
 import { isNoisyWindow1 } from './noise-window-utils'
 
 /* General Utils */
 
 // Finds a single day
 // NOTE: If the day passed is a non-market-day (weekend/holiday), no results will be returned!
-export const daySelector = (data: any, day: number) => {
+export const daySelector = (data: TickArray, day: number) => {
   let result = []
 
   for (const tick of data) {
-    if (parseFloat(tick.timestamp.substring(8, 10)) === day) {
+    if (parseFloat(tick.timestamp!.substring(8, 10)) === day) {
       result.push(tick)
     }
   }
@@ -28,7 +28,7 @@ export const daySelector = (data: any, day: number) => {
   return result
 }
 
-export const groupByDays = (data: Tick[]) => {
+export const groupByDays = (data: TickArray) => {
   const dataByDays: Record<string, Tick[]> = {}
   for (const tick of data) {
     if (tick.timestamp === undefined) return
@@ -78,7 +78,12 @@ export const isWithinTolerancePercent = (number1: number, number2: number, toler
 
 /* Direction Utils */
 
-export const isDirectionTolerant = (data: any, nextTick: any, tolerance: number, lastDirectionalIndex: number) => {
+export const isDirectionTolerant = (
+  data: Tick[] | ExtTick[],
+  nextTick: Tick | ExtTick,
+  tolerance: number,
+  lastDirectionalIndex: number,
+) => {
   const initialTick = data[0]
   const lastTick = data[lastDirectionalIndex]
   const opposingTickValue = isGreenCandle(initialTick) ? nextTick.low : nextTick.high
@@ -91,7 +96,7 @@ export const isDirectionTolerant = (data: any, nextTick: any, tolerance: number,
   return opposingChangePercentage < tolerance * 100
 }
 
-export const detectSingleDirection = (data: any, minimumSequenceLength: number, tolerance?: number) => {
+export const detectSingleDirection = (data: TickArray, minimumSequenceLength: number, tolerance?: number) => {
   console.log(minimumSequenceLength, tolerance)
   let result = []
   let directionArray = [data[0]]
@@ -125,7 +130,7 @@ export const detectSingleDirection = (data: any, minimumSequenceLength: number, 
 
   const group: any = {}
   for (const array of result) {
-    if (group[array[0].timestamp] === undefined) {
+    if (array[0].timestamp && group[array[0].timestamp] === undefined) {
       group[array[0].timestamp] = {
         start: array[0].timestamp,
         end: array[array.length - 1].timestamp,
@@ -139,7 +144,7 @@ export const detectSingleDirection = (data: any, minimumSequenceLength: number, 
 
 /* Volume Utils */
 
-export const getVolumeRange = (data: any) => {
+export const getVolumeRange = (data: TickArray) => {
   let high = data[0].volume
   let low = data[0].volume
 
@@ -155,7 +160,7 @@ export const getVolumeRange = (data: any) => {
   return { volHigh: high, volLow: low }
 }
 
-export const createVolumeDistributionMap = (data: any) => {
+export const createVolumeDistributionMap = (data: TickArray) => {
   const volumeRange = getVolumeRange(data)
 
   const distributionBlock = (volumeRange.volHigh - volumeRange.volLow) / 100
@@ -203,19 +208,20 @@ export const directionalBlockVolumeAnalysis = (directionalArray: any[], volumeDi
   return result
 }
 
-export const findTickVolumeDistribution = (tick: any, low: number, distributionBlock: number) => {
+export const findTickVolumeDistribution = (tick: Tick | ExtTick, low: number, distributionBlock: number) => {
   return Math.floor((tick.volume - low) / distributionBlock)
 }
 
 /* Candlestick Analysis Utils */
 
-export const isGreenCandle = (tick: any) => tick.open < tick.close
+export const isGreenCandle = (tick: Tick | ExtTick) => tick.open < tick.close
 
-export const isRedCandle = (tick: any) => tick.open > tick.close
+export const isRedCandle = (tick: Tick | ExtTick) => tick.open > tick.close
 
-export const candlesMatch = (tick1: any, tick2: any) => isGreenCandle(tick1) === isGreenCandle(tick2)
+export const candlesMatch = (tick1: Tick | ExtTick, tick2: Tick | ExtTick) =>
+  isGreenCandle(tick1) === isGreenCandle(tick2)
 
-export const isCandleFullByPercentage = (tick: Tick, bodyPercentage: number) => {
+export const isCandleFullByPercentage = (tick: Tick | ExtTick, bodyPercentage: number) => {
   const bodyValue = Math.abs(tick.open - tick.close)
   const wickValue = tick.high - tick.low
   return bodyValue >= wickValue * bodyPercentage
@@ -227,22 +233,7 @@ export const getCandleBodyFullness = (tick: Tick | ExtTick) => {
   return (bodyValue / wickValue) * 100
 }
 
-export interface ExtTick extends Tick {
-  originalIndex: number | undefined
-  isPrevGreen: boolean | null
-  isGreen: boolean
-  isNextGreen: boolean | null
-  movingAvg: number | undefined
-  isBodyCrossing: boolean | undefined
-  isWickCrossing: boolean | undefined
-  crossesBodyAtPercent?: number | null
-  isCandleFull80: boolean
-  candleBodyFullness: number
-  candleBodyDistPercentile: number | undefined
-  candleVolumeDistPercentile: number | undefined
-}
-
-export const extendTickData = (data: Tick[], MaAvgArray: number[], dailyDistributions: any): ExtTick[] => {
+export const extendTickData = (data: TickArray, MaAvgArray: number[], dailyDistributions: any): ExtTick[] => {
   let currentDay = ''
   let previousDayDistributions: any = null
 
@@ -293,8 +284,8 @@ interface MAOptions {
   avgType: AvgType
 }
 
-export const calculateMA = (data: Tick[], numOfTicks: number, options: MAOptions) => {
-  const avgTypeFns: Record<AvgType, (tick: Tick) => number> = {
+export const calculateMA = (data: TickArray, numOfTicks: number, options: MAOptions) => {
+  const avgTypeFns: Record<AvgType, (tick: Tick | ExtTick) => number> = {
     default: (tick: Tick) => tick.close,
     typicalPrice: (tick: Tick) => (tick.high + tick.low + tick.close) / 3,
     OHLCAverage: (tick: Tick) => (tick.open + tick.high + tick.low + tick.close) / 4,
@@ -315,14 +306,14 @@ export const calculateMA = (data: Tick[], numOfTicks: number, options: MAOptions
   return analysisPacket
 }
 
-export const findBodyCrossingPercent = (tick: Tick, avg: number) => {
+export const findBodyCrossingPercent = (tick: Tick | ExtTick, avg: number) => {
   const amountBelowAvg = isGreenCandle(tick) ? avg - tick.open : avg - tick.close
   const tickBodyRange = Math.abs(tick.open - tick.close)
   const percentCrossedAt = (amountBelowAvg / tickBodyRange) * 100
   return percentCrossedAt
 }
 
-export const isCandleBodyCrossingAvg = (tick: Tick, avg: number) => {
+export const isCandleBodyCrossingAvg = (tick: Tick | ExtTick, avg: number) => {
   if (isGreenCandle(tick)) {
     return tick.open <= avg && tick.close >= avg
   } else if (isRedCandle(tick)) {
@@ -330,7 +321,7 @@ export const isCandleBodyCrossingAvg = (tick: Tick, avg: number) => {
   }
 }
 
-export const isCandleWickCrossingAvg = (tick: Tick, avg: number) => {
+export const isCandleWickCrossingAvg = (tick: Tick | ExtTick, avg: number) => {
   if (isGreenCandle(tick)) {
     return tick.low <= avg && tick.high >= avg
   } else if (isRedCandle(tick)) {
@@ -340,15 +331,15 @@ export const isCandleWickCrossingAvg = (tick: Tick, avg: number) => {
 
 /* Candle Size Distributions */
 
-const findSingleTickWickDistribution = (tick: Tick, range: any, distributionBlock: number) => {
+const findSingleTickWickDistribution = (tick: Tick | ExtTick, range: any, distributionBlock: number) => {
   return Math.floor(((tick.high - tick.low - range.low) * 1000) / (distributionBlock * 1000))
 }
 
-const findSingleTickBodyDistribution = (tick: Tick, range: any, distributionBlock: number) => {
+const findSingleTickBodyDistribution = (tick: Tick | ExtTick, range: any, distributionBlock: number) => {
   return Math.floor(((Math.abs(tick.open - tick.close) - range.low) * 1000) / (distributionBlock * 1000))
 }
 
-export const getCandleSizeRange = (data: Tick[]) => {
+export const getCandleSizeRange = (data: TickArray) => {
   const wickRange = {
     high: 0,
     low: Infinity,
@@ -377,7 +368,7 @@ export const getCandleSizeRange = (data: Tick[]) => {
   return [wickRange, bodyRange]
 }
 
-export const createCandleSizeDistributionMaps = (data: Tick[]) => {
+export const createCandleSizeDistributionMaps = (data: TickArray) => {
   const [wickRange, bodyRange] = getCandleSizeRange(data)
 
   const wickDistributionBlock = (wickRange.high - wickRange.low) / 100
@@ -445,7 +436,7 @@ const filterByConfirmed = (fullData: ExtTick[], filteredData: ExtTick[]) => {
   return result
 }
 
-const filterByCandleDistribution = (data: ExtTick[], lowerThreshold: number) => {
+const filterByCandleDistribution = (data: TickArray, lowerThreshold: number) => {
   let result = []
   const candleSizeDistributionMap = createCandleSizeDistributionMaps(data)
   for (const tick of data) {

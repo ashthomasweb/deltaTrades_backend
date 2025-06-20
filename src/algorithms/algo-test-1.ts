@@ -1,4 +1,5 @@
 import { Logger } from '../__core/logger'
+import { RequestParams, TransactionPacket } from '../types/types'
 import {
   daySelector,
   detectFullCandles,
@@ -24,9 +25,11 @@ import {
   isNoisyWindow4,
 } from './noise-window-utils'
 
-export function algo1(requestParams: any, passedData?: any) {
-  console.log('TRACE: algo1', requestParams)
-  console.time('algo1')
+export function algo1(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
+  if (passedData === undefined) return
+  if (requestParams.algoParams === undefined) return
+  // console.log('TRACE: algo1', requestParams)
+  console.time('Algo runtime')
 
   const data = passedData.queue
   Logger.info(
@@ -63,10 +66,10 @@ export function algo1(requestParams: any, passedData?: any) {
 
   const noiseWindows = getAllNoiseWindows(extendedTickData, isNoisyWindow1)
 
-  console.timeEnd('algo1')
+  console.timeEnd('Algo runtime')
   return {
     singleDirBlocks: singleDirectionBlocks,
-    MA10: MA,
+    MA: MA,
     crossingSignal: crossingSignal,
     noiseWindows: noiseWindows,
   }
@@ -85,10 +88,6 @@ export function algo1(requestParams: any, passedData?: any) {
 /* END */
 
 // const findIncreasingVolume
-
-// const detectFuzz (Decent indicator of directional change. Defined as sequential candlesticks
-// inluding some of the following: No clear direction - long wicks & short candles - alternating
-// colors - usually for 3-5 minutes)
 
 // const detectDirectionChange (usually consistent single direction followed by some fuzz)
 
