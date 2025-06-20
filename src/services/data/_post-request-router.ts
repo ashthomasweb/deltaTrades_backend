@@ -55,8 +55,22 @@ export default function postRequestRouter(
       const storedDataAdapter = new DataAdapter(requestParams, data)
 
       if (requestParams.returnToFE) {
+        // TODO: Problematic - sending an event each creates a double render cycle on the frontend,
+        // breaking user-selected chart state (zoom) persistence
         EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
       }
+      break
+    }
+
+    case 'analysis': {
+      Logger.info('AnalysisData postRequestRouter')
+      const analysisDataAdapter = new DataAdapter(requestParams, data)
+      EventBus.emit(
+        'analysis:data:queue',
+        analysisDataAdapter.returnFormattedData('queue'),
+        analysisDataAdapter.returnFormattedData('chart'),
+        requestParams,
+      )
       break
     }
 
