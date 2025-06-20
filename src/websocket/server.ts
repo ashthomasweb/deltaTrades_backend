@@ -4,12 +4,13 @@ import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import WebSocket, { WebSocketServer as WSS } from 'ws'
 import preRequestRouter from '../services/data/_pre-request-router'
-import { RequestParams } from '../types/types'
+import { ChartData, RequestParams } from '../types/types'
+import EventEmitter from 'events'
 
 export class WebSocketServer {
   private wss: WSS
   private _listening = false
-  private bus: any
+  private bus: EventEmitter
   private clients: Set<WebSocket>
 
   constructor() {
@@ -31,7 +32,6 @@ export class WebSocketServer {
         try {
           const requestParams: Partial<RequestParams> = JSON.parse(message.toString())
           Logger.info('Websocket received message:', requestParams)
-
           preRequestRouter(requestParams)
         } catch (err) {
           console.error('Error handling WS message:', err)
@@ -44,18 +44,9 @@ export class WebSocketServer {
       this._listening = false
     })
 
-    /* Listeners to return data to frontend */
+    /* Frontend return events */
     this.bus.on('realTime:data', (data: any, id: number) => {
       const message = JSON.stringify({ type: 'realTime', data, id })
-      this.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(message)
-        }
-      })
-    })
-
-    this.bus.on('algo1Analysis:data', (data: any, id: number) => {
-      const message = JSON.stringify({ type: 'algo1Analysis', data, id })
       this.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(message)
@@ -72,7 +63,7 @@ export class WebSocketServer {
       })
     })
 
-    this.bus.on('analysisResults:data', (algoResults: any, chartData: any) => {
+    this.bus.on('analysisResults:data', (algoResults: any, chartData: ChartData) => {
       const message = JSON.stringify({ type: 'analysis', algoResults, data: { ...chartData } })
       this.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {

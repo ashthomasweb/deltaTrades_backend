@@ -6,7 +6,7 @@ import {
   DataSource,
   FrontEndChartPacket,
   NormalizedData,
-  NormalizedDataShape,
+  Tick,
   OutputFormat,
   RequestParams,
   SourceType,
@@ -170,7 +170,7 @@ const convertAVtoNormalized = (data: any, options: any = null): Partial<Normaliz
   output.data = []
 
   for (let i = 0; i <= dateArray.length - 1; i++) {
-    const data: Partial<NormalizedDataShape> = {
+    const data: Partial<Tick> = {
       timestamp: dateArray[i],
       open: +dataArray[i]['1. open'],
       close: +dataArray[i]['4. close'],
@@ -217,7 +217,7 @@ const convertTradiertoNormalized = (rawData: any, options: any = null): Partial<
   output.data = []
 
   for (let i = 0; i <= dataset.length - 1; i++) {
-    const data: Partial<NormalizedDataShape> = {
+    const data: Partial<Tick> = {
       timestamp: dataset[i].time,
       open: dataset[i].open,
       close: dataset[i].close,
