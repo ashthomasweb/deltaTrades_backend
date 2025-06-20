@@ -1,10 +1,9 @@
-/* eslint-disable no-undef */
 /* src/websocket/server.test.ts */
 /* eslint-env node, vitest */
 
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
-// import { HistoricalService } from '../services/data/historical-service'
+import { historicalActions } from '../services/data/historical-actions'
 import { WebSocketServer } from './server'
 import { MockInstance, vi } from 'vitest'
 import { WebSocketServer as WSS, WebSocket } from 'ws'
@@ -25,10 +24,10 @@ describe('WebSocketServer', () => {
   beforeEach(async () => {
     wssOn = vi.spyOn(WSS.prototype, 'on')
     wssSend = vi.spyOn(WebSocket.prototype, 'send')
-    vi.spyOn(HistoricalService.prototype, 'fetch').mockImplementation(async () => {
+    vi.spyOn(historicalActions, 'sendStored').mockImplementation(async () => {
       eventBus.emit('historical:data', mockHistoricalData)
     })
-    vi.spyOn(HistoricalService.prototype, 'fetchHistoricalSavedData').mockImplementation(async () => {
+    vi.spyOn(historicalActions, 'sendRequested').mockImplementation(async () => {
       eventBus.emit('historical:data', mockHistoricalData)
     })
 
@@ -36,14 +35,14 @@ describe('WebSocketServer', () => {
     vi.spyOn(console, 'log').mockImplementation(vi.fn())
     vi.spyOn(Logger, 'info').mockImplementation(vi.fn())
 
-    server = new WebSocketServer(eventBus)
+    server = new WebSocketServer()
     await vi.waitFor(() => expect(server.listening).toBe(true))
 
     client = new WebSocket('ws://localhost:8080')
     await new Promise((resolve) => client.on('open', resolve))
-    client.send(JSON.stringify({ type: 'getHistorical' }))
-    client.send(JSON.stringify({ type: 'otherRequest' }))
-    client.send('invalid message')
+    // client.send(JSON.stringify({ type: 'historical' }))
+    // client.send(JSON.stringify({ type: 'realtime' }))
+    // client.send('invalid message')
   })
 
   afterEach(() => {
@@ -63,17 +62,34 @@ describe('WebSocketServer', () => {
     expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ msg: 'Established' }))
   })
 
-  it("should respond with historical data on 'getHistorical' message", () => {
-    expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ type: 'historical', data: mockHistoricalData }))
+  it('should broadcast historical data when historical:data event is emitted', async () => {
+    const message = { type: 'historical', data: mockHistoricalData }
+
+    // Manually emit the event
+    eventBus.emit('historical:data', mockHistoricalData)
+
+    // Wait for the send to be triggered
+    await vi.waitFor(() => {
+      expect(wssSend).toHaveBeenCalledWith(JSON.stringify(message))
+    })
   })
 
-  it("should send price updates to clients on 'price:update' event", () => {
-    const priceUpdate = { symbol: 'TSLA', price: 720 }
-    eventBus.emit('price:update', priceUpdate)
-    expect(wssSend).toHaveBeenCalledWith(JSON.stringify({ type: 'price', data: priceUpdate }))
+  it('should broadcast realTime data when realTime:data event is emitted', async () => {
+    const mockRealTimeData = [{ symbol: 'TSLA', price: 270 }]
+    const mockId = 42
+    const expectedMessage = JSON.stringify({ type: 'realTime', data: mockRealTimeData, id: mockId })
+
+    eventBus.emit('realTime:data', mockRealTimeData, mockId)
+
+    await vi.waitFor(() => {
+      expect(wssSend).toHaveBeenCalledWith(expectedMessage)
+    })
   })
 
-  it('should handle invalid client messages gracefully', () => {
-    expect(console.error).toHaveBeenCalledWith('Error handling WS message:', expect.any(SyntaxError))
+  it('should handle invalid client messages gracefully', async () => {
+    client.send('bad json')
+    await vi.waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith('Error handling WS message:', expect.any(SyntaxError))
+    })
   })
 })
