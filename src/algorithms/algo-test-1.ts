@@ -26,47 +26,71 @@ import {
 } from './noise-window-utils'
 
 export function algo1(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
+  /* Early returns */
   if (passedData === undefined) return
   if (requestParams.algoParams === undefined) return
-  // console.log('TRACE: algo1', requestParams)
-  console.time('Algo runtime')
 
-  const data = passedData.queue
+  /* Runtime measurement and log */
+  console.time('Algo runtime')
   Logger.info(
     'Packet retrieved and parsed!\n',
     passedData.tickerSymbol,
-    data.length > 0 ? `\nData present with ${data.length - 1} entries` : '\nNo data present',
+    passedData.queue.length > 0 ? `\nData present with ${passedData.queue.length - 1} entries` : '\nNo data present',
     '\n',
   )
 
-  const singleDirectionBlocks = detectSingleDirection(
-    data,
-    +requestParams.algoParams.singleDirMin,
-    +requestParams.algoParams.oppThreshold,
-  )
+  /* Param destructuring */
+  const data = passedData.queue
 
+  /* Output declarations */
+  let singleDirectionBlocks = undefined
+  let MA = undefined
+  let crossingSignal = undefined
+  let noiseWindows = undefined
+
+  /* Single Direction Blocks */
+  singleDirectionBlocks = detectSingleDirection(data, requestParams)
+
+  /* Single Direction Block Volume Analysis */
   // const singleDirectionVolumeAnalysis = directionalBlockVolumeAnalysis(
   //   singleDirectionBlocks,
   //   dailyVolumeDistributionData,
   // )
 
-  /* This will be stored in the DB at the end of each day */
+  /* Secondary Data Generation */
+  // These values will likely be stored in the DB at the end of each day
   const dayDataGroups: DailyDataGroups | undefined = groupByDays(data)
   const dailyDistributions = buildDailyDistributions(dayDataGroups)
-  /* END */
 
-  const MA = calculateMA(data, 7, { avgType: 'default' })
+  /* Moving Average */
+  MA = calculateMA(data, requestParams)
 
-  const extendedTickData = extendTickData(data, MA.data, dailyDistributions)
-  Logger.toFileOut('extendedTickTesting/05-23.txt', 'Full Extended Results', extendedTickData.slice(-390), {
-    overwrite: true,
-  })
+  /* Create ExtendedTick Data */
+  let extendedTickData
+  if (MA) {
+    extendedTickData = extendTickData(data, MA.data, dailyDistributions)
+  }
+  // Logger.toFileOut('extendedTickTesting/05-23.txt', 'Full Extended Results', extendedTickData.slice(-390), {
+  //   overwrite: true,
+  // })
 
-  const [crossingSignal, noiseWindowsPerSignal] = detectMAConfirmedCrossing(extendedTickData)
+  /* CrossingSignal (BuySignal) */
+  // returns array of crossingSignals, and associated noiseWindows
+  let confirmedCrossingDetectionOutput
+  if (extendedTickData) {
+    confirmedCrossingDetectionOutput = detectMAConfirmedCrossing(extendedTickData, requestParams)
+    crossingSignal = confirmedCrossingDetectionOutput && confirmedCrossingDetectionOutput[0]
+  }
 
-  const noiseWindows = getAllNoiseWindows(extendedTickData, isNoisyWindow1)
+  /* All Noise Windows In Dataset */
+  if (extendedTickData) {
+    noiseWindows = getAllNoiseWindows(extendedTickData, isNoisyWindow1, requestParams)
+  }
 
+  /* Completion of algorithm runtime measurement */
   console.timeEnd('Algo runtime')
+
+  /* Output */
   return {
     singleDirBlocks: singleDirectionBlocks,
     MA: MA,
