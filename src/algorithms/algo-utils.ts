@@ -4,9 +4,10 @@
  *  - All functions should return a value
 /* ------------------------------------------------ */
 
+import { request } from 'http'
 import { Logger } from '../__core/logger'
-import { ExtTick, Tick as Tick, TickArray } from '../types/types'
-import { isNoisyWindow1 } from './noise-window-utils'
+import { ExtTick, RequestParams, Tick as Tick, TickArray } from '../types/types'
+import { isNoisyWindow1, isNoisyWindow2, isNoisyWindow3, isNoisyWindow4 } from './noise-window-utils'
 
 /* General Utils */
 
@@ -96,11 +97,13 @@ export const isDirectionTolerant = (
   return opposingChangePercentage < tolerance * 100
 }
 
-export const detectSingleDirection = (data: TickArray, minimumSequenceLength: number, tolerance?: number) => {
-  console.log(minimumSequenceLength, tolerance)
+export const detectSingleDirection = (data: TickArray, requestParams: Partial<RequestParams>) => {
+  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
   let result = []
   let directionArray = [data[0]]
   let lastDirectionalIndex = 0
+  const minimumSequenceLength = +requestParams.algoParams.singleDirMin
+  const tolerance = +requestParams.algoParams.oppThreshold
 
   for (const [index, tick] of Object.entries(data)) {
     if (candlesMatch(tick, directionArray[0])) {
@@ -280,12 +283,16 @@ export const extendTickData = (data: TickArray, MaAvgArray: number[], dailyDistr
 
 type AvgType = 'default' | 'typicalPrice' | 'OHLCAverage'
 
-interface MAOptions {
-  avgType: AvgType
-}
+export const calculateMA = (
+  data: TickArray,
+  requestParams: Partial<RequestParams>,
+): { data: any[]; type: string; smooth: boolean } => {
+  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
 
-export const calculateMA = (data: TickArray, numOfTicks: number, options: MAOptions) => {
-  const avgTypeFns: Record<AvgType, (tick: Tick | ExtTick) => number> = {
+  const numOfTicks = requestParams.algoParams.avgPeriod
+  const avgType: AvgType = requestParams.algoParams.maAvgType
+
+  const avgTypeFns = {
     default: (tick: Tick) => tick.close,
     typicalPrice: (tick: Tick) => (tick.high + tick.low + tick.close) / 3,
     OHLCAverage: (tick: Tick) => (tick.open + tick.high + tick.low + tick.close) / 4,
@@ -299,7 +306,7 @@ export const calculateMA = (data: TickArray, numOfTicks: number, options: MAOpti
 
   for (let i = numOfTicks - 1; i < data.length; i++) {
     const window = data.slice(i - numOfTicks + 1, i + 1)
-    const sum = window.reduce((acc, tick) => acc + avgTypeFns[options.avgType](tick), 0)
+    const sum = window.reduce((acc, tick) => acc + avgTypeFns[avgType](tick), 0)
     analysisPacket.data[i] = sum / numOfTicks
   }
 
@@ -455,54 +462,48 @@ const filterByCandleDistribution = (data: TickArray, lowerThreshold: number) => 
 
 /* Multi-metric Utils */
 
-export const detectMAConfirmedCrossing = (data: ExtTick[]): (string | undefined)[] => {
+export const detectMAConfirmedCrossing = (
+  data: ExtTick[],
+  requestParams: Partial<RequestParams>,
+): (string | undefined)[] | undefined => {
+  console.log(requestParams)
+  if (!requestParams.algoParams) return
+  const algoParams = requestParams.algoParams
   let result: any = []
   let windowArray = []
-  let count = 0
   let noiseWindows = []
-
-  // const checkForNoise = (tick: ExtTick, index: number) => {
-  //   windowArray = data.slice(index - 6, index - 1)
-  //   count = 0
-  //   windowArray.forEach((entry) => entry.isWickCrossing && count++)
-  //   if (count < 2) {
-  //     result.push(tick)
-  //   }
-  // }
-
-  const checkForNoise = (tick: ExtTick, index: number) => {
-    windowArray = data.slice(index - 10, index - 1)
-    count = 0
-    windowArray.forEach((entry) => (entry.candleBodyFullness < 40 || entry.isWickCrossing) && count++)
-    if (count < 5) {
-      result.push(tick)
-    }
+  const noiseWindowKey: string = algoParams.noiseWindow
+  const noiseFunction: Record<string, Function> = {
+    NW1: isNoisyWindow1,
+    NW2: isNoisyWindow2,
+    NW3: isNoisyWindow3,
+    NW4: isNoisyWindow4,
   }
 
-  for (let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length - 1; i++) {
     const tick = data[i]
-    if (tick.isBodyCrossing && tick.candleBodyDistPercentile! > 17 && !isBefore945am(tick)) {
-      windowArray = data.slice(i - 7, i - 1)
-      if (
-        isNoisyWindow1(windowArray, {
-          atrMultiplier: 0.5,
-          alternationThreshold: 0.4,
-          huggingRatio: 0.5, // Accepts range of [1 - 0]. Lower values result in more noise windows picked up
-        })
-      ) {
+    if (tick.isBodyCrossing && tick.candleBodyDistPercentile! > +algoParams.minCandleBodyDist && !isBefore945am(tick)) {
+      windowArray = data.slice(i - +algoParams.noiseWindowLength, i - 1)
+      const options = {
+        atrMultiplier: +algoParams.atrMultiplier,
+        alternationThreshold: +algoParams.altThreshold,
+        huggingRatio: +algoParams.hugRatio, // Accepts range of [0 - 1]. Lower values result in more noise windows
+      }
+      if (noiseFunction[noiseWindowKey](windowArray, options)) {
         noiseWindows.push(windowArray)
       } else {
         result.push(tick)
       }
-      // checkForNoise(tick, i)
-      // result.push(tick)
     }
   }
 
-  const group: any = {}
+  console.log(result.length)
+
+  // Array of noise windows that caused a crossing signal to be marked as 'non-starter'
+  const negatingWindows: any = {}
   for (const array of noiseWindows) {
-    if (group[array[0].timestamp!] === undefined) {
-      group[array[0].timestamp!] = {
+    if (negatingWindows[array[0].timestamp!] === undefined) {
+      negatingWindows[array[0].timestamp!] = {
         start: array[0].timestamp,
         end: array[array.length - 1].timestamp,
         data: [...array],
@@ -524,11 +525,11 @@ export const detectMAConfirmedCrossing = (data: ExtTick[]): (string | undefined)
 
   // refine by averageHugging
 
+  // ATTN: At this time, this function must be the last filter run in the algo
   // refine by confirmed candles
   result = filterByConfirmed(data, result)
 
-  Logger.info(result.length)
-  return [result.map((entry: ExtTick) => entry.timestamp), group]
+  return [result.map((entry: ExtTick) => entry.timestamp), negatingWindows]
 }
 
 export type DailyDataGroups = Record<string, Tick[]>
@@ -550,3 +551,26 @@ export const buildDailyDistributions = (dailyDataGroups: DailyDataGroups | undef
 const getPreviousDayDistributions = (currentDay: string, dailyDistributions: any) => {
   return dailyDistributions[currentDay]
 }
+
+/* FOR RETIRE? */
+
+/*
+ const checkForNoise = (tick: ExtTick, index: number) => {
+    windowArray = data.slice(index - 6, index - 1)
+    count = 0
+    windowArray.forEach((entry) => entry.isWickCrossing && count++)
+    if (count < 2) {
+      result.push(tick)
+    }
+  }
+
+  const checkForNoise = (tick: ExtTick, index: number) => {
+    windowArray = data.slice(index - 10, index - 1)
+    count = 0
+    windowArray.forEach((entry) => (entry.candleBodyFullness < 40 || entry.isWickCrossing) && count++)
+    if (count < 5) {
+      result.push(tick)
+    }
+  }
+
+*/
