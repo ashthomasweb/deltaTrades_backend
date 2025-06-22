@@ -4,10 +4,15 @@
  *  - All functions should return a value
 /* ------------------------------------------------ */
 
-import { request } from 'http'
-import { Logger } from '../__core/logger'
 import { ExtTick, RequestParams, Tick as Tick, TickArray } from '../types/types'
-import { isNoisyWindow1, isNoisyWindow2, isNoisyWindow3, isNoisyWindow4 } from './noise-window-utils'
+import {
+  isNoisyWindow1,
+  isNoisyWindow2,
+  isNoisyWindow3,
+  isNoisyWindow4,
+  isNoisyWindow5,
+  isNoisyWindow6,
+} from './noise-window-utils'
 
 /* General Utils */
 
@@ -478,12 +483,14 @@ export const detectMAConfirmedCrossing = (
     NW2: isNoisyWindow2,
     NW3: isNoisyWindow3,
     NW4: isNoisyWindow4,
+    NW5: isNoisyWindow5,
+    NW6: isNoisyWindow6,
   }
 
   for (let i = 0; i < data.length - 1; i++) {
     const tick = data[i]
     if (tick.isBodyCrossing && tick.candleBodyDistPercentile! > +algoParams.minCandleBodyDist && !isBefore945am(tick)) {
-      windowArray = data.slice(i - +algoParams.noiseWindowLength, i - 1)
+      windowArray = data.slice(i - (+algoParams.noiseWindowLength + 1), i - 1)
       const options = {
         atrMultiplier: +algoParams.atrMultiplier,
         alternationThreshold: +algoParams.altThreshold,

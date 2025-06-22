@@ -54,7 +54,7 @@ export default defineConfig([
       'no-case-declarations': ['warn'],
       'no-fallthrough': ['warn'],
       'no-undef': ['warn'],
-      'max-len': ['warn', 120],
+      // 'max-len': ['warn', 120],
 
       'prettier/prettier': [
         'error',
