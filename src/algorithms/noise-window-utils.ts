@@ -27,14 +27,11 @@ type NoiseGroup = {
  * @param requestParams - Parameters passed to the noise function
  * @returns An object grouping noisy windows by their starting timestamp
  */
-export function getAllNoiseWindows(
-  data: ExtTick[],
-  noiseFunction: (array: ExtTick[], options: NoiseOptions) => boolean,
-  requestParams: Partial<RequestParams>,
-) {
+export function getAllNoiseWindows(data: ExtTick[], requestParams: Partial<RequestParams>) {
   if (requestParams.algoParams === undefined) return
   let noiseWindows: ExtTick[][] = []
   let windowArray = []
+
   const options: NoiseOptions = {
     atrMultiplier: requestParams?.algoParams.atrMultiplier,
     alternationThreshold: requestParams?.algoParams.altThreshold,
@@ -43,9 +40,19 @@ export function getAllNoiseWindows(
     compFullThresh: requestParams?.algoParams.compFullThresh,
   }
 
+  const noiseWindowKey: string = requestParams.algoParams.noiseWindow
+  const noiseFunction: Record<string, Function> = {
+    NW1: isNoisyWindow1,
+    NW2: isNoisyWindow2,
+    NW3: isNoisyWindow3,
+    NW4: isNoisyWindow4,
+    NW5: isNoisyWindow5,
+    NW6: isNoisyWindow6,
+  }
+
   for (let i = 10; i < data.length; i++) {
     windowArray = data.slice(i - (+requestParams.algoParams.noiseWindowLength + 1), i - 1)
-    if (noiseFunction(windowArray, options)) {
+    if (noiseFunction[noiseWindowKey](windowArray, options)) {
       noiseWindows.push(windowArray)
     }
   }

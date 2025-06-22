@@ -84,7 +84,7 @@ export function algo1(requestParams: Partial<RequestParams>, passedData?: Transa
 
   /* All Noise Windows In Dataset */
   if (extendedTickData) {
-    noiseWindows = getAllNoiseWindows(extendedTickData, isNoisyWindow1, requestParams)
+    noiseWindows = getAllNoiseWindows(extendedTickData, requestParams)
   }
 
   /* Completion of algorithm runtime measurement */
