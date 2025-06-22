@@ -20,15 +20,21 @@ type NoiseOptions = {
  */
 export function getAllNoiseWindows(
   data: ExtTick[],
-  noiseFunction: (array: ExtTick[], requestParams: Partial<RequestParams>) => boolean,
+  noiseFunction: (array: ExtTick[], options: NoiseOptions) => boolean,
   requestParams: Partial<RequestParams>,
 ) {
+  if (requestParams.algoParams === undefined) return
   let noiseWindows: ExtTick[][] = []
   let windowArray = []
+  const options: NoiseOptions = {
+    atrMultiplier: requestParams?.algoParams.atrMultiplier,
+    alternationThreshold: requestParams?.algoParams.altThreshold,
+    huggingRatio: requestParams?.algoParams.hugRatio,
+  }
 
   for (let i = 10; i < data.length; i++) {
     windowArray = data.slice(i - 7, i - 1)
-    if (noiseFunction(windowArray, requestParams)) {
+    if (noiseFunction(windowArray, options)) {
       noiseWindows.push(windowArray)
     }
   }
@@ -49,6 +55,11 @@ export function getAllNoiseWindows(
 
 /* Hugging average analysis functions */
 
+const findAvgTrueRange = (data: ExtTick[]): number => {
+  const ranges = data.map((t) => t.high - t.low)
+  return ranges.reduce((sum, r) => sum + r, 0) / ranges.length
+}
+
 /**
  * Determines if a majority of ticks are "hugging" the moving average within an ATR-based range.
  *
@@ -57,17 +68,23 @@ export function getAllNoiseWindows(
  * @param threshold - Minimum ratio of hugging ticks to return true
  */
 function isTickCloseHuggingMA(data: ExtTick[], multiplier: number, threshold: number): boolean {
-  const avgTrueRange = (data: ExtTick[]): number => {
-    const ranges = data.map((t) => t.high - t.low)
-    return ranges.reduce((sum, r) => sum + r, 0) / ranges.length
-  }
-
   const huggingTicksAvg =
     data.filter((tick) => {
-      return Math.abs(tick.close - tick.movingAvg!) < avgTrueRange(data) * multiplier
+      return Math.abs(tick.close - tick.movingAvg!) < findAvgTrueRange(data) * multiplier
     }).length / data.length
 
   return huggingTicksAvg >= threshold
+}
+
+function findTickWickHuggingMaRatio(data: ExtTick[], multiplier: number, threshold: number): boolean {
+  const band = findAvgTrueRange(data) * multiplier
+
+  const huggingCount =
+    data.filter((tick) => {
+      return tick.high >= tick.movingAvg! - band && tick.low <= tick.movingAvg! + band
+    }).length / data.length
+
+  return huggingCount >= threshold
 }
 
 /**
@@ -153,63 +170,8 @@ export function isNoisyWindow3(data: ExtTick[], options: NoiseOptions): boolean 
   return score >= 2
 }
 
-export function isNoisyWindow4(
-  data: ExtTick[],
-  options: NoiseOptions = {
-    atrMultiplier: 0.5,
-    alternationThreshold: 0.6,
-    huggingRatio: 0.7, // Accepts range of [1 - 0]. Lower values result in more noise windows picked up
-  },
-): boolean {
-  Logger.info('ATTENTION: THIS IS THE SAME AS NW3!')
-  function isTickCloseHuggingMA(data: ExtTick[], multiplier: number, threshold: number): boolean {
-    const avgTrueRange = (data: ExtTick[]): number => {
-      const ranges = data.map((t) => t.high - t.low)
-      return ranges.reduce((sum, r) => sum + r, 0) / ranges.length
-    }
-
-    const huggingTicksAvg =
-      data.filter((tick) => {
-        return Math.abs(tick.close - tick.movingAvg!) < avgTrueRange(data) * multiplier
-      }).length / data.length
-
-    return huggingTicksAvg >= threshold
-  }
-
-  const analyzeWindowIndecision = (data: ExtTick[], threshold: number) => {
-    const avgIndecision =
-      data.reduce((acc, tick) => {
-        const body = Math.abs(tick.close - tick.open)
-        const range = tick.high - tick.low || 1
-        return acc + body / range
-      }, 0) / data.length
-
-    const indecisive = avgIndecision < threshold
-    return indecisive
-  }
-
-  function isAlternating(data: ExtTick[], threshold: number): boolean {
-    const directions = data.map((tick) => {
-      if (tick.close > tick.open) return 1
-      if (tick.close < tick.open) return -1
-      return 0 // tie
-    })
-
-    let alternations = 0
-    let prev = directions[0]
-
-    for (let i = 1; i < directions.length; i++) {
-      const curr = directions[i]
-      if (curr === 0) continue // skip ties
-      if (prev !== 0 && curr !== prev) alternations++
-      prev = curr
-    }
-
-    const alternationRatio = alternations / data.length
-    return alternationRatio > threshold
-  }
-
-  const hugging = isTickCloseHuggingMA(data, options.atrMultiplier, options.huggingRatio)
+export function isNoisyWindow4(data: ExtTick[], options: NoiseOptions): boolean {
+  const hugging = findTickWickHuggingMaRatio(data, options.atrMultiplier, options.huggingRatio)
   const indecisive = analyzeWindowIndecision(data, options.alternationThreshold)
   const alternating = isAlternating(data, options.alternationThreshold)
 
