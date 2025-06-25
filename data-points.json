@@ -1,0 +1,134 @@
+{
+  "rawData": {
+    "timestamp": {
+      "description": "Unix timestamp or ISO date string for each tick/candle",
+      "fullName": "Timestamp"
+    },
+    "open": {
+      "description": "Opening price of the candle",
+      "fullName": "Open Price"
+    },
+    "high": {
+      "description": "Highest price of the candle",
+      "fullName": "High Price"
+    },
+    "low": {
+      "description": "Lowest price of the candle",
+      "fullName": "Low Price"
+    },
+    "close": {
+      "description": "Closing price of the candle",
+      "fullName": "Close Price"
+    },
+    "volume": {
+      "description": "Total volume traded in the candle",
+      "fullName": "Trade Volume"
+    }
+  },
+  "trendIndicators": {
+    "SMA": {
+      "period": 20,
+      "description": "Simple Moving Average over N periods",
+      "fullName": "Simple Moving Average"
+    },
+    "EMA": {
+      "period": 9,
+      "description": "Exponential Moving Average over N periods",
+      "fullName": "Exponential Moving Average"
+    },
+    "slope": {
+      "source": "SMA or EMA",
+      "window": 5,
+      "description": "Slope of selected moving average over N periods",
+      "fullName": "Moving Average Slope"
+    },
+    "ADX": {
+      "period": 14,
+      "threshold": 25,
+      "description": "Average Directional Index — trend strength filter",
+      "fullName": "Average Directional Index"
+    }
+  },
+  "volatilityFilters": {
+    "ATR": {
+      "period": 14,
+      "description": "Average True Range — measures volatility",
+      "fullName": "Average True Range"
+    },
+    "bollingerBands": {
+      "period": 20,
+      "multiplier": 2,
+      "description": "Bollinger Bands for measuring volatility and range",
+      "fullName": "Bollinger Bands"
+    },
+    "chopFilter": {
+      "parameters": {
+        "atrMultiplier": 1.5,
+        "alternationThreshold": 3,
+        "huggingRatio": 0.2
+      },
+      "description": "Custom chop filter using ATR and bar behavior",
+      "fullName": "Choppiness Filter"
+    }
+  },
+  "entryTriggers": {
+    "priceAboveMA": {
+      "ma": "EMA",
+      "period": 9,
+      "description": "Entry when price closes above selected moving average",
+      "fullName": "Price Above Moving Average"
+    },
+    "maCrossover": {
+      "fastMA": 9,
+      "slowMA": 21,
+      "description": "Entry when fast MA crosses above slow MA",
+      "fullName": "Moving Average Crossover"
+    },
+    "bollingerBreakout": {
+      "direction": "aboveUpper",
+      "description": "Entry when price closes above upper Bollinger Band",
+      "fullName": "Bollinger Band Breakout"
+    }
+  },
+  "timeFilters": {
+    "sessionStart": {
+      "value": "09:30",
+      "description": "Start of trading session",
+      "fullName": "Session Start Time"
+    },
+    "sessionEnd": {
+      "value": "16:00",
+      "description": "End of trading session",
+      "fullName": "Session End Time"
+    },
+    "excludedTimeRanges": [
+      {
+        "start": "09:30",
+        "end": "10:00",
+        "description": "Avoid trading during this range",
+        "fullName": "Excluded Time Window"
+      }
+    ]
+  },
+  "optionalConfirmations": {
+    "RSI": {
+      "period": 14,
+      "minValue": 50,
+      "description": "RSI must be above 50 to confirm bullish strength",
+      "fullName": "Relative Strength Index"
+    },
+    "MACD": {
+      "fastEMA": 12,
+      "slowEMA": 26,
+      "signalEMA": 9,
+      "description": "MACD histogram turning positive as a confirmation",
+      "fullName": "Moving Average Convergence Divergence"
+    },
+    "volumeTrend": {
+      "lookback": 5,
+      "minGrowth": 1.2,
+      "description": "Volume increasing over time to confirm move strength",
+      "fullName": "Volume Trend Growth"
+    }
+  }
+}

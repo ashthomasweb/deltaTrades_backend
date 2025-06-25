@@ -1,31 +1,15 @@
 import { Logger } from '../__core/logger'
 import { RequestParams, TransactionPacket } from '../types/types'
-import {
-  daySelector,
-  detectFullCandles,
-  createVolumeDistributionMap,
-  directionalBlockVolumeAnalysis,
-  detectSingleDirection,
-  getVolumeRange,
-  batchVolumeAnalysis,
-  calculateMA,
-  detectMAConfirmedCrossing,
-  createCandleSizeDistributionMaps,
-  extendTickData,
-  groupByDays,
-  buildDailyDistributions,
-  DailyDataGroups,
-} from './algo-utils'
+import { extendTickData } from './data-extension'
+import { detectSingleDirection } from './direction-analysis'
+import { DailyDataGroups, buildDailyDistributions } from './distributions-ranges'
+import { groupByDays } from './general-utilities'
+import { getAllNoiseWindows } from './noise-windows'
+import { detectMAConfirmedCrossing } from './signal-algos/trend-following'
+import { calculateMA } from './trend-analysis'
+import { generateBollingerSeries } from './volatility-analysis'
 
-import {
-  getAllNoiseWindows,
-  isNoisyWindow1,
-  isNoisyWindow2,
-  isNoisyWindow3,
-  isNoisyWindow4,
-} from './noise-window-utils'
-
-export function algo1(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
+export function algoOutput(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
   /* Early returns */
   if (passedData === undefined) return
   if (requestParams.algoParams === undefined) return
@@ -47,6 +31,7 @@ export function algo1(requestParams: Partial<RequestParams>, passedData?: Transa
   let MA = undefined
   let crossingSignal = undefined
   let noiseWindows = undefined
+  let bollingerBands = undefined
 
   /* Single Direction Blocks */
   singleDirectionBlocks = detectSingleDirection(data, requestParams)
@@ -65,14 +50,14 @@ export function algo1(requestParams: Partial<RequestParams>, passedData?: Transa
   /* Moving Average */
   MA = calculateMA(data, requestParams)
 
+  /* Bollinger Bands */
+  bollingerBands = generateBollingerSeries(data, 20, 2)
+
   /* Create ExtendedTick Data */
   let extendedTickData
   if (MA) {
     extendedTickData = extendTickData(data, MA.data, dailyDistributions)
   }
-  // Logger.toFileOut('extendedTickTesting/05-23.txt', 'Full Extended Results', extendedTickData.slice(-390), {
-  //   overwrite: true,
-  // })
 
   /* CrossingSignal (BuySignal) */
   // returns array of crossingSignals, and associated noiseWindows
@@ -96,6 +81,7 @@ export function algo1(requestParams: Partial<RequestParams>, passedData?: Transa
     MA: MA,
     crossingSignal: crossingSignal,
     noiseWindows: noiseWindows,
+    bollingerBands,
   }
 }
 
@@ -114,9 +100,3 @@ export function algo1(requestParams: Partial<RequestParams>, passedData?: Transa
 // const findIncreasingVolume
 
 // const detectDirectionChange (usually consistent single direction followed by some fuzz)
-
-// const detectFloor
-
-// const detectCeiling
-
-// const detectFloorCeilingMerge (often times indicates a correction - BIG MOVE)

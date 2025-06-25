@@ -284,3 +284,24 @@ export function isNoisyWindow6(data: ExtTick[], options: NoiseOptions): boolean 
 
   return score >= 2
 }
+
+/*
+ const checkForNoise = (tick: ExtTick, index: number) => {
+    windowArray = data.slice(index - 6, index - 1)
+    count = 0
+    windowArray.forEach((entry) => entry.isWickCrossing && count++)
+    if (count < 2) {
+      result.push(tick)
+    }
+  }
+
+  const checkForNoise = (tick: ExtTick, index: number) => {
+    windowArray = data.slice(index - 10, index - 1)
+    count = 0
+    windowArray.forEach((entry) => (entry.candleBodyFullness < 40 || entry.isWickCrossing) && count++)
+    if (count < 5) {
+      result.push(tick)
+    }
+  }
+
+*/
