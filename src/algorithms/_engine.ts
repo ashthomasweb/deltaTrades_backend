@@ -4,6 +4,7 @@ import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import { TransactionPacket, Tick as Tick, RequestParams, ChartData, QueueType, ExtTick } from '../types/types'
 import { algoOutput } from './_output'
+import { extendTickData } from './data-extension'
 
 export class Queue {
   private bus: EventEmitter
@@ -36,6 +37,8 @@ export class Queue {
           ...queueData.queue.slice(0, 2),
         )
         const algoResult = algoOutput(requestParams, queueData)
+        // console.log(algoResult?.extTickData[30], chartData)
+        // chartData.values = algoResult?.extTickData
         this.bus.emit('analysisResults:data', algoResult, chartData)
       },
     )

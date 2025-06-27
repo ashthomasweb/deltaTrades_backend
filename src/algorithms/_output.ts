@@ -6,7 +6,7 @@ import { DailyDataGroups, buildDailyDistributions } from './distributions-ranges
 import { groupByDays } from './general-utilities'
 import { getAllNoiseWindows } from './noise-windows'
 import { detectMAConfirmedCrossing } from './signal-algos/trend-following'
-import { calculateMA } from './trend-analysis'
+import { calculateEMA, calculateSMA } from './trend-analysis'
 import { generateBollingerSeries } from './volatility-analysis'
 
 export function algoOutput(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
@@ -28,7 +28,8 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Output declarations */
   let singleDirectionBlocks = undefined
-  let MA = undefined
+  let SMA = undefined
+  let EMA = undefined
   let crossingSignal = undefined
   let noiseWindows = undefined
   let bollingerBands = undefined
@@ -48,15 +49,16 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   const dailyDistributions = buildDailyDistributions(dayDataGroups)
 
   /* Moving Average */
-  MA = calculateMA(data, requestParams)
+  SMA = calculateSMA(data, requestParams)
+  EMA = calculateEMA(data, requestParams)
 
   /* Bollinger Bands */
   bollingerBands = generateBollingerSeries(data, 20, 2)
 
   /* Create ExtendedTick Data */
   let extendedTickData
-  if (MA) {
-    extendedTickData = extendTickData(data, MA.data, dailyDistributions)
+  if (SMA) {
+    extendedTickData = extendTickData(data, SMA.data, dailyDistributions)
   }
 
   /* CrossingSignal (BuySignal) */
@@ -77,11 +79,15 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Output */
   return {
-    singleDirBlocks: singleDirectionBlocks,
-    MA: MA,
-    crossingSignal: crossingSignal,
-    noiseWindows: noiseWindows,
-    bollingerBands,
+    analysis: {
+      singleDirBlocks: singleDirectionBlocks,
+      MA: SMA,
+      EMA: EMA,
+      crossingSignal: crossingSignal,
+      noiseWindows: noiseWindows,
+      bollingerBands,
+    },
+    extTickData: extendedTickData,
   }
 }
 

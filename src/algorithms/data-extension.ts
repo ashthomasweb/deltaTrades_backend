@@ -39,6 +39,7 @@ export const extendTickData = (data: TickArray, MaAvgArray: number[], dailyDistr
         previousDayDistributions.volume.volLow,
         previousDayDistributions.volume.distributionBlock,
       ),
+      value: [tick.timestamp, null],
     }
 
     const isBodyCrossing = isCandleBodyCrossingAvg(tick, MaAvgArray[index])
