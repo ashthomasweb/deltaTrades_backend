@@ -94,6 +94,7 @@ export interface ExtTick extends Tick {
   candleBodyDistPercentile: number | undefined
   candleVolumeDistPercentile: number | undefined
   value: [string | undefined, null]
+  slope: number | null
 }
 
 export type TickArray = Tick[] | ExtTick[]

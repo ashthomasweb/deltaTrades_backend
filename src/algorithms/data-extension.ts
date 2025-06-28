@@ -1,4 +1,4 @@
-import { TickArray, ExtTick, Tick } from '../types/types'
+import { TickArray, ExtTick, Tick, RequestParams } from '../types/types'
 import {
   findSingleTickBodyDistribution,
   findTickVolumeDistribution,
@@ -6,8 +6,14 @@ import {
 } from './distributions-ranges'
 import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
 import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
+import { calculateSMA, getPercentSlopeByPeriod } from './trend-analysis'
 
-export const extendTickData = (data: TickArray, MaAvgArray: number[], dailyDistributions: any): ExtTick[] => {
+export const extendTickData = (
+  data: TickArray,
+  MaAvgArray: number[],
+  dailyDistributions: any,
+  requestParams: Partial<RequestParams>,
+): ExtTick[] => {
   let currentDay = ''
   let previousDayDistributions: any = null
 
@@ -40,6 +46,8 @@ export const extendTickData = (data: TickArray, MaAvgArray: number[], dailyDistr
         previousDayDistributions.volume.distributionBlock,
       ),
       value: [tick.timestamp, null],
+      slope:
+        index >= +requestParams.algoParams?.slopePeriod ? getPercentSlopeByPeriod(data, index, requestParams) : null,
     }
 
     const isBodyCrossing = isCandleBodyCrossingAvg(tick, MaAvgArray[index])

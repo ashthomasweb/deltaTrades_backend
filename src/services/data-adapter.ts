@@ -179,8 +179,8 @@ const convertAVtoNormalized = (data: any, options: any = null): Partial<Normaliz
       volume: +dataArray[i]['5. volume'],
     }
     if (i > 0) {
-      data.percentChange = findPercentChange(dataArray[i]['1. open'], dataArray[i - 1]['1. open'])
-      data.absoluteChange = findAbsoluteChange(dataArray[i]['1. open'], dataArray[i - 1]['1. open'])
+      data.percentChange = findPercentChange(dataArray[i]['1. close'], dataArray[i - 1]['1. close'])
+      data.absoluteChange = findAbsoluteChange(dataArray[i]['1. close'], dataArray[i - 1]['1. close'])
     }
     output.data.push(data)
   }
@@ -226,8 +226,8 @@ const convertTradiertoNormalized = (rawData: any, options: any = null): Partial<
       volume: dataset[i].volume,
     }
     if (i > 0) {
-      data.percentChange = findPercentChange(dataset[i].open, dataset[i - 1].open)
-      data.absoluteChange = findAbsoluteChange(dataset[i].open, dataset[i - 1].open)
+      data.percentChange = findPercentChange(dataset[i].close, dataset[i - 1].close)
+      data.absoluteChange = findAbsoluteChange(dataset[i].close, dataset[i - 1].close)
     }
     output.data.push(data)
   }

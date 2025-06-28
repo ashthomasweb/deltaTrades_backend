@@ -70,32 +70,20 @@ export function calculateEMA(
   return analysisPacket
 }
 
-export function calculateSlope(
+export function getPercentSlopeByPeriod(
   ticks: TickArray,
-  period: number,
-): { data: (number | null)[]; type: string; smooth: boolean } {
-  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
+  index: number,
+  requestParams: Partial<RequestParams>,
+): number | null {
+  if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
+  const period = +requestParams.algoParams.slopePeriod
+  if (index < period) return null
 
-  const data: (number | null)[] = new Array(ticks.length).fill(null)
+  const curr = ticks[index].close
+  const prev = ticks[index - period].close
 
-  for (let i = period; i < ticks.length; i++) {
-    const prev = ticks[i - period].close
-    const curr = ticks[i].close
+  if (prev === 0 || isNaN(prev) || isNaN(curr)) return null
 
-    // Prevent divide-by-zero and meaningless comparison
-    if (prev === 0 || isNaN(prev) || isNaN(curr)) {
-      data[i] = null
-      continue
-    }
-
-    // Percent slope over `period` bars
-    const slope = (curr - prev) / prev
-    data[i] = slope
-  }
-
-  return {
-    data,
-    type: 'line',
-    smooth: true,
-  }
+  // Percent change over `period` bars
+  return ((curr - prev) / prev) * 100
 }
