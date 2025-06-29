@@ -6,11 +6,12 @@ import {
 } from './distributions-ranges'
 import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
 import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
-import { calculateSMA, getPercentSlopeByPeriod } from './trend-analysis'
+import { calculateSMA, getPercentSlopeByPeriod, getPriceSlopeByPeriod } from './trend-analysis'
 
 export const extendTickData = (
   data: TickArray,
-  MaAvgArray: number[],
+  maAvgArray: number[],
+  emaAvgArray: number[],
   dailyDistributions: any,
   requestParams: Partial<RequestParams>,
 ): ExtTick[] => {
@@ -29,8 +30,8 @@ export const extendTickData = (
       isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
       isGreen: isGreenCandle(tick),
       isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
-      movingAvg: MaAvgArray[index],
-      isWickCrossing: isCandleWickCrossingAvg(tick, MaAvgArray[index]),
+      movingAvg: maAvgArray[index],
+      isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArray[index]),
       isBodyCrossing: false,
       crossesBodyAtPercent: null,
       isCandleFull80: isCandleFullByPercentage(tick, 0.8),
@@ -46,14 +47,28 @@ export const extendTickData = (
         previousDayDistributions.volume.distributionBlock,
       ),
       value: [tick.timestamp, null],
-      slope:
-        index >= +requestParams.algoParams?.slopePeriod ? getPercentSlopeByPeriod(data, index, requestParams) : null,
+      percSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodRawPrice
+          ? getPercentSlopeByPeriod(data, index, requestParams, 'close')
+          : null,
+      priceSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodRawPrice
+          ? getPriceSlopeByPeriod(data, index, requestParams)
+          : null,
+      smaSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodSMA
+          ? getPercentSlopeByPeriod(maAvgArray, index, requestParams, 'sma')
+          : null,
+      emaSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodEMA
+          ? getPercentSlopeByPeriod(emaAvgArray, index, requestParams, 'ema')
+          : null,
     }
 
-    const isBodyCrossing = isCandleBodyCrossingAvg(tick, MaAvgArray[index])
+    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArray[index])
     if (isBodyCrossing) {
       result['isBodyCrossing'] = isBodyCrossing
-      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, MaAvgArray[index])
+      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, maAvgArray[index])
     }
     return result
   })

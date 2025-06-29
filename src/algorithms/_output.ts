@@ -57,8 +57,8 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Create ExtendedTick Data */
   let extendedTickData
-  if (SMA) {
-    extendedTickData = extendTickData(data, SMA.data, dailyDistributions, requestParams)
+  if (SMA && EMA) {
+    extendedTickData = extendTickData(data, SMA.data, EMA.data, dailyDistributions, requestParams)
   }
 
   /* CrossingSignal (BuySignal) */

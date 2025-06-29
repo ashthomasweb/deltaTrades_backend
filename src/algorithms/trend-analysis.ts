@@ -71,12 +71,69 @@ export function calculateEMA(
 }
 
 export function getPercentSlopeByPeriod(
+  data: TickArray | any[],
+  index: number,
+  requestParams: Partial<RequestParams>,
+  type: string,
+): number | null {
+  if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
+  let period
+
+  switch (type) {
+    case 'close':
+      period = +requestParams.algoParams.slopePeriodRawPrice
+      break
+
+    case 'sma':
+      period = +requestParams.algoParams.slopePeriodSMA
+      break
+
+    case 'ema':
+      period = +requestParams.algoParams.slopePeriodEMA
+      break
+
+    default:
+      break
+  }
+
+  if (index <= period) return null
+
+  let curr
+  let prev
+
+  switch (type) {
+    case 'close':
+      curr = data[index].close
+      prev = data[index - period].close
+      break
+
+    case 'ema':
+      curr = data[index]
+      prev = data[index - period]
+      break
+
+    case 'sma':
+      curr = data[index]
+      prev = data[index - period]
+      break
+
+    default:
+      break
+  }
+
+  if (prev === 0 || isNaN(prev) || isNaN(curr)) return null
+
+  // Percent change over `period` bars
+  return ((curr - prev) / prev) * 100
+}
+
+export function getPriceSlopeByPeriod(
   ticks: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
 ): number | null {
   if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
-  const period = +requestParams.algoParams.slopePeriod
+  const period = +requestParams.algoParams.slopePeriodRawPrice
   if (index < period) return null
 
   const curr = ticks[index].close
@@ -85,5 +142,5 @@ export function getPercentSlopeByPeriod(
   if (prev === 0 || isNaN(prev) || isNaN(curr)) return null
 
   // Percent change over `period` bars
-  return ((curr - prev) / prev) * 100
+  return (curr - prev) / period
 }
