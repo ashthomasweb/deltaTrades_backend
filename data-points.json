@@ -130,5 +130,37 @@
       "description": "Volume increasing over time to confirm move strength",
       "fullName": "Volume Trend Growth"
     }
+  },
+  "trendWarnings": {
+    "bearishEngulfing": {
+      "description": "Bearish engulfing pattern detected within trend",
+      "fullName": "Bearish Engulfing Candle"
+    },
+    "bullishExhaustionGap": {
+      "description": "Gap up followed by weak candle close — possible top",
+      "fullName": "Bullish Exhaustion Gap"
+    }
+  },
+  "entryCooldown": {
+    "minBarsBetweenTrades": 10,
+    "description": "Minimum bars between entries to avoid overtrading",
+    "fullName": "Cooldown Period"
+  },
+  "riskControls": {
+    "stopLossATR": {
+      "multiplier": 1.5,
+      "description": "Stop loss distance as multiple of ATR",
+      "fullName": "ATR-based Stop Loss"
+    },
+    "takeProfitRR": {
+      "ratio": 2,
+      "description": "Take profit at 2:1 risk-reward ratio",
+      "fullName": "Risk-Reward Target"
+    },
+    "maxOpenPositions": {
+      "value": 1,
+      "description": "Restrict to one open trade at a time",
+      "fullName": "Single Position Mode"
+    }
   }
 }

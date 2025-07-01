@@ -86,6 +86,9 @@ export interface ExtTick extends Tick {
   isGreen: boolean
   isNextGreen: boolean | null
   movingAvg: number | undefined
+  shortEmaAvg: number | undefined
+  longEmaAvg: number | undefined
+  isMACrossingEMA: boolean | undefined
   isBodyCrossing: boolean | undefined
   isWickCrossing: boolean | undefined
   crossesBodyAtPercent?: number | null

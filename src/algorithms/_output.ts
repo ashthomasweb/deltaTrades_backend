@@ -6,7 +6,7 @@ import { DailyDataGroups, buildDailyDistributions } from './distributions-ranges
 import { groupByDays } from './general-utilities'
 import { getAllNoiseWindows } from './noise-windows'
 import { detectMAConfirmedCrossing } from './signal-algos/trend-following'
-import { calculateEMA, calculateSMA } from './trend-analysis'
+import { calculateADX, calculateEMA1, calculateEMA2, calculateSMA1 } from './trend-analysis'
 import { generateBollingerSeries } from './volatility-analysis'
 
 export function algoOutput(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
@@ -28,8 +28,10 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Output declarations */
   let singleDirectionBlocks = undefined
-  let SMA = undefined
-  let EMA = undefined
+  let SMA1 = undefined
+  let EMA1 = undefined
+  let EMA2 = undefined
+  let ADX = undefined
   let crossingSignal = undefined
   let noiseWindows = undefined
   let bollingerBands = undefined
@@ -49,16 +51,20 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   const dailyDistributions = buildDailyDistributions(dayDataGroups)
 
   /* Moving Average */
-  SMA = calculateSMA(data, requestParams)
-  EMA = calculateEMA(data, requestParams)
+  SMA1 = calculateSMA1(data, requestParams)
+  EMA1 = calculateEMA1(data, requestParams)
+  EMA2 = calculateEMA2(data, requestParams)
+
+  /* Average Directional Index */
+  ADX = calculateADX(data, requestParams)
 
   /* Bollinger Bands */
   bollingerBands = generateBollingerSeries(data, 20, 2)
 
   /* Create ExtendedTick Data */
   let extendedTickData
-  if (SMA && EMA) {
-    extendedTickData = extendTickData(data, SMA.data, EMA.data, dailyDistributions, requestParams)
+  if (SMA1 && EMA1 && EMA2) {
+    extendedTickData = extendTickData(data, SMA1.data, EMA1.data, EMA2.data, dailyDistributions, requestParams)
   }
 
   /* CrossingSignal (BuySignal) */
@@ -81,8 +87,10 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   return {
     analysis: {
       singleDirBlocks: singleDirectionBlocks,
-      MA: SMA,
-      EMA: EMA,
+      SMA1: SMA1,
+      EMA1: EMA1,
+      EMA2: EMA2,
+      ADX: ADX,
       crossingSignal: crossingSignal,
       noiseWindows: noiseWindows,
       bollingerBands,

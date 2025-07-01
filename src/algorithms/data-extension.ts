@@ -10,8 +10,9 @@ import { calculateSMA, getPercentSlopeByPeriod, getPriceSlopeByPeriod } from './
 
 export const extendTickData = (
   data: TickArray,
-  maAvgArray: number[],
-  emaAvgArray: number[],
+  maAvgArrayShort: number[],
+  emaAvgArrayShort: number[],
+  emaAvgArrayLong: number[],
   dailyDistributions: any,
   requestParams: Partial<RequestParams>,
 ): ExtTick[] => {
@@ -30,8 +31,11 @@ export const extendTickData = (
       isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
       isGreen: isGreenCandle(tick),
       isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
-      movingAvg: maAvgArray[index],
-      isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArray[index]),
+      movingAvg: maAvgArrayShort[index],
+      shortEmaAvg: emaAvgArrayShort[index],
+      longEmaAvg: emaAvgArrayLong[index],
+      isMACrossingEMA: false,
+      isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
       isBodyCrossing: false,
       crossesBodyAtPercent: null,
       isCandleFull80: isCandleFullByPercentage(tick, 0.8),
@@ -57,18 +61,18 @@ export const extendTickData = (
           : null,
       smaSlopeByPeriod:
         index >= +requestParams.algoParams?.slopePeriodSMA
-          ? getPercentSlopeByPeriod(maAvgArray, index, requestParams, 'sma')
+          ? getPercentSlopeByPeriod(maAvgArrayShort, index, requestParams, 'sma')
           : null,
       emaSlopeByPeriod:
         index >= +requestParams.algoParams?.slopePeriodEMA
-          ? getPercentSlopeByPeriod(emaAvgArray, index, requestParams, 'ema')
+          ? getPercentSlopeByPeriod(emaAvgArrayShort, index, requestParams, 'ema')
           : null,
     }
 
-    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArray[index])
+    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])
     if (isBodyCrossing) {
       result['isBodyCrossing'] = isBodyCrossing
-      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, maAvgArray[index])
+      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, maAvgArrayShort[index])
     }
     return result
   })
