@@ -1,7 +1,7 @@
 /* src/__core/init.ts */
 
 import { WebSocketServer } from '../websocket/server'
-import { Queue } from '../algorithms/algo-engine'
+import { Queue } from '../algorithms/_engine'
 import { DataBaseClient } from '../database/db-client'
 import { Logger } from './logger'
 import { runOnInit } from '../utils/run-on-init'

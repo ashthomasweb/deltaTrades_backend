@@ -1,0 +1,79 @@
+import { TickArray, ExtTick, Tick, RequestParams } from '../types/types'
+import {
+  findSingleTickBodyDistribution,
+  findTickVolumeDistribution,
+  getPreviousDayDistributions,
+} from './distributions-ranges'
+import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
+import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
+import { calculateSMA, getPercentSlopeByPeriod, getPriceSlopeByPeriod } from './trend-analysis'
+
+export const extendTickData = (
+  data: TickArray,
+  maAvgArrayShort: number[],
+  emaAvgArrayShort: number[],
+  emaAvgArrayLong: number[],
+  dailyDistributions: any,
+  requestParams: Partial<RequestParams>,
+): ExtTick[] => {
+  let currentDay = ''
+  let previousDayDistributions: any = null
+
+  return data.map((tick: Tick, index: number) => {
+    if (tick.timestamp?.substring(0, 10) !== currentDay) {
+      currentDay = tick.timestamp?.substring(0, 10)!
+      previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
+    }
+
+    const result: ExtTick = {
+      ...tick,
+      originalIndex: index,
+      isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
+      isGreen: isGreenCandle(tick),
+      isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
+      movingAvg: maAvgArrayShort[index],
+      shortEmaAvg: emaAvgArrayShort[index],
+      longEmaAvg: emaAvgArrayLong[index],
+      isMACrossingEMA: false,
+      isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
+      isBodyCrossing: false,
+      crossesBodyAtPercent: null,
+      isCandleFull80: isCandleFullByPercentage(tick, 0.8),
+      candleBodyFullness: getCandleBodyFullness(tick),
+      candleBodyDistPercentile: findSingleTickBodyDistribution(
+        tick,
+        previousDayDistributions.candleSize.body.range,
+        previousDayDistributions.candleSize.body.distBlock,
+      ),
+      candleVolumeDistPercentile: findTickVolumeDistribution(
+        tick,
+        previousDayDistributions.volume.volLow,
+        previousDayDistributions.volume.distributionBlock,
+      ),
+      value: [tick.timestamp, null],
+      percSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodRawPrice
+          ? getPercentSlopeByPeriod(data, index, requestParams, 'close')
+          : null,
+      priceSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodRawPrice
+          ? getPriceSlopeByPeriod(data, index, requestParams)
+          : null,
+      smaSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodSMA
+          ? getPercentSlopeByPeriod(maAvgArrayShort, index, requestParams, 'sma')
+          : null,
+      emaSlopeByPeriod:
+        index >= +requestParams.algoParams?.slopePeriodEMA
+          ? getPercentSlopeByPeriod(emaAvgArrayShort, index, requestParams, 'ema')
+          : null,
+    }
+
+    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])
+    if (isBodyCrossing) {
+      result['isBodyCrossing'] = isBodyCrossing
+      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, maAvgArrayShort[index])
+    }
+    return result
+  })
+}

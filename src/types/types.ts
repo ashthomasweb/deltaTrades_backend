@@ -86,6 +86,9 @@ export interface ExtTick extends Tick {
   isGreen: boolean
   isNextGreen: boolean | null
   movingAvg: number | undefined
+  shortEmaAvg: number | undefined
+  longEmaAvg: number | undefined
+  isMACrossingEMA: boolean | undefined
   isBodyCrossing: boolean | undefined
   isWickCrossing: boolean | undefined
   crossesBodyAtPercent?: number | null
@@ -93,6 +96,11 @@ export interface ExtTick extends Tick {
   candleBodyFullness: number
   candleBodyDistPercentile: number | undefined
   candleVolumeDistPercentile: number | undefined
+  value: [string | undefined, null]
+  percSlopeByPeriod: number | null
+  priceSlopeByPeriod: number | null
+  smaSlopeByPeriod: number | null
+  emaSlopeByPeriod: number | null
 }
 
 export type TickArray = Tick[] | ExtTick[]
