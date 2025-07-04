@@ -88,7 +88,11 @@ export interface ExtTick extends Tick {
   movingAvg: number | undefined
   shortEmaAvg: number | undefined
   longEmaAvg: number | undefined
-  isMACrossingEMA: boolean | undefined
+  emaCrossing: {
+    crossing: boolean | undefined
+    direction: 'bullish' | 'bearish' | undefined
+  }
+  bollingerBreakout: boolean
   isBodyCrossing: boolean | undefined
   isWickCrossing: boolean | undefined
   crossesBodyAtPercent?: number | null

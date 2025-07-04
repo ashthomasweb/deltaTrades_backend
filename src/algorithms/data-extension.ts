@@ -6,13 +6,14 @@ import {
 } from './distributions-ranges'
 import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
 import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
-import { calculateSMA, getPercentSlopeByPeriod, getPriceSlopeByPeriod } from './trend-analysis'
+import { bollingerBreakout, getPercentSlopeByPeriod, getPriceSlopeByPeriod, MACrossover } from './trend-analysis'
 
 export const extendTickData = (
   data: TickArray,
   maAvgArrayShort: number[],
   emaAvgArrayShort: number[],
   emaAvgArrayLong: number[],
+  bollingerSeries: any,
   dailyDistributions: any,
   requestParams: Partial<RequestParams>,
 ): ExtTick[] => {
@@ -34,7 +35,8 @@ export const extendTickData = (
       movingAvg: maAvgArrayShort[index],
       shortEmaAvg: emaAvgArrayShort[index],
       longEmaAvg: emaAvgArrayLong[index],
-      isMACrossingEMA: false,
+      emaCrossing: MACrossover(emaAvgArrayShort, emaAvgArrayLong, index),
+      bollingerBreakout: bollingerBreakout(tick, bollingerSeries, index),
       isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
       isBodyCrossing: false,
       crossesBodyAtPercent: null,

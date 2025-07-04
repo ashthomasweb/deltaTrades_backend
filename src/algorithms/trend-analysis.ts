@@ -204,7 +204,6 @@ export function calculateADX(ticks: TickArray, requestParams: Partial<RequestPar
     plusDM.push(upMove > downMove && upMove > 0 ? upMove : 0)
     minusDM.push(downMove > upMove && downMove > 0 ? downMove : 0)
 
-    // eslint-disable-next-line prettier/prettier
     tr.push(Math.max(curr.high - curr.low, Math.abs(curr.high - prev.close), Math.abs(curr.low - prev.close)))
   }
 
@@ -260,11 +259,12 @@ export function calculateADX(ticks: TickArray, requestParams: Partial<RequestPar
   return adxResults
 }
 
-const MACrossover = (
-  fastMaArray: (number | null)[], // Shorter period Moving Average
-  slowMaArray: (number | null)[], // Longer period Moving Average
+export const MACrossover = (
+  fastMaArray: (number | null)[] | undefined, // Shorter period Moving Average
+  slowMaArray: (number | null)[] | undefined, // Longer period Moving Average
   index: number,
-): [boolean, 'bullish' | 'bearish' | undefined] | undefined => {
+): { crossing: boolean; direction: 'bullish' | 'bearish' | undefined } => {
+  if (fastMaArray === undefined || slowMaArray === undefined) return { crossing: false, direction: undefined }
   let direction: 'bullish' | 'bearish' | undefined
   let crossing: boolean
   let prevFastMa = fastMaArray[index - 1]
@@ -272,7 +272,8 @@ const MACrossover = (
   let currFastMa = fastMaArray[index]
   let currSlowMa = slowMaArray[index]
 
-  if (prevFastMa === null || prevSlowMa === null || currFastMa === null || currSlowMa === null) return
+  if (prevFastMa === null || prevSlowMa === null || currFastMa === null || currSlowMa === null)
+    return { crossing: false, direction: undefined }
 
   if (prevFastMa < prevSlowMa && currFastMa > currSlowMa) {
     direction = 'bullish'
@@ -284,5 +285,10 @@ const MACrossover = (
     direction = undefined
     crossing = false
   }
-  return [crossing, direction]
+  return { crossing, direction }
+}
+
+export const bollingerBreakout = (tick: Tick, bollingerSeries: any, index: number) => {
+  if (bollingerSeries[0].data[index] === null) return false
+  return tick.close > bollingerSeries[0].data[index] ? true : false
 }

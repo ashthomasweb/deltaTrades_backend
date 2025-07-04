@@ -64,7 +64,15 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   /* Create ExtendedTick Data */
   let extendedTickData
   if (SMA1 && EMA1 && EMA2) {
-    extendedTickData = extendTickData(data, SMA1.data, EMA1.data, EMA2.data, dailyDistributions, requestParams)
+    extendedTickData = extendTickData(
+      data,
+      SMA1.data,
+      EMA1.data,
+      EMA2.data,
+      bollingerBands,
+      dailyDistributions,
+      requestParams,
+    )
   }
 
   /* CrossingSignal (BuySignal) */
