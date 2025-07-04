@@ -7,7 +7,7 @@ import { groupByDays } from './general-utilities'
 import { getAllNoiseWindows } from './noise-windows'
 import { detectMAConfirmedCrossing } from './signal-algos/trend-following'
 import { calculateADX, calculateEMA1, calculateEMA2, calculateSMA1 } from './trend-analysis'
-import { generateBollingerSeries } from './volatility-analysis'
+import { calculateRSI, generateBollingerSeries } from './volatility-analysis'
 
 export function algoOutput(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
   /* Early returns */
@@ -35,6 +35,7 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   let crossingSignal = undefined
   let noiseWindows = undefined
   let bollingerBands = undefined
+  let RSI = undefined
 
   /* Single Direction Blocks */
   singleDirectionBlocks = detectSingleDirection(data, requestParams)
@@ -57,6 +58,9 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Average Directional Index */
   ADX = calculateADX(data, requestParams)
+
+  /* RSI (Relative Strength Index) */
+  RSI = calculateRSI(data, requestParams)
 
   /* Bollinger Bands */
   bollingerBands = generateBollingerSeries(data, 20, 2)
@@ -99,6 +103,7 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
       EMA1: EMA1,
       EMA2: EMA2,
       ADX: ADX,
+      RSI: RSI,
       crossingSignal: crossingSignal,
       noiseWindows: noiseWindows,
       bollingerBands,
