@@ -292,3 +292,71 @@ export const bollingerBreakout = (tick: Tick, bollingerSeries: any, index: numbe
   if (bollingerSeries[0].data[index] === null) return false
   return tick.close > bollingerSeries[0].data[index] ? true : false
 }
+
+type MACDResult = {
+  macdLine: (number | null)[]
+  signalLine: (number | null)[]
+  histogram: (number | null)[]
+}
+
+export function calculateMACD(data: TickArray, requestParams: Partial<RequestParams>): MACDResult | undefined {
+  if (!requestParams.algoParams) return undefined
+  const shortPeriod = +requestParams.algoParams.macdShortPeriod
+  const longPeriod = +requestParams.algoParams.macdLongPeriod
+  const signalPeriod = +requestParams.algoParams.macdSignalPeriod
+
+  const closes = data.map((entry) => {
+    return entry.close
+  })
+
+  const macdResults: MACDResult = {
+    macdLine: [],
+    signalLine: [],
+    histogram: [],
+  }
+
+  const k = (n: number) => 2 / (n + 1)
+
+  function ema(arr: number[], period: number): number[] {
+    const result: number[] = []
+    let sum = 0
+    for (let i = 0; i < arr.length; i++) {
+      if (i < period) {
+        sum += arr[i]
+        result.push(NaN)
+      } else if (i === period) {
+        const avg = sum / period
+        result.push(avg)
+      } else {
+        const prev = result[i - 1]
+        const next = (arr[i] - prev) * k(period) + prev
+        result.push(next)
+      }
+    }
+    return result
+  }
+
+  const shortEma = ema(closes, shortPeriod)
+  const longEma = ema(closes, longPeriod)
+
+  const macdLine: (number | null)[] = closes.map((_, i) =>
+    isNaN(shortEma[i]) || isNaN(longEma[i]) ? null : shortEma[i] - longEma[i],
+  )
+
+  const signalLine: (number | null)[] = ema(
+    macdLine.map((x) => x ?? 0),
+    signalPeriod,
+  ).map((val, i) => (macdLine[i] === null ? null : val))
+
+  const histogram: (number | null)[] = macdLine.map((val, i) =>
+    val === null || signalLine[i] === null ? null : val - signalLine[i],
+  )
+
+  for (let i = 0; i < closes.length; i++) {
+    macdResults.macdLine.push(macdLine[i])
+    macdResults.signalLine.push(signalLine[i])
+    macdResults.histogram.push(histogram[i])
+  }
+
+  return macdResults
+}
