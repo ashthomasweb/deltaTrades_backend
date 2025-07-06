@@ -360,3 +360,72 @@ export function calculateMACD(data: TickArray, requestParams: Partial<RequestPar
 
   return macdResults
 }
+
+export const getBearishEngulfingScore = (
+  data: TickArray,
+  index: number,
+  requestParams: Partial<RequestParams>,
+  // tolerance: number = 0.005
+): number | null => {
+  if (!requestParams.algoParams) return null
+  if (index < 1) return null
+  const tolerance = +requestParams.algoParams.bearEngTolerance
+
+  const prev = data[index - 1]
+  const curr = data[index]
+
+  const prevBullish = prev.close > prev.open
+  const currBearish = curr.close < curr.open
+  if (!prevBullish || !currBearish) return 0
+
+  const prevBody = Math.abs(prev.close - prev.open)
+  const currBody = Math.abs(curr.close - curr.open)
+
+  // Handle flat candles
+  if (prevBody === 0 || currBody === 0) return 0
+
+  // How much of the previous body is covered?
+  const engulfStart = Math.max(curr.close, curr.open)
+  const engulfEnd = Math.min(curr.close, curr.open)
+  const engulfedAmount = Math.max(
+    0,
+    engulfStart - engulfEnd - Math.max(0, engulfStart - prev.close) - Math.max(0, prev.open - engulfEnd),
+  )
+  const engulfPercent = Math.min(1, engulfedAmount / prevBody)
+
+  const bodyRatio = currBody / prevBody
+
+  const gappedUp = curr.open > prev.close * (1 + tolerance)
+  const closedBelowPrevOpen = curr.close < prev.open
+
+  const gapBonus = gappedUp ? 0.1 : 0
+  const closeBelowBonus = closedBelowPrevOpen ? 0.1 : 0
+
+  const confidence =
+    engulfPercent * 0.5 +
+    Math.min(bodyRatio, 2) * 0.4 + // cap contribution from huge candles
+    gapBonus +
+    closeBelowBonus
+
+  return Math.min(confidence, 1) // cap at 1
+}
+
+export const isBullishExhaustion = (
+  data: TickArray,
+  index: number,
+  requestParams: Partial<RequestParams>,
+): boolean | null => {
+  if (!requestParams.algoParams) return null
+  const bullExhaustionRatioThreshold = +requestParams.algoParams.bullExhThreshold
+  const candle = data[index]
+  if (!candle) return null
+
+  const body = Math.abs(candle.close - candle.open)
+  const upperWick = candle.high - Math.max(candle.close, candle.open)
+  const lowerWick = Math.min(candle.close, candle.open) - candle.low
+
+  const isSmallBody = body < (candle.high - candle.low) * 0.4
+  const isTopHeavy = upperWick / (lowerWick + 1e-6) > bullExhaustionRatioThreshold
+
+  return isSmallBody && isTopHeavy
+}
