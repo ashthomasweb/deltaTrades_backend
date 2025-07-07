@@ -1,6 +1,6 @@
 /* Bollinger Bands */
 
-import { Tick } from '../types/types'
+import { RequestParams, Tick, TickArray } from '../types/types'
 
 type BollingerBand = {
   upper: number | null
@@ -66,4 +66,42 @@ export function generateBollingerSeries(ticks: Tick[], period: number = 20, mult
       lineStyle: { type: 'dashed', color: '#888' },
     },
   ]
+}
+
+export function calculateRSI(data: TickArray, requestParams: Partial<RequestParams>): (number | null)[] | undefined {
+  if (!requestParams.algoParams) return undefined
+  const period = +requestParams.algoParams.rsiPeriod
+  const rsi: (number | null)[] = new Array(data.length).fill(null)
+
+  let gains = 0
+  let losses = 0
+
+  // First average gain/loss
+  for (let i = 1; i <= period; i++) {
+    const delta = data[i].close - data[i - 1].close
+    if (delta >= 0) {
+      gains += delta
+    } else {
+      losses -= delta // subtracting negative value to get positive loss
+    }
+  }
+
+  let avgGain = gains / period
+  let avgLoss = losses / period
+
+  rsi[period] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss)
+
+  // Smooth RSI calculation
+  for (let i = period + 1; i < data.length; i++) {
+    const delta = data[i].close - data[i - 1].close
+    const gain = delta > 0 ? delta : 0
+    const loss = delta < 0 ? -delta : 0
+
+    avgGain = (avgGain * (period - 1) + gain) / period
+    avgLoss = (avgLoss * (period - 1) + loss) / period
+
+    rsi[i] = avgLoss === 0 ? 100 : 100 - 100 / (1 + avgGain / avgLoss)
+  }
+
+  return rsi
 }
