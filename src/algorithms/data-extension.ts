@@ -6,13 +6,22 @@ import {
 } from './distributions-ranges'
 import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
 import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
-import { calculateSMA, getPercentSlopeByPeriod, getPriceSlopeByPeriod } from './trend-analysis'
+import {
+  bollingerBreakout,
+  getBearishEngulfingScore,
+  getPercentSlopeByPeriod,
+  getPriceSlopeByPeriod,
+  isBullishExhaustion,
+  MACrossover,
+} from './trend-analysis'
+import { calculateVolumeTrend, calculateVolumeTrendScore } from './volume-utils'
 
 export const extendTickData = (
   data: TickArray,
   maAvgArrayShort: number[],
   emaAvgArrayShort: number[],
   emaAvgArrayLong: number[],
+  bollingerSeries: any,
   dailyDistributions: any,
   requestParams: Partial<RequestParams>,
 ): ExtTick[] => {
@@ -34,7 +43,10 @@ export const extendTickData = (
       movingAvg: maAvgArrayShort[index],
       shortEmaAvg: emaAvgArrayShort[index],
       longEmaAvg: emaAvgArrayLong[index],
-      isMACrossingEMA: false,
+      emaCrossing: MACrossover(emaAvgArrayShort, emaAvgArrayLong, index),
+      bollingerBreakout: bollingerBreakout(tick, bollingerSeries, index),
+      bearishEngulfingScore: getBearishEngulfingScore(data, index, requestParams),
+      isBullishExhaustion: isBullishExhaustion(data, index, requestParams),
       isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
       isBodyCrossing: false,
       crossesBodyAtPercent: null,
@@ -50,7 +62,8 @@ export const extendTickData = (
         previousDayDistributions.volume.volLow,
         previousDayDistributions.volume.distributionBlock,
       ),
-      value: [tick.timestamp, null],
+      volumeTrendIncreasing: calculateVolumeTrendScore(data, index, requestParams),
+      value: [tick.timestamp, null], // WHAT IS THIS? I think it's for a hidden display point? Verify or Retire.
       percSlopeByPeriod:
         index >= +requestParams.algoParams?.slopePeriodRawPrice
           ? getPercentSlopeByPeriod(data, index, requestParams, 'close')

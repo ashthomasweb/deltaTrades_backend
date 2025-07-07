@@ -88,14 +88,21 @@ export interface ExtTick extends Tick {
   movingAvg: number | undefined
   shortEmaAvg: number | undefined
   longEmaAvg: number | undefined
-  isMACrossingEMA: boolean | undefined
+  emaCrossing: {
+    crossing: boolean | undefined
+    direction: 'bullish' | 'bearish' | undefined
+  }
+  bollingerBreakout: boolean
   isBodyCrossing: boolean | undefined
   isWickCrossing: boolean | undefined
+  bearishEngulfingScore: number | null
+  isBullishExhaustion: boolean | null
   crossesBodyAtPercent?: number | null
   isCandleFull80: boolean
   candleBodyFullness: number
   candleBodyDistPercentile: number | undefined
   candleVolumeDistPercentile: number | undefined
+  volumeTrendIncreasing: number | null
   value: [string | undefined, null]
   percSlopeByPeriod: number | null
   priceSlopeByPeriod: number | null
