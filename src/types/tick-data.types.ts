@@ -14,9 +14,9 @@ export interface CreationMeta {
 export interface MetaData {
   tickerSymbol: string
   interval: string
-  inputType: 'historical' | 'real-time'
-  inputSource: 'AlphaVantage' | 'Tradier'
-  originator: 'frontend' | 'backend' | 'emergency'
+  inputType: InputType
+  inputSource: InputSource
+  originator: Originator
   historicalMeta?: {
     datasetSize: 'compact' | 'full'
     endDate: string
@@ -28,6 +28,10 @@ export interface MetaData {
   }
 }
 
+export type InputType = 'historical' | 'real-time'
+export type InputSource = 'AlphaVantage' | 'Tradier'
+export type Originator = 'frontend' | 'backend' | 'emergency'
+
 export interface Tick {
   timestamp: string | undefined
   open: number
@@ -35,12 +39,12 @@ export interface Tick {
   high: number
   low: number
   volume: number
-  percentChange?: number | null
-  absoluteChange?: number | null
-  vwap?: number | null
 }
 
 export interface ExtTick extends Tick {
+  percentChange?: number | null
+  absoluteChange?: number | null
+  vwap?: number | null
   originalIndex: number | undefined
   isPrevGreen: boolean | null
   isGreen: boolean

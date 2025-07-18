@@ -1,9 +1,11 @@
 import { Logger } from '../../__core/logger'
-import { RequestParams } from '../../types/types'
+import DebugService from '../debug'
+import { RequestParams } from '@/types'
 import { historicalActions } from './historical-actions'
 import { realTimeActions, RealTimeHandlerRegistry } from './real-time-actions'
 
 export default function preRequestRouter(requestParams: Partial<RequestParams>) {
+  DebugService.trace()
   const type = requestParams.type
 
   switch (type) {
@@ -34,6 +36,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       break
 
     case 'analysis':
+      DebugService.trace('Switch - analysis')
       historicalActions.sendStored(requestParams)
       break
 

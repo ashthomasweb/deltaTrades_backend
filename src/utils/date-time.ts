@@ -72,3 +72,14 @@ export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string =
 
   return formatted
 }
+
+export function getTimestampMeta() {
+  const now = new Date()
+  return {
+    createdAtUTC: now.toISOString(),
+    createdAtLocal: now.toLocaleString('en-US', {
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }),
+    localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }
+}

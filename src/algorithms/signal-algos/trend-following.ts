@@ -1,6 +1,6 @@
 /* Multi-metric Utils */
 
-import { ExtTick, RequestParams } from '../../types/types'
+import { ExtTick, RequestParams } from '@/types'
 import { filterByConfirmed } from '../general-filters'
 import {
   isNoisyWindow1,

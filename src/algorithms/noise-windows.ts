@@ -1,6 +1,6 @@
 /* Chop/Noise Utils */
 
-import { ExtTick, RequestParams } from '../types/types'
+import { ExtTick, RequestParams } from '@/types'
 
 type NoiseOptions = {
   atrMultiplier: number

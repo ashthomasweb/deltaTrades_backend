@@ -4,7 +4,7 @@ import { Logger } from '../../__core/logger'
 import postRequestRouter from './_post-request-router'
 import { marketDataFetcher } from './_market-data-fetcher'
 import { buildParamString } from '../../utils/api'
-import { RequestParams } from '../../types/types'
+import { RequestParams } from '@/types'
 import { getEastern930Timestamp, getEasternTimestamps } from '../../utils/date-time'
 
 export const realTimeActions = {

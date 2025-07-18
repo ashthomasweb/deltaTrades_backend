@@ -1,6 +1,6 @@
 /* Bollinger Bands */
 
-import { RequestParams, Tick, TickArray } from '../types/types'
+import { RequestParams, Tick, TickArray } from '@/types'
 
 type BollingerBand = {
   upper: number | null

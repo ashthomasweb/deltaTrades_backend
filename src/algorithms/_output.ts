@@ -1,15 +1,27 @@
 import { Logger } from '../__core/logger'
-import { RequestParams, TransactionPacket } from '../types/types'
+import { RequestParams, TransactionPacket } from '@/types'
 import { extendTickData } from './data-extension'
 import { detectSingleDirection } from './direction-analysis'
-import { DailyDataGroups, buildDailyDistributions } from './distributions-ranges'
+import {
+  DailyDataGroups,
+  buildDailyDistributions,
+} from './distributions-ranges'
 import { groupByDays } from './general-utilities'
 import { getAllNoiseWindows } from './noise-windows'
 import { detectMAConfirmedCrossing } from './signal-algos/trend-following'
-import { calculateADX, calculateEMA1, calculateEMA2, calculateMACD, calculateSMA1 } from './trend-analysis'
+import {
+  calculateADX,
+  calculateEMA1,
+  calculateEMA2,
+  calculateMACD,
+  calculateSMA1,
+} from './trend-analysis'
 import { calculateRSI, generateBollingerSeries } from './volatility-analysis'
 
-export function algoOutput(requestParams: Partial<RequestParams>, passedData?: TransactionPacket) {
+export function algoOutput(
+  requestParams: Partial<RequestParams>,
+  passedData?: TransactionPacket,
+) {
   /* Early returns */
   if (passedData === undefined) return
   if (requestParams.algoParams === undefined) return
@@ -19,7 +31,9 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   Logger.info(
     'Packet retrieved and parsed!\n',
     passedData.tickerSymbol,
-    passedData.queue.length > 0 ? `\nData present with ${passedData.queue.length - 1} entries` : '\nNo data present',
+    passedData.queue.length > 0
+      ? `\nData present with ${passedData.queue.length - 1} entries`
+      : '\nNo data present',
     '\n',
   )
 
@@ -40,12 +54,6 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
 
   /* Single Direction Blocks */
   singleDirectionBlocks = detectSingleDirection(data, requestParams)
-
-  /* Single Direction Block Volume Analysis */
-  // const singleDirectionVolumeAnalysis = directionalBlockVolumeAnalysis(
-  //   singleDirectionBlocks,
-  //   dailyVolumeDistributionData,
-  // )
 
   /* Secondary Data Generation */
   // These values will likely be stored in the DB at the end of each day
@@ -87,8 +95,12 @@ export function algoOutput(requestParams: Partial<RequestParams>, passedData?: T
   // returns array of crossingSignals, and associated noiseWindows
   let confirmedCrossingDetectionOutput
   if (extendedTickData) {
-    confirmedCrossingDetectionOutput = detectMAConfirmedCrossing(extendedTickData, requestParams)
-    crossingSignal = confirmedCrossingDetectionOutput && confirmedCrossingDetectionOutput[0]
+    confirmedCrossingDetectionOutput = detectMAConfirmedCrossing(
+      extendedTickData,
+      requestParams,
+    )
+    crossingSignal =
+      confirmedCrossingDetectionOutput && confirmedCrossingDetectionOutput[0]
   }
 
   /* All Noise Windows In Dataset */

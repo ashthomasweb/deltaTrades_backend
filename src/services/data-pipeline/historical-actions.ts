@@ -4,7 +4,7 @@ import { Logger } from '../../__core/logger'
 import { marketDataFetcher } from './_market-data-fetcher'
 import postRequestRouter from './_post-request-router'
 import { buildParamString } from '../../utils/api'
-import { RequestParams } from '../../types/types'
+import { RequestParams } from '@/types'
 
 export const historicalActions = {
   sendStored: async (requestParams: Partial<RequestParams>) => {

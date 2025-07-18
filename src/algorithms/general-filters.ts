@@ -1,4 +1,4 @@
-import { ExtTick, TickArray } from '../types/types'
+import { ExtTick, TickArray } from '@/types'
 import { createCandleSizeDistributionMaps, findSingleTickBodyDistribution } from './distributions-ranges'
 
 export const filterByConfirmed = (fullData: ExtTick[], filteredData: ExtTick[]) => {

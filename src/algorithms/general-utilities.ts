@@ -1,6 +1,6 @@
 /* General Utils */
 
-import { TickArray, Tick, ExtTick } from '../types/types'
+import { TickArray, Tick, ExtTick } from '@/types'
 
 // Finds a single day
 // NOTE: If the day passed is a non-market-day (weekend/holiday), no results will be returned!
@@ -70,4 +70,14 @@ export const isWithinTolerancePercent = (number1: number, number2: number, toler
     toleranceAbsValue = number2 * tolerance
   }
   return difference <= toleranceAbsValue
+}
+
+export function findPercentChange(currentValue: number, previousValue: number) {
+  const difference = findAbsoluteChange(currentValue, previousValue)
+  const percentChange = (+difference / previousValue) * 100
+  return +percentChange.toFixed(3)
+}
+
+export function findAbsoluteChange(currentValue: number, previousValue: number) {
+  return +(currentValue - previousValue).toFixed(3)
 }

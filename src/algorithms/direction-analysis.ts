@@ -1,6 +1,6 @@
 /* Direction Utils */
 
-import { Tick, ExtTick, TickArray, RequestParams } from '../types/types'
+import { Tick, ExtTick, TickArray, RequestParams } from '@/types'
 import { isGreenCandle, candlesMatch } from './general-utilities'
 
 export const isDirectionTolerant = (

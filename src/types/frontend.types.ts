@@ -19,7 +19,7 @@ export type ChartData = {
   volumes: number[][]
 }
 
-export type TimeStamp = string // TODO: Make more explicit once timestamp format is finalized
+export type TimeStamp = string | undefined // TODO: Make more explicit once timestamp format is finalized
 export type CandleStickValues = [CSValueOpen, CSValueClose, CSValueLow, CSValueHigh, CSValueVolume]
 export type CSValueOpen = number
 export type CSValueClose = number

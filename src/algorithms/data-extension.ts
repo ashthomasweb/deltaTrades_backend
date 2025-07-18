@@ -1,11 +1,17 @@
-import { TickArray, ExtTick, Tick, RequestParams } from '../types/types'
+import { TickArray, ExtTick, Tick, RequestParams } from '@/types'
 import {
   findSingleTickBodyDistribution,
   findTickVolumeDistribution,
   getPreviousDayDistributions,
 } from './distributions-ranges'
 import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
-import { isGreenCandle, isCandleFullByPercentage, getCandleBodyFullness } from './general-utilities'
+import {
+  isGreenCandle,
+  isCandleFullByPercentage,
+  getCandleBodyFullness,
+  findAbsoluteChange,
+  findPercentChange,
+} from './general-utilities'
 import {
   bollingerBreakout,
   getBearishEngulfingScore,
@@ -34,12 +40,16 @@ export const extendTickData = (
       previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
     }
 
+    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])
+
     const result: ExtTick = {
       ...tick,
       originalIndex: index,
       isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
       isGreen: isGreenCandle(tick),
       isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
+      percentChange: index > 0 ? findPercentChange(data[index].close, data[index - 1].close) : null,
+      absoluteChange: index > 0 ? findAbsoluteChange(data[index].close, data[index - 1].close) : null,
       movingAvg: maAvgArrayShort[index],
       shortEmaAvg: emaAvgArrayShort[index],
       longEmaAvg: emaAvgArrayLong[index],
@@ -48,8 +58,8 @@ export const extendTickData = (
       bearishEngulfingScore: getBearishEngulfingScore(data, index, requestParams),
       isBullishExhaustion: isBullishExhaustion(data, index, requestParams),
       isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
-      isBodyCrossing: false,
-      crossesBodyAtPercent: null,
+      isBodyCrossing: isBodyCrossing,
+      crossesBodyAtPercent: isBodyCrossing ? findBodyCrossingPercent(tick, maAvgArrayShort[index]) : null,
       isCandleFull80: isCandleFullByPercentage(tick, 0.8),
       candleBodyFullness: getCandleBodyFullness(tick),
       candleBodyDistPercentile: findSingleTickBodyDistribution(
@@ -82,11 +92,6 @@ export const extendTickData = (
           : null,
     }
 
-    const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])
-    if (isBodyCrossing) {
-      result['isBodyCrossing'] = isBodyCrossing
-      result['crossesBodyAtPercent'] = findBodyCrossingPercent(tick, maAvgArrayShort[index])
-    }
     return result
   })
 }

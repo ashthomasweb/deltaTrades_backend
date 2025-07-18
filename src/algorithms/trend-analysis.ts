@@ -1,4 +1,4 @@
-import { TickArray, RequestParams, Tick } from '../types/types'
+import { TickArray, RequestParams, Tick } from '@/types'
 
 type AvgType = 'default' | 'typicalPrice' | 'OHLCAverage'
 

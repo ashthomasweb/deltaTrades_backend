@@ -1,7 +1,7 @@
-import DataAdapter from '../data-adapter'
+import DataAdapter from '../data-adapter/data-adapter'
 import EventBus from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
-import { RequestParams } from '../../types/types'
+import { RequestParams } from '@/types'
 
 export default function postRequestRouter(
   data: any,

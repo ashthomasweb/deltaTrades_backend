@@ -1,6 +1,6 @@
 /* Time Utils */
 
-import { ExtTick } from '../types/types'
+import { ExtTick } from '@/types'
 
 export const isBefore945am = (tick: ExtTick) => {
   let result = false

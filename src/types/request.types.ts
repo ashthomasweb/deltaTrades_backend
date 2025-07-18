@@ -23,3 +23,18 @@ export interface RequestParams {
 export type SourceType = 'historical' | 'real-time' | 'closeRequest' | 'storedData' | 'analysis' | undefined
 export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData' | undefined
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
+
+/**
+ * General options for conversion functions.
+ */
+export type ConversionOptions = {
+  isTest?: boolean
+  inputType?: any // TODO: Check and refine this param
+  inputSource?: any // TODO: Check and refine this param
+  originator?: any // TODO: Check and refine this param
+  tickerSymbol?: string
+  interval?: string
+  start?: string
+  end?: string
+  count?: number
+}

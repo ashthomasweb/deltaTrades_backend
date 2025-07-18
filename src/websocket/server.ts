@@ -3,8 +3,8 @@
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import WebSocket, { WebSocketServer as WSS } from 'ws'
-import preRequestRouter from '../services/data/_pre-request-router'
-import { ChartData, RequestParams } from '../types/types'
+import preRequestRouter from '../services/data-pipeline/_pre-request-router'
+import { ChartData, RequestParams } from '@/types'
 import EventEmitter from 'events'
 
 export class WebSocketServer {

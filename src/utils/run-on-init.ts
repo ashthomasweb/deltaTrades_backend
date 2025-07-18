@@ -1,7 +1,6 @@
 // import { marketDataFetcher } from '../services/data/_market-data-fetcher'
 // import DataAdapter from '../services/data-adapter'
 import { Logger } from '../__core/logger'
-import { algo1 } from '../algorithms/algo-test-1'
 import fs from 'fs'
 import path from 'path'
 
@@ -12,8 +11,6 @@ export const runOnInit = async () => {
   // DO NOT PLACE ANY APPLICATION CRITICAL BUSINESS LOGIC IN THIS FILE.
   // FOR DEVELOPMENT CYCLE PURPOSES ONLY
   //---------------------------------------------------------------------//
-
-  // algo1()
 
   // Get all stored data filenames - copy paste from console to FE /src/config/stored-data-paths.ts
   function readDirectoryFileNames(directoryPath: string) {

@@ -3,7 +3,7 @@
 
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
-import { historicalActions } from '../services/data/historical-actions'
+import { historicalActions } from '../services/data-pipeline/historical-actions'
 import { WebSocketServer } from './server'
 import { MockInstance, vi } from 'vitest'
 import { WebSocketServer as WSS, WebSocket } from 'ws'

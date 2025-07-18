@@ -1,6 +1,6 @@
 /* Volume Utils */
 
-import { RequestParams, TickArray } from '../types/types'
+import { RequestParams, TickArray } from '@/types'
 import { findTickVolumeDistribution } from './distributions-ranges'
 import { isGreenCandle } from './general-utilities'
 
@@ -170,3 +170,61 @@ export const calculateVolumeTrendScore = (
 
   return 0
 }
+
+/* EXPERIMENTAL VOLUME TREND ANALYSIS */
+
+// const myData = [null, null, null, null, null, null, null, null, null, 100, 101, 500, 110, 105, 99]
+
+// const valueTrend = (data, lookback, index) => {
+//   let upCount = 0
+//   let downCount = 0
+
+//   for (let i = index - lookback + 1; i < data.length; i++) {
+//     const window = data.slice(i)
+//     for (let j = 0; j < window.length; j++) {
+//       if (j === 0) continue
+
+//       if (window[0] <= window[j]) {
+//         upCount++
+//       } else {
+//         downCount++
+//       }
+//     }
+//     console.log(window, upCount, downCount)
+//   }
+// }
+
+// // valueTrend(myData, 6, 14)
+
+// const valueTrend2 = (data, lookback, index) => {
+//   let upCount = 0
+//   let downCount = 0
+//   let windowUpCount = 0
+//   let windowDownCount = 0
+
+//   for (let i = index - lookback + 1; i < data.length; i++) {
+//     const window = data.slice(i)
+//     for (let j = 0; j < window.length; j++) {
+//       if (j === 0) continue
+
+//       if (window[0] <= window[j]) {
+//         upCount++
+//       } else {
+//         downCount++
+//       }
+//     }
+
+//     if (upCount > downCount) {
+//       windowUpCount++
+//     } else {
+//       windowDownCount++
+//     }
+//     upCount = 0
+//     downCount = 0
+//   }
+//   console.log(windowUpCount, windowDownCount)
+// }
+
+// valueTrend2(myData, 6, 14)
+
+/* END */
