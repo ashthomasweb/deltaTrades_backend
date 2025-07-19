@@ -1,5 +1,16 @@
-/* src/__core/init.ts */
-/* Initialization module for core backend services for DeltaTrades */
+/**
+ * @file src/__core/init.ts
+ * @fileoverview Initialization module for core backend services for DeltaTrades.
+ * 
+ * This module handles the startup process for the backend application, including:
+ * - Initializing database connections.
+ * - Starting the WebSocket server for real-time communication with the frontend.
+ * - Preparing in-memory queue structures for daily data caching and analysis.
+ * 
+ * Usage:
+ * Call `initApp()` at the application entry point to initialize core services before starting
+ * any data pipelines or trading processes.
+**/
 
 import { WebSocketServer } from '../websocket/server'
 import { Queue } from '../algorithms/_engine'
@@ -8,11 +19,6 @@ import { Logger } from './logger'
 
 /**
  * Initializes the DeltaTrades backend application.
- *
- * Sets up:
- * - Database client for logs, transaction packets, and historical data.
- * - WebSocket server for frontend communication.
- * - Queue (will transition into DayCache) for daily data caching and windowed analysis.
  */
 export async function initApp() {
   Logger.info('Initializing DeltaTrades backend...')

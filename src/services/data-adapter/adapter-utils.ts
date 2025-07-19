@@ -1,5 +1,6 @@
 /**
- * Data adapter utilities for transforming raw API responses into normalized internal structures.
+ * @file src/data-adapter/adapter-utils.ts
+ * @fileoverview Data adapter utilities for transforming raw API responses into normalized internal structures.
  * 
  * This module contains functions to:
  * - Convert AlphaVantage and Trader API data into a standard NormalizedData shape.
@@ -30,13 +31,11 @@ import {
 } from '@/types'
 import { getTimestampMeta } from '@/utils/date-time'
 
-
-
 export const convertNormalizedToTransactionPacket = (
   data: NormalizedData, 
   options?: Partial<ConversionOptions>
 ) => {
-  let newTransactionPacket = {
+  const newTransactionPacket = {
     contractType: undefined,
     tickerSymbol: data.metaData.tickerSymbol,
     expiryDate: undefined,
@@ -68,7 +67,7 @@ export const convertNormalizedToChart = (
 
   const requiredData = data as NormalizedData
 
-  let frontEndPacket = {
+  const frontEndPacket = {
     id: requiredData.id,
     creationMeta: requiredData.creationMeta,
     metaData: requiredData.metaData,
@@ -136,7 +135,7 @@ export const convertAVtoNormalized = (
   output.data = []
 
   for (let i = 0; i < dateArray.length; i++) {
-    const data: Partial<Tick> | any = {
+    const data: Tick = {
       timestamp: dateArray[i],
       open: +dataArray[i]['1. open'],
       close: +dataArray[i]['4. close'],
@@ -188,7 +187,7 @@ export const convertTradierToNormalized = (
   output.data = []
 
   for (let i = 0; i < dataset.length; i++) {
-    const data: Partial<Tick> | any = {
+    const data: Tick = {
       timestamp: dataset[i].time,
       open: dataset[i].open,
       close: dataset[i].close,

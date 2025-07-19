@@ -1,5 +1,23 @@
-// import { marketDataFetcher } from '../services/data/_market-data-fetcher'
-// import DataAdapter from '../services/data-adapter'
+/**
+ * @file src/__core/dev-cycle.ts
+ * @fileoverview Development cycle utility module for DeltaTrades backend.
+ * 
+ * Attention:
+ * - Do **NOT** include any critical application logic or business workflows in this module.
+ * 
+ * Purpose:
+ * - This file contains helper functions intended solely for development and testing purposes.
+ * - Supports quick experimentation, local data inspections, and utility tasks during development.
+ * 
+ * Example:
+ * import { runOnInit } from './__core/dev-cycle'
+ * await runOnInit()
+ * 
+ * Note:
+ * You are responsible for commenting/uncommenting any specific dev tasks (e.g., file reads).
+ * This module is excluded from production runtime and should remain isolated from core logic.
+**/
+
 import { Logger } from '../__core/logger'
 import fs from 'fs'
 import path from 'path'
@@ -30,7 +48,6 @@ export const runOnInit = async () => {
     })
   }
 
-  // Example usage:
   const directoryPath = '../dt_backend/src/storedData' // Replace with the path to your directory
   // readDirectoryFileNames(directoryPath)
 

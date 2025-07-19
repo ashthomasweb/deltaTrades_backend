@@ -1,5 +1,7 @@
 /**
- * DataAdapter class for normalizing various API response formats and converting them to application-specific data structures.
+ * @file src/services/data-adapter/data-adapter.ts
+ * @fileoverview DataAdapter class for normalizing various API response formats and 
+ * converting them to application-specific data structures.
  * 
  * Responsibilities:
  * - Normalize raw data from AlphaVantage, Tradier, or pre-stored sources.
