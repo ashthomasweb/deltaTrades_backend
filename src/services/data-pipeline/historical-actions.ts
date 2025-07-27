@@ -1,4 +1,13 @@
-/* src/services/brokerage/historical-actions.ts */
+/**
+ * @file src/services/brokerage/historical-actions.ts
+ * @fileoverview Service layer for sending historical market data to the processing pipeline.
+ * 
+ * This module routes historical data to the `postRequestRouter` by either:
+ * - Reading from locally stored data files.
+ * - Fetching from an external API (rate-limited).
+ * 
+ * Handles data retrieval and logging for historical backfills or testing.
+**/
 
 import { Logger } from '../../__core/logger'
 import { marketDataFetcher } from './_market-data-fetcher'
@@ -7,7 +16,15 @@ import { buildParamString } from '../../utils/api'
 import { RequestParams } from '@/types'
 
 export const historicalActions = {
-  sendStored: async (requestParams: Partial<RequestParams>) => {
+  /**
+   * @function sendStored
+   * @description Sends historical data retrieved from local storage to the request router.
+   * Logs the action, reads the stored data file, and passes it downstream.
+   * 
+   * @param requestParams - Parameters including savedData identifier.
+   * @returns A Promise that resolves after routing the fetched data.
+   */
+  async sendStored(requestParams: Partial<RequestParams>) {
     Logger.info(`historicalActions sendStored - ${requestParams.savedData}`)
 
     const localStoredDataRootPath = './src/storedData/'
@@ -21,8 +38,17 @@ export const historicalActions = {
       Logger.error(`Historical fetch failed: ${error}`)
     }
   },
-  sendRequested: async (requestParams: Partial<RequestParams>) => {
-    Logger.info('ATTN! Using rate-limited historical endpoint!') // TODO: Log the count somehow
+
+   /**
+   * @function sendRequested
+   * @description Sends historical data fetched from the external API to the request router.
+   * Intended for requests to historical endpoints (rate-limited).
+   * 
+   * @param requestParams - Parameters including symbol, interval, month, and dataSize.
+   * @returns A Promise that resolves after routing the fetched data.
+   */
+  async sendRequested(requestParams: Partial<RequestParams>) {
+    Logger.info('ATTN! Using rate-limited historical endpoint.') // TODO: Log the count somehow
     Logger.info('historicalActions sendRequested')
 
     const historicalRequest = {
