@@ -33,6 +33,18 @@ export const directionalBlockVolumeAnalysis = (directionalArray: any[], volumeDi
   return result
 }
 
+export const calculateVWAP = (data: TickArray, index: number) => {
+  let accumulatedPV: number = 0
+  let accumulatedVolume: number = 0
+
+  for (let i = 0; i <= index; i++) {
+    accumulatedVolume = accumulatedVolume + data[i].volume
+    accumulatedPV = accumulatedPV + ((data[i].high + data[i].low + data[i].close) / 3) * data[i].volume
+  }
+
+  return accumulatedVolume === 0 ? 0 : accumulatedPV / accumulatedVolume
+}
+
 // export const calculateVolumeStepTrend = (
 //   data: TickArray,
 //   index: number,
@@ -228,3 +240,4 @@ export const calculateVolumeTrendScore = (
 // valueTrend2(myData, 6, 14)
 
 /* END */
+

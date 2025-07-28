@@ -20,7 +20,7 @@ import {
   isBullishExhaustion,
   MACrossover,
 } from './trend-analysis'
-import { calculateVolumeTrend, calculateVolumeTrendScore } from './volume-utils'
+import { calculateVolumeTrend, calculateVolumeTrendScore, calculateVWAP } from './volume-utils'
 
 export const extendTickData = (
   data: TickArray,
@@ -90,6 +90,7 @@ export const extendTickData = (
         index >= +requestParams.algoParams?.slopePeriodEMA
           ? getPercentSlopeByPeriod(emaAvgArrayShort, index, requestParams, 'ema')
           : null,
+      vwap: calculateVWAP(data, index) // TODO: what window should this be calculated by? Intraday only?
     }
 
     return result
