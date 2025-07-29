@@ -22,7 +22,7 @@ export const isDirectionTolerant = (
 }
 
 export const detectSingleDirection = (data: TickArray, requestParams: Partial<RequestParams>) => {
-  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
+  if (data.length === 0 || !requestParams.algoParams?.singleDirMin || !requestParams.algoParams?.oppThreshold) return {} // TODO: This is a weak narrowing clause...
   let result = []
   let directionArray = [data[0]]
   let lastDirectionalIndex = 0

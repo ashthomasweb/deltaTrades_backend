@@ -16,7 +16,7 @@ export interface RequestParams {
   originator: string | undefined
   returnToFE: boolean | undefined
   chartId: string | undefined
-  algoParams: Record<string, any>
+  algoParams: Record<string, string | number>
 }
 
 // TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE

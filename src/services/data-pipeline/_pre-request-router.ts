@@ -31,6 +31,15 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     return
   }
 
+  console.log(requestParams)
+  for (const key in requestParams.algoParams) {
+    if (key.match(/^noiseWindow$|maAvgType/)) continue
+    requestParams.algoParams[key] = +requestParams.algoParams[key]
+    console.log(key)
+  }
+  console.log(requestParams)
+
+
   switch (type) {
     case 'historical':
       DebugService.trace('Switch - historical')
