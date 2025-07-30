@@ -139,19 +139,26 @@ export const calculateVWAP = (data: TickArray, index: number) => {
 // }
 
 export const calculateVolumeTrendScore = (
-  data: TickArray,
+  tickArray: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
 ): number | null => {
-  if (!requestParams.algoParams) return null
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.volumeTrendLookback !== 'number' ||
+    typeof algoParams.volumeTrendMinTrend !== 'number' ||
+    typeof algoParams.volumeTrendMinSurge !== 'number'
+  ) return null
 
-  const lookback = +requestParams.algoParams.volumeTrendLookback
-  const minUpTrendScore = +requestParams.algoParams.volumeTrendMinTrend || 0.65
-  const minSurgeMultiplier = +requestParams.algoParams.volumeTrendMinSurge || 1.2
+  const lookback = algoParams.volumeTrendLookback
+  const minUpTrendScore = algoParams.volumeTrendMinTrend || 0.65
+  const minSurgeMultiplier = algoParams.volumeTrendMinSurge || 1.2
 
   if (index < lookback - 1) return null
 
-  const slice = data.slice(index - lookback + 1, index + 1)
+  const slice = tickArray.slice(index - lookback + 1, index + 1)
   const volumes = slice.map((d) => d.volume)
 
   const lastVolume = volumes[volumes.length - 1]

@@ -22,12 +22,19 @@ export const isDirectionTolerant = (
 }
 
 export const detectSingleDirection = (data: TickArray, requestParams: Partial<RequestParams>) => {
-  if (data.length === 0 || !requestParams.algoParams?.singleDirMin || !requestParams.algoParams?.oppThreshold) return {} // TODO: This is a weak narrowing clause...
+  const { algoParams } = requestParams
+  if (
+    !data.length ||
+    !algoParams ||
+    typeof algoParams.singleDirMin !== 'number' ||
+    typeof algoParams.oppThreshold !== 'number'
+  ) return {}
+
   let result = []
   let directionArray = [data[0]]
   let lastDirectionalIndex = 0
-  const minimumSequenceLength = +requestParams.algoParams.singleDirMin
-  const tolerance = +requestParams.algoParams.oppThreshold
+  const minimumSequenceLength = algoParams.singleDirMin
+  const tolerance = algoParams.oppThreshold
 
   for (const [index, tick] of Object.entries(data)) {
     if (candlesMatch(tick, directionArray[0])) {

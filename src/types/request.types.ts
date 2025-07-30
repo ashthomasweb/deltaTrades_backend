@@ -16,7 +16,38 @@ export interface RequestParams {
   originator: string | undefined
   returnToFE: boolean | undefined
   chartId: string | undefined
-  algoParams: Record<string, string | number>
+  algoParams: AlgoParams
+}
+
+export type AlgoParams = {
+  noiseWindow: string
+  noiseWindowLength: number
+  atrMultiplier: number
+  altThreshold: number
+  hugRatio: number
+  compBodyMult: number
+  compFullThresh: number
+  simpleAvgPeriod1: number
+  simpleAvgPeriod2: number
+  emaAvgPeriod1: number
+  emaAvgPeriod2: number
+  maAvgType: string
+  singleDirMin: number
+  oppThreshold: number
+  rsiPeriod: number
+  minCandleBodyDist: number
+  slopePeriodRawPrice: number
+  slopePeriodSMA: number
+  slopePeriodEMA: number
+  adxPeriod: number
+  macdShortPeriod: number
+  macdLongPeriod: number
+  macdSignalPeriod: number
+  volumeTrendLookback: number
+  volumeTrendMinTrend: number
+  volumeTrendMinSurge: number
+  bearEngTolerance: number
+  bullExhThreshold: number
 }
 
 // TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE

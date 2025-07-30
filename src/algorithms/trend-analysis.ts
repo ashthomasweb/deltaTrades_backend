@@ -9,22 +9,28 @@ const avgTypeFns = {
 }
 
 export const calculateSMA1 = (
-  data: TickArray,
+  tickArray: TickArray,
   requestParams: Partial<RequestParams>,
 ): { data: any[]; type: string; smooth: boolean } | undefined => {
-  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.simpleAvgPeriod1 !== 'number' ||
+    typeof algoParams.maAvgType !== 'string'
+  ) return undefined
 
-  const avgPeriod: number = +requestParams.algoParams.simpleAvgPeriod1 // TODO: rename param
-  const avgType: AvgType = requestParams.algoParams.maAvgType
+  const avgPeriod: number = algoParams.simpleAvgPeriod1 // TODO: rename param
+  const avgType = algoParams.maAvgType as AvgType
 
   const analysisPacket = {
-    data: new Array(data.length).fill(null),
+    data: new Array(tickArray.length).fill(null),
     type: 'line',
     smooth: true,
   }
 
-  for (let i = avgPeriod - 1; i < data.length; i++) {
-    const window = data.slice(i - avgPeriod + 1, i + 1)
+  for (let i = avgPeriod - 1; i < tickArray.length; i++) {
+    const window = tickArray.slice(i - avgPeriod + 1, i + 1)
     const sum = window.reduce((acc, tick) => acc + avgTypeFns[avgType](tick), 0)
     analysisPacket.data[i] = sum / avgPeriod
   }
@@ -33,30 +39,36 @@ export const calculateSMA1 = (
 }
 
 export function calculateEMA1(
-  ticks: TickArray,
+  tickArray: TickArray,
   requestParams: Partial<RequestParams>,
 ): { data: any[]; type: string; smooth: boolean } | undefined {
-  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.emaAvgPeriod1 !== 'number' ||
+    typeof algoParams.maAvgType !== 'string'
+  ) return undefined
 
-  const avgPeriod: number = +requestParams.algoParams.emaAvgPeriod1
-  const avgType: AvgType = requestParams.algoParams.maAvgType
+  const avgPeriod: number = algoParams.emaAvgPeriod1
+  const avgType = algoParams.maAvgType as AvgType
 
   const k = 2 / (avgPeriod + 1)
 
   let prev: number | null = null
 
   const analysisPacket = {
-    data: new Array(ticks.length).fill(null),
+    data: new Array(tickArray.length).fill(null),
     type: 'line',
     smooth: true,
   }
 
-  for (let i = 0; i < ticks.length; i++) {
-    const price = ticks[i].close
+  for (let i = 0; i < tickArray.length; i++) {
+    const price = tickArray[i].close
     if (i < avgPeriod - 1) {
       analysisPacket.data[i] = null
     } else if (i === avgPeriod - 1) {
-      const slice = ticks.slice(i - avgPeriod + 1, i + 1)
+      const slice = tickArray.slice(i - avgPeriod + 1, i + 1)
       const sma = slice.reduce((sum, tick) => sum + avgTypeFns[avgType](tick), 0) / avgPeriod
       analysisPacket.data[i] = sma
       prev = sma
@@ -71,30 +83,37 @@ export function calculateEMA1(
 }
 
 export function calculateEMA2(
-  ticks: TickArray,
+  tickArray: TickArray,
   requestParams: Partial<RequestParams>,
 ): { data: any[]; type: string; smooth: boolean } | undefined {
-  if (!requestParams.algoParams) return // TODO: This is a weak narrowing clause...
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.emaAvgPeriod2 !== 'number' ||
+    typeof algoParams.maAvgType !== 'string'
+  ) return undefined
 
-  const avgPeriod: number = +requestParams.algoParams.emaAvgPeriod2
-  const avgType: AvgType = requestParams.algoParams.maAvgType
+
+  const avgPeriod: number = algoParams.emaAvgPeriod2
+  const avgType = algoParams.maAvgType as AvgType
 
   const k = 2 / (avgPeriod + 1)
 
   let prev: number | null = null
 
   const analysisPacket = {
-    data: new Array(ticks.length).fill(null),
+    data: new Array(tickArray.length).fill(null),
     type: 'line',
     smooth: true,
   }
 
-  for (let i = 0; i < ticks.length; i++) {
-    const price = ticks[i].close
+  for (let i = 0; i < tickArray.length; i++) {
+    const price = tickArray[i].close
     if (i < avgPeriod - 1) {
       analysisPacket.data[i] = null
     } else if (i === avgPeriod - 1) {
-      const slice = ticks.slice(i - avgPeriod + 1, i + 1)
+      const slice = tickArray.slice(i - avgPeriod + 1, i + 1)
       const sma = slice.reduce((sum, tick) => sum + avgTypeFns[avgType](tick), 0) / avgPeriod
       analysisPacket.data[i] = sma
       prev = sma
@@ -109,31 +128,41 @@ export function calculateEMA2(
 }
 
 export function getPercentSlopeByPeriod(
-  data: TickArray | any[],
+  tickArray: TickArray | any[],
   index: number,
   requestParams: Partial<RequestParams>,
   type: string,
 ): number | null {
-  if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.slopePeriodRawPrice !== 'number' ||
+    typeof algoParams.slopePeriodSMA !== 'number' ||
+    typeof algoParams.slopePeriodEMA !== 'number'
+  ) return null
+
   let period
 
   switch (type) {
     case 'close':
-      period = +requestParams.algoParams.slopePeriodRawPrice
+      period = algoParams.slopePeriodRawPrice // TODO: This param name is a bit confusing
       break
 
     case 'sma':
-      period = +requestParams.algoParams.slopePeriodSMA
+      period = algoParams.slopePeriodSMA
       break
 
     case 'ema':
-      period = +requestParams.algoParams.slopePeriodEMA
+      period = algoParams.slopePeriodEMA
       break
 
     default:
+      period = undefined
       break
   }
 
+  if (period === undefined) return null
   if (index <= period) return null
 
   let curr
@@ -141,18 +170,18 @@ export function getPercentSlopeByPeriod(
 
   switch (type) {
     case 'close':
-      curr = data[index].close
-      prev = data[index - period].close
+      curr = tickArray[index].close
+      prev = tickArray[index - period].close
       break
 
     case 'ema':
-      curr = data[index]
-      prev = data[index - period]
+      curr = tickArray[index]
+      prev = tickArray[index - period]
       break
 
     case 'sma':
-      curr = data[index]
-      prev = data[index - period]
+      curr = tickArray[index]
+      prev = tickArray[index - period]
       break
 
     default:
@@ -166,16 +195,23 @@ export function getPercentSlopeByPeriod(
 }
 
 export function getPriceSlopeByPeriod(
-  ticks: TickArray,
+  tickArray: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
 ): number | null {
-  if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
-  const period = +requestParams.algoParams.slopePeriodRawPrice
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.slopePeriodRawPrice !== 'number'
+  ) return null
+
+  const period = algoParams.slopePeriodRawPrice
+
   if (index < period) return null
 
-  const curr = ticks[index].close
-  const prev = ticks[index - period].close
+  const curr = tickArray[index].close
+  const prev = tickArray[index - period].close
 
   if (prev === 0 || isNaN(prev) || isNaN(curr)) return null
 
@@ -183,20 +219,26 @@ export function getPriceSlopeByPeriod(
   return (curr - prev) / period
 }
 
-export function calculateADX(ticks: TickArray, requestParams: Partial<RequestParams>): (number | null)[] | null {
-  if (!requestParams.algoParams) return null // TODO: This is a weak narrowing clause...
-  const period = requestParams.algoParams.adxPeriod
-  if (ticks.length <= period) return new Array(ticks.length).fill(null)
+export function calculateADX(tickArray: TickArray, requestParams: Partial<RequestParams>): (number | null)[] | null {
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.adxPeriod !== 'number'
+  ) return null
 
-  const adxResults: (number | null)[] = new Array(ticks.length).fill(null)
+  const period = algoParams.adxPeriod
+  if (tickArray.length <= period) return new Array(tickArray.length).fill(null)
+
+  const adxResults: (number | null)[] = new Array(tickArray.length).fill(null)
 
   const tr: number[] = []
   const plusDM: number[] = []
   const minusDM: number[] = []
 
-  for (let i = 1; i < ticks.length; i++) {
-    const curr = ticks[i]
-    const prev = ticks[i - 1]
+  for (let i = 1; i < tickArray.length; i++) {
+    const curr = tickArray[i]
+    const prev = tickArray[i - 1]
 
     const upMove = curr.high - prev.high
     const downMove = prev.low - curr.low
@@ -222,9 +264,9 @@ export function calculateADX(ticks: TickArray, requestParams: Partial<RequestPar
   const smoothedPlusDM = smooth(plusDM)
   const smoothedMinusDM = smooth(minusDM)
 
-  const dx: (number | null)[] = new Array(ticks.length).fill(null)
+  const dx: (number | null)[] = new Array(tickArray.length).fill(null)
 
-  for (let i = period - 1; i < ticks.length - 1; i++) {
+  for (let i = period - 1; i < tickArray.length - 1; i++) {
     const trVal = smoothedTR[i]
     const plus = (smoothedPlusDM[i] / trVal) * 100
     const minus = (smoothedMinusDM[i] / trVal) * 100
@@ -242,7 +284,7 @@ export function calculateADX(ticks: TickArray, requestParams: Partial<RequestPar
       continue
     }
     if (i === 2 * period) {
-      adxSum = dx.slice(i - period + 1, i + 1).reduce((a, b) => a + (b ?? 0), 0)
+      adxSum = dx.slice(i - period + 1, i + 1).reduce((a, b) => a! + (b ?? 0), 0) // TODO: Check validity of ! assertion
       if (adxSum) {
         adx[i] = adxSum / period
       }
@@ -299,14 +341,22 @@ type MACDResult = {
   histogram: (number | null)[]
 }
 
-export function calculateMACD(data: TickArray, requestParams: Partial<RequestParams>): MACDResult | undefined {
-  if (!requestParams.algoParams) return undefined
-  const shortPeriod = +requestParams.algoParams.macdShortPeriod
-  const longPeriod = +requestParams.algoParams.macdLongPeriod
-  const signalPeriod = +requestParams.algoParams.macdSignalPeriod
+export function calculateMACD(tickArray: TickArray, requestParams: Partial<RequestParams>): MACDResult | undefined {
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.macdShortPeriod !== 'number' ||
+    typeof algoParams.macdLongPeriod !== 'number' ||
+    typeof algoParams.macdSignalPeriod !== 'number'
+  ) return undefined
 
-  const closes = data.map((entry) => {
-    return entry.close
+  const shortPeriod = algoParams.macdShortPeriod
+  const longPeriod = algoParams.macdLongPeriod
+  const signalPeriod = algoParams.macdSignalPeriod
+
+  const closes = tickArray.map((tick) => {
+    return tick.close
   })
 
   const macdResults: MACDResult = {
@@ -362,17 +412,23 @@ export function calculateMACD(data: TickArray, requestParams: Partial<RequestPar
 }
 
 export const getBearishEngulfingScore = (
-  data: TickArray,
+  tickArray: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
-  // tolerance: number = 0.005
 ): number | null => {
-  if (!requestParams.algoParams) return null
-  if (index < 1) return null
-  const tolerance = +requestParams.algoParams.bearEngTolerance
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.bearEngTolerance !== 'number'
+  ) return null
 
-  const prev = data[index - 1]
-  const curr = data[index]
+  if (index < 1) return null
+
+  const tolerance = algoParams.bearEngTolerance
+
+  const prev = tickArray[index - 1]
+  const curr = tickArray[index]
 
   const prevBullish = prev.close > prev.open
   const currBearish = curr.close < curr.open
@@ -411,14 +467,21 @@ export const getBearishEngulfingScore = (
 }
 
 export const isBullishExhaustion = (
-  data: TickArray,
+  tickArray: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
 ): boolean | null => {
-  if (!requestParams.algoParams) return null
-  const bullExhaustionRatioThreshold = +requestParams.algoParams.bullExhThreshold
-  const candle = data[index]
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.bullExhThreshold !== 'number'
+  ) return null
+
+  const candle = tickArray[index]
   if (!candle) return null
+  
+  const bullExhaustionRatioThreshold = algoParams.bullExhThreshold
 
   const body = Math.abs(candle.close - candle.open)
   const upperWick = candle.high - Math.max(candle.close, candle.open)

@@ -31,13 +31,12 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     return
   }
 
-  console.log(requestParams)
   for (const key in requestParams.algoParams) {
-    if (key.match(/^noiseWindow$|maAvgType/)) continue
+    // ATTN: This may need additional handling if algoParams grows to include more complex data types
+    if (!Object.prototype.hasOwnProperty.call(requestParams.algoParams, key)) continue // Defensively pass keys in the prototype chain
+    if (key.match(/^noiseWindow$|maAvgType/)) continue // Pass on these keys which need to remain as is from FE
     requestParams.algoParams[key] = +requestParams.algoParams[key]
-    console.log(key)
   }
-  console.log(requestParams)
 
 
   switch (type) {
