@@ -42,13 +42,11 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
   switch (type) {
     case 'historical':
       DebugService.trace('Switch - historical')
-
       historicalActions.sendRequested(requestParams)
       break
 
     case 'real-time':
       DebugService.trace('Switch - real-time')
-
       if (requestParams.getPrevious === 'on') {
         realTimeActions.sendMockIntervalTick(requestParams)
       } else {
@@ -58,7 +56,6 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
 
     case 'closeRequest':
       DebugService.trace('Switch - closeRequest')
-
       RealTimeHandlerRegistry.stop(requestParams.chartId!) // TODO: Handle case where no chartId is passed
       break
 

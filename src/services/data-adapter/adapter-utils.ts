@@ -16,6 +16,7 @@
 **/
 
 import {
+  AlphaVantageResponse,
   CandleStickValues,
   CandleStickVolume,
   ChartDataShape,
@@ -29,12 +30,16 @@ import {
   Tick,
   TimeStamp,
 } from '@/types'
+
+import DebugService from '../debug'
+
 import { getTimestampMeta } from '@/utils/date-time'
 
 export const convertNormalizedToTransactionPacket = (
-  data: NormalizedData, 
+  data: Partial<NormalizedData>, 
   options?: Partial<ConversionOptions>
 ) => {
+  if (!data.metaData || !data.creationMeta || !data.data) return
   const newTransactionPacket = {
     contractType: undefined,
     tickerSymbol: data.metaData.tickerSymbol,
@@ -64,6 +69,7 @@ export const convertNormalizedToChart = (
   options?: ConversionOptions
 ): FrontEndChartPacket | null => {
   if (!data || !data.data) return null
+  DebugService.trace()
 
   const requiredData = data as NormalizedData
 
@@ -100,7 +106,7 @@ export const convertNormalizedToChart = (
 }
 
 export const convertAVtoNormalized = (
-  data: any, // TODO: Assert type of AlphaVantage
+  data: AlphaVantageResponse,
   options: ConversionOptions
 ): Partial<NormalizedData> | undefined => {
   // Logger.info('DataAdapter convertAVtoNormalized')

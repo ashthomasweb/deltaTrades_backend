@@ -14,6 +14,7 @@ import { config } from '../../__core/config'
 import { Logger } from '@/__core/logger'
 import { promises as fs } from 'fs'
 import axios from 'axios'
+import DebugService from '../debug'
 
 export const marketDataFetcher = {
   /**
@@ -42,6 +43,8 @@ export const marketDataFetcher = {
         Accept: 'application/json',
       },
     })
+    DebugService.trace()
+    console.log('response.data', response.data)
     return response.data
   },
 

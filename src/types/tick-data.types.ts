@@ -1,3 +1,5 @@
+import { NumberValidateRequest } from "aws-sdk/clients/pinpoint"
+
 export interface NormalizedData {
   id: number
   creationMeta: CreationMeta
@@ -86,3 +88,42 @@ export type TickArray = Tick[] | ExtTick[]
 //   percentChange: number
 //   absoluteChange: number
 // }
+
+export type AlphaVantageResponse = {
+  'Meta Data': {
+    '1. Information': string
+    '2. Symbol': string
+    '3. Last Refreshed': string
+    '4. Interval': string
+    '5. Output Size': string
+    '6. Time Zone': string
+  } & {
+    [key: string]: {
+      [timestamp: string]: {
+        '1. open': string
+        '2. high': string
+        '3. low': string
+        '4. close': string
+        '5. volume': string
+      }
+    }
+  }
+}
+
+export type TradierResponse = {
+  series: {
+    data: TradierTickData | TradierTickData[]
+  }
+}
+
+type TradierTickData = {
+  time: string
+  timestamp: number
+  price: number
+  open: number
+  high: number
+  low: number
+  close: number
+  volume: number
+  vwap: number
+}

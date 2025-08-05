@@ -31,6 +31,7 @@ import WebSocket, { WebSocketServer as WSS } from 'ws'
 import preRequestRouter from '../services/data-pipeline/_pre-request-router'
 import { ChartData, RequestParams } from '@/types'
 import EventEmitter from 'events'
+import DebugService from '../services/debug'
 
 export class WebSocketServer {
   private readonly wss: WSS
@@ -120,6 +121,7 @@ export class WebSocketServer {
     })
 
     this.bus.on('historical:data', (data: any) => {
+      DebugService.trace('server event: historical:data')
       const message = JSON.stringify({ type: 'historical', data })
       this.broadcastToAllClients(message)
     })

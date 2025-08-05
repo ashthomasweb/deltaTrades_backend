@@ -13,7 +13,7 @@
 **/
 
 import { Logger } from '../../__core/logger'
-import { ConversionOptions, DataSource, NormalizedData, OutputFormat, RequestParams, SourceType } from '@/types'
+import { AlphaVantageResponse, ConversionOptions, DataSource, NormalizedData, OutputFormat, RequestParams, SourceType, TradierResponse } from '@/types'
 
 import {
   convertAVtoNormalized,
@@ -21,6 +21,8 @@ import {
   convertNormalizedToChart,
   convertNormalizedToTransactionPacket,
 } from './adapter-utils'
+
+import DebugService from '../debug'
 
 class DataAdapter {
   inputType!: SourceType | undefined
@@ -30,12 +32,10 @@ class DataAdapter {
   requestParams: Partial<RequestParams>
   options: any
 
-  // TODO: Annotate types once data structures are more hardened.
   constructor(requestParams: 
     Partial<RequestParams>, 
-    data: any, 
-    options: any = null
-
+    data: AlphaVantageResponse | TradierResponse | NormalizedData, 
+    options: Partial<ConversionOptions> | null = null
   ) {
     this.inputType = requestParams.type
     this.inputSource = requestParams.dataSource
@@ -50,27 +50,26 @@ class DataAdapter {
    * depending on the specified data source.
    */
   private init(
-    data: any, 
-    options: ConversionOptions | null = null
-
+    data: AlphaVantageResponse | TradierResponse | NormalizedData, 
+    options: Partial<ConversionOptions> | null = null
   ) {
+    DebugService.trace()
     if (this.inputSource === 'alpha-vantage') {
-      this.alphaVantageToNormalized(data, options)
+      this.alphaVantageToNormalized(data as AlphaVantageResponse, options)
     }
     if (this.inputSource === 'tradier') {
-      this.tradierToNormalized(data, options)
+      this.tradierToNormalized(data as TradierResponse, options)
     }
     if (this.inputSource === 'storedData') {
-      this.normalizedData = data
+      this.normalizedData = data as NormalizedData
     }
   }
 
   /**
    * Converts raw AlphaVantage data to normalized internal format
-   * TODO: Annotate types once data structures are more hardened.
    */
   private alphaVantageToNormalized(
-    data: any, 
+    data: AlphaVantageResponse, 
     options?: Partial<ConversionOptions> | null
   ) {
     this.normalizedData = convertAVtoNormalized(data, {
@@ -82,12 +81,10 @@ class DataAdapter {
 
   /**
    * Converts raw Tradier data to normalized internal format
-   * TODO: Annotate types once data structures are more hardened.
    */
   private tradierToNormalized(
-    data: any, 
+    data: TradierResponse, 
     options?: Partial<ConversionOptions> | null
-
   ) {
     this.normalizedData = convertTradierToNormalized(data, {
       inputSource: this.inputSource,
@@ -101,6 +98,7 @@ class DataAdapter {
    * Converts normalized data to a chart-friendly structure
    */
   normalizedToChartFormat() {
+    if (!this.normalizedData) return null
     return convertNormalizedToChart(this.normalizedData, this.options)
   }
 
@@ -108,6 +106,7 @@ class DataAdapter {
    * Converts normalized data into a queue packet format
    */
   normalizedToQueueFormat() {
+    if (!this.normalizedData) return null
     return convertNormalizedToTransactionPacket(this.normalizedData)
   }
 

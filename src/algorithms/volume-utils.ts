@@ -46,20 +46,27 @@ export const calculateVWAP = (data: TickArray, index: number) => {
 }
 
 // export const calculateVolumeStepTrend = (
-//   data: TickArray,
+//   tickArray: TickArray,
 //   index: number,
 //   requestParams: Partial<RequestParams>,
 // ): boolean | null => {
-//   if (!requestParams.algoParams) return null
-//   const lookback = +requestParams.algoParams.volumeTrendLookback
-//   const minGrowthSteps = +requestParams.algoParams.volumeTrendMinGrowthSteps
+//   const { algoParams } = requestParams
+//   if (
+//     !tickArray.length ||
+//     !algoParams ||
+//     typeof algoParams.volumeTrendLookback !== 'number' ||
+//     // typeof algoParams.volumeTrendMinGrowthSteps !== 'number'
+//   ) return null
+
+//   const lookback = algoParams.volumeTrendLookback
+//   const minGrowthSteps = algoParams.volumeTrendMinGrowthSteps // TODO: Pass from FE if used
 
 //   if (index < lookback) return null
 
 //   let upCount = 0
 
 //   for (let j = index - lookback + 1; j <= index; j++) {
-//     if (data[j].volume > data[j - 1].volume) {
+//     if (tickArray[j].volume > tickArray[j - 1].volume) {
 //       upCount++
 //     }
 //   }
