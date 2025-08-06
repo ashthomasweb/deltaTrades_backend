@@ -85,7 +85,6 @@ export const convertNormalizedToChart = (
   }
 
   for (let i = 0; i < requiredData.data.length; i++) {
-    // TODO! How to handle the first tick? Is it green/red? We need previous tick data to calculate...
     const tick = requiredData.data[i]
     frontEndPacket.chartData.categoryData.push(tick.timestamp)
     frontEndPacket.chartData.values.push([

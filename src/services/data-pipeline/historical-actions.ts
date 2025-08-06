@@ -65,7 +65,6 @@ export const historicalActions = {
 
     try {
       const data = await marketDataFetcher.fetchHistorical(paramString)
-      console.log('raw data:', data)
       postRequestRouter(data, requestParams)
     } catch (error) {
       Logger.error(`Historical fetch failed: ${error}`)

@@ -79,7 +79,7 @@ export default function postRequestRouter(
     }
 
     case 'storedData': {
-      Logger.info('StoredData postRequestRouter', count) // TODO: Change these to the new DebugService.trace()
+      Logger.info('StoredData postRequestRouter') // TODO: Change these to the new DebugService.trace()
       const storedDataAdapter = new DataAdapter(requestParams, data)
 
       if (requestParams.returnToFE) {

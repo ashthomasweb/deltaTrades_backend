@@ -16,11 +16,11 @@ export const calculateSMA1 = (
   if (
     !tickArray.length ||
     !algoParams ||
-    typeof algoParams.simpleAvgPeriod1 !== 'number' ||
+    typeof algoParams.sma1Period !== 'number' ||
     typeof algoParams.maAvgType !== 'string'
   ) return undefined
 
-  const avgPeriod: number = algoParams.simpleAvgPeriod1 // TODO: rename param
+  const avgPeriod: number = algoParams.sma1Period
   const avgType = algoParams.maAvgType as AvgType
 
   const analysisPacket = {
@@ -46,11 +46,11 @@ export function calculateEMA1(
   if (
     !tickArray.length ||
     !algoParams ||
-    typeof algoParams.emaAvgPeriod1 !== 'number' ||
+    typeof algoParams.ema1Period !== 'number' ||
     typeof algoParams.maAvgType !== 'string'
   ) return undefined
 
-  const avgPeriod: number = algoParams.emaAvgPeriod1
+  const avgPeriod: number = algoParams.ema1Period
   const avgType = algoParams.maAvgType as AvgType
 
   const k = 2 / (avgPeriod + 1)
@@ -90,12 +90,12 @@ export function calculateEMA2(
   if (
     !tickArray.length ||
     !algoParams ||
-    typeof algoParams.emaAvgPeriod2 !== 'number' ||
+    typeof algoParams.ema2Period !== 'number' ||
     typeof algoParams.maAvgType !== 'string'
   ) return undefined
 
 
-  const avgPeriod: number = algoParams.emaAvgPeriod2
+  const avgPeriod: number = algoParams.ema2Period
   const avgType = algoParams.maAvgType as AvgType
 
   const k = 2 / (avgPeriod + 1)
@@ -137,24 +137,24 @@ export function getPercentSlopeByPeriod(
   if (
     !tickArray.length ||
     !algoParams ||
-    typeof algoParams.slopePeriodRawPrice !== 'number' ||
-    typeof algoParams.slopePeriodSMA !== 'number' ||
-    typeof algoParams.slopePeriodEMA !== 'number'
+    typeof algoParams.slopePeriodByRawPrice !== 'number' ||
+    typeof algoParams.slopePeriodBySMA !== 'number' ||
+    typeof algoParams.slopePeriodByEMA !== 'number'
   ) return null
 
   let period
 
   switch (type) {
     case 'close':
-      period = algoParams.slopePeriodRawPrice // TODO: This param name is a bit confusing
+      period = algoParams.slopePeriodByRawPrice
       break
 
     case 'sma':
-      period = algoParams.slopePeriodSMA
+      period = algoParams.slopePeriodBySMA
       break
 
     case 'ema':
-      period = algoParams.slopePeriodEMA
+      period = algoParams.slopePeriodByEMA
       break
 
     default:
@@ -203,10 +203,10 @@ export function getPriceSlopeByPeriod(
   if (
     !tickArray.length ||
     !algoParams ||
-    typeof algoParams.slopePeriodRawPrice !== 'number'
+    typeof algoParams.slopePeriodByRawPrice !== 'number'
   ) return null
 
-  const period = algoParams.slopePeriodRawPrice
+  const period = algoParams.slopePeriodByRawPrice
 
   if (index < period) return null
 
@@ -284,7 +284,7 @@ export function calculateADX(tickArray: TickArray, requestParams: Partial<Reques
       continue
     }
     if (i === 2 * period) {
-      adxSum = dx.slice(i - period + 1, i + 1).reduce((a, b) => a! + (b ?? 0), 0) // TODO: Check validity of ! assertion
+      adxSum = dx.slice(i - period + 1, i + 1).reduce((acc, val) => acc! + (val ?? 0), 0) // Initial value '0' guards 'acc'
       if (adxSum) {
         adx[i] = adxSum / period
       }

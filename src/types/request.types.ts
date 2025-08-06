@@ -27,18 +27,18 @@ export type AlgoParams = {
   hugRatio: number
   compBodyMult: number
   compFullThresh: number
-  simpleAvgPeriod1: number
-  simpleAvgPeriod2: number
-  emaAvgPeriod1: number
-  emaAvgPeriod2: number
+  sma1Period: number
+  sma2Period: number
+  ema1Period: number
+  ema2Period: number
   maAvgType: string
   singleDirMin: number
   oppThreshold: number
   rsiPeriod: number
   minCandleBodyDist: number
-  slopePeriodRawPrice: number
-  slopePeriodSMA: number
-  slopePeriodEMA: number
+  slopePeriodByRawPrice: number
+  slopePeriodBySMA: number
+  slopePeriodByEMA: number
   adxPeriod: number
   macdShortPeriod: number
   macdLongPeriod: number

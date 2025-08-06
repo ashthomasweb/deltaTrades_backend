@@ -30,7 +30,16 @@ export const extendTickData = (
   bollingerSeries: any,
   dailyDistributions: any,
   requestParams: Partial<RequestParams>,
-): ExtTick[] => {
+): ExtTick[] | null => {
+  const { algoParams } = requestParams
+  if (
+    !data.length ||
+    !algoParams ||
+    typeof algoParams.slopePeriodByRawPrice !== 'number' ||
+    typeof algoParams.slopePeriodByEMA !== 'number' ||
+    typeof algoParams.slopePeriodBySMA !== 'number'
+  ) return null
+
   let currentDay = ''
   let previousDayDistributions: any = null
 
@@ -75,19 +84,19 @@ export const extendTickData = (
       volumeTrendIncreasing: calculateVolumeTrendScore(data, index, requestParams),
       value: [tick.timestamp, null], // WHAT IS THIS? I think it's for a hidden display point? Verify or Retire.
       percSlopeByPeriod:
-        index >= +requestParams.algoParams?.slopePeriodRawPrice
+        index >= algoParams?.slopePeriodByRawPrice
           ? getPercentSlopeByPeriod(data, index, requestParams, 'close')
           : null,
       priceSlopeByPeriod:
-        index >= +requestParams.algoParams?.slopePeriodRawPrice
+        index >= algoParams?.slopePeriodByRawPrice
           ? getPriceSlopeByPeriod(data, index, requestParams)
           : null,
       smaSlopeByPeriod:
-        index >= +requestParams.algoParams?.slopePeriodSMA
+        index >= algoParams?.slopePeriodBySMA
           ? getPercentSlopeByPeriod(maAvgArrayShort, index, requestParams, 'sma')
           : null,
       emaSlopeByPeriod:
-        index >= +requestParams.algoParams?.slopePeriodEMA
+        index >= algoParams?.slopePeriodByEMA
           ? getPercentSlopeByPeriod(emaAvgArrayShort, index, requestParams, 'ema')
           : null,
       vwap: calculateVWAP(data, index) // TODO: what window should this be calculated by? Intraday only?

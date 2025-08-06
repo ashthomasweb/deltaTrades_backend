@@ -62,9 +62,9 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     case 'storedData':
       DebugService.trace('Switch - storedData')
       // TODO: What is this checking?? Shouldn't it always have a selection with this type? Clarify Condition...
-      if (requestParams.savedData !== 'none') {
+      // if (requestParams.savedData !== 'none') {
         historicalActions.sendStored(requestParams)
-      }
+      // }
       break
 
     case 'analysis':
