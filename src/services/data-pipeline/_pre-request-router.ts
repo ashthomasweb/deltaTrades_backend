@@ -10,7 +10,6 @@
  * - This router directs requests before any data fetching or adaptation occurs.
 **/
 
-import { Logger } from '../../__core/logger'
 import DebugService from '../debug'
 import { RequestParams } from '@/types'
 import { historicalActions } from './historical-actions'
@@ -27,7 +26,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
   const type = requestParams.type
 
   if (!type) {
-    Logger.error('preRequestRouter called without valid requestParams.type', requestParams)
+    DebugService.warn(`preRequestRouter called without valid param - 'requestParams.type': ${requestParams}`)
     return
   }
 
@@ -42,11 +41,13 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
   switch (type) {
     case 'historical':
       DebugService.trace('Switch - historical')
+
       historicalActions.sendRequested(requestParams)
       break
 
     case 'real-time':
       DebugService.trace('Switch - real-time')
+
       if (requestParams.getPrevious === 'on') {
         realTimeActions.sendMockIntervalTick(requestParams)
       } else {
@@ -56,15 +57,14 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
 
     case 'closeRequest':
       DebugService.trace('Switch - closeRequest')
-      RealTimeHandlerRegistry.stop(requestParams.chartId!) // TODO: Handle case where no chartId is passed
+
+      RealTimeHandlerRegistry.stop(requestParams.chartId!) // TODO: Handle case where no chartId is passed - Why would this happen? - What would I want to do?
       break
 
     case 'storedData':
       DebugService.trace('Switch - storedData')
-      // TODO: What is this checking?? Shouldn't it always have a selection with this type? Clarify Condition...
-      // if (requestParams.savedData !== 'none') {
-        historicalActions.sendStored(requestParams)
-      // }
+
+      historicalActions.sendStored(requestParams)
       break
 
     case 'analysis':
@@ -74,7 +74,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       break
 
     default:
-      Logger.info(`Unknown preRequestRouter type: ${type}`) // TODO: add 'warn' to the Logger and change here.
+      DebugService.warn(`Unknown Param - 'type': ${type}`)
       break
   }
 }

@@ -16,6 +16,7 @@ import DataAdapter from '../data-adapter/data-adapter'
 import EventBus from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
 import { RequestParams } from '@/types'
+import DebugService from '../debug'
 
 /**
  * @function postRequestRouter
@@ -32,16 +33,18 @@ export default function postRequestRouter(
   chartId?: number | string,
   count?: number,
 ) {
+  DebugService.trace()
+
   const type = requestParams.type
 
   if (!type) {
-    Logger.error('postRequestRouter called without valid requestParams.type', requestParams)
+    DebugService.warn(`postRequestRouter called without valid param - 'requestParams.type': ${requestParams}`)
     return
   }
 
   switch (type) {
     case 'historical': {
-      Logger.info('Historical postRequestRouter') // TODO: Change these to the new DebugService.trace()
+      DebugService.trace('Switch - historical')
 
       const historicalDataAdapter = new DataAdapter(requestParams, data)
 
@@ -56,7 +59,9 @@ export default function postRequestRouter(
     }
 
     case 'real-time': {
-      Logger.info('RealTime postRequestRouter', count) // TODO: Change these to the new DebugService.trace()
+      DebugService.trace('Switch - real-time')
+      Logger.info('count:', count)
+
       const options = {
         tickerSymbol: requestParams.symbol,
         interval: requestParams.interval,
@@ -79,7 +84,8 @@ export default function postRequestRouter(
     }
 
     case 'storedData': {
-      Logger.info('StoredData postRequestRouter') // TODO: Change these to the new DebugService.trace()
+      DebugService.trace('Switch - storedData')
+
       const storedDataAdapter = new DataAdapter(requestParams, data)
 
       if (requestParams.returnToFE) {
@@ -89,7 +95,8 @@ export default function postRequestRouter(
     }
 
     case 'analysis': {
-      Logger.info('AnalysisData postRequestRouter') // TODO: Change these to the new DebugService.trace()
+      DebugService.trace('Switch - analysis')
+
       const analysisDataAdapter = new DataAdapter(requestParams, data)
       EventBus.emit(
         'analysis:data:queue',
@@ -101,7 +108,7 @@ export default function postRequestRouter(
     }
 
     default:
-      Logger.info(`Unknown postRequestRouter type: ${type}`) // TODO: add 'warn' to the Logger and change here.
+      DebugService.warn(`Unknown Param - 'type': ${type}`)
       break
   }
 }

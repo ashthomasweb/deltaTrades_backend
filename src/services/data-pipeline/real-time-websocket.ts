@@ -8,7 +8,7 @@
  * - Routes real-time data to the EventBus for consumption by downstream modules.
  */
 
-import { config } from '../../__core/config'
+import { config, realTimeWebSocketSessionIdHeaders } from '../../__core/config'
 import { Logger } from '../../__core/logger'
 import axios from 'axios'
 import WebSocket from 'ws'
@@ -51,11 +51,7 @@ export class RealTimeWebSocket {
    */
   async getSessionId() {
     const options = {
-      // TODO: Could be moved to a config file
-      headers: {
-        Authorization: `Bearer ${config.REALTIME_API_KEY}`,
-        Accept: 'application/json',
-      },
+      headers: realTimeWebSocketSessionIdHeaders
     }
     try {
       const response = await axios.post(config.REALTIME_SESSION_URL, {}, options)
@@ -76,16 +72,14 @@ export class RealTimeWebSocket {
    */
   async initTradierWS() {
     const tradierStream = new WebSocket(config.REALTIME_WS_BASE_URL)
-    // TODO: Investigate - v1 had an interval set to 30sec... But the api returns on every new tick.
-    // API changed? Manual rate limiting?
-    let streamPollInterval = 30_000
+    
     const sessionid = this.sessionId
 
     // TODO: These request specific params need to be controllable from the frontend, and persist after being set
     const symbols = [this.params.symbol]
     const linebreak = true
     const filter: string[] = ['summary']
-    // END TODO
+    // END
 
     const buildStreamPayload = () => {
       return JSON.stringify({

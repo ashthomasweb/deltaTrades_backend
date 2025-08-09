@@ -16,6 +16,7 @@ import { WebSocketServer } from '../websocket/server'
 import { Queue } from '../algorithms/_engine'
 import { DataBaseClient } from '../database/db-client'
 import { Logger } from './logger'
+import { runOnInit } from '@/utils/run-on-init'
 
 /**
  * Initializes the DeltaTrades backend application.
@@ -39,6 +40,8 @@ export async function initApp() {
    * TODO: Convert into daily storage with sliding window.
    */
   const queue = new Queue()
+
+  // runOnInit()
 
   Logger.info('DeltaTrades backend initialized.')
 }

@@ -48,7 +48,7 @@ export const historicalActions = {
    * @returns A Promise that resolves after routing the fetched data.
    */
   async sendRequested(requestParams: Partial<RequestParams>) {
-    Logger.info('ATTN! Using rate-limited historical endpoint.') // TODO: Log the count somehow
+    Logger.info('ATTN! Using rate-limited historical endpoint.') // TODO: Track and log the daily rate-limit count
     Logger.info('historicalActions sendRequested')
 
     const historicalRequest = {

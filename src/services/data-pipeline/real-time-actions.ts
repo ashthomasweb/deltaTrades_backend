@@ -243,7 +243,7 @@ export class RealTimeHandlerRegistry {
       this.handlers.delete(chartId)
     }
 
-    // Create new handler // TODO: Clean this up - could be more elegant - will bloat if more handlers are added
+    // Create new handler //
     let type: HandlerTypes
     if (params.getPrevious === 'on') {
       type = 'previousDay'

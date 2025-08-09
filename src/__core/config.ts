@@ -26,6 +26,11 @@ export const config = {
   MONGO_URL: process.env.MONGO_URL || '',
 }
 
+export const realTimeWebSocketSessionIdHeaders = {
+  Authorization: `Bearer ${config.REALTIME_API_KEY}`,
+  Accept: 'application/json',
+}
+
 /**
  * NOTE: Perhaps we should have a text file that we use to keep root level logs for the rate-limit per day
  * on AlphaVantage. We could have a data:count pair, which is used to log out the count as we are making

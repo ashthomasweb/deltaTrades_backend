@@ -21,6 +21,7 @@
 import { Logger } from '../__core/logger'
 import fs from 'fs'
 import path from 'path'
+import DebugService from '@/services/debug'
 
 export const runOnInit = async () => {
   Logger.info('DEV CYCLE runOnInit()')
@@ -50,6 +51,15 @@ export const runOnInit = async () => {
 
   const directoryPath = '../dt_backend/src/storedData' // Replace with the path to your directory
   // readDirectoryFileNames(directoryPath)
+
+  
+  const myTestFunction = (value1, value2) => {
+    DebugService.warn('Watch yourself!')
+    DebugService.trace(null)
+
+    // console.log('[PARAMS]: ', {value1, value2})
+  }
+  myTestFunction('foo', 3)
 
   //---------------------------------------------------------------------//
   Logger.info('END - DEV CYCLE runOnInit()')

@@ -48,15 +48,6 @@ export const Logger = {
   error: (...msgs: any[]) => console.error('[ERROR]', ...msgs),
 
   /**
-   * @function debug
-   * @description Log debug messages to the console
-   * TODO - Potentially retire when DebugService is more robust
-   * 
-   * @param msgs One or more messages to log as debug output.
-   */
-  debug: (...msgs: any[]) => console.debug('[DEBUG]', ...msgs),
-
-  /**
    * @function toFileOut
    * @description Write a formatted log message (with optional data) to a file.
    *
