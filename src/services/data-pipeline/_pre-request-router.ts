@@ -23,10 +23,10 @@ import { realTimeActions, RealTimeHandlerRegistry } from './real-time-actions'
  */
 export default function preRequestRouter(requestParams: Partial<RequestParams>) {
   DebugService.trace()
-  const type = requestParams.type
+  const type = requestParams.requestType
 
   if (!type) {
-    DebugService.warn(`preRequestRouter called without valid param - 'requestParams.type': ${requestParams}`)
+    DebugService.warn(`preRequestRouter called without valid param - 'requestParams.requestType': ${requestParams}`)
     return
   }
 

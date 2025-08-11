@@ -21,12 +21,8 @@ import {
   CandleStickVolume,
   ChartDataShape,
   ConversionOptions,
-  DataSource,
   FrontEndChartPacket,
-  InputSource,
-  InputType,
   NormalizedData,
-  Originator,
   Tick,
   TimeStamp,
 } from '@/types'
@@ -36,7 +32,7 @@ import DebugService from '../debug'
 import { getTimestampMeta } from '@/utils/date-time'
 
 export const convertNormalizedToTransactionPacket = (
-  data: Partial<NormalizedData>, 
+  data: Partial<NormalizedData>,
   options?: Partial<ConversionOptions>
 ) => {
   if (!data.metaData || !data.creationMeta || !data.data) return
@@ -54,8 +50,8 @@ export const convertNormalizedToTransactionPacket = (
     priceAtPurchase: undefined,
     priceAtSale: undefined,
     priceChange: undefined,
-    inputType: data.metaData.inputType,
-    inputSource: data.metaData.inputSource,
+    requestType: data.metaData.requestType,
+    dataSource: data.metaData.dataSource,
     limited: undefined,
     orderInfo: undefined,
     isTest: options?.isTest || false,
@@ -65,7 +61,7 @@ export const convertNormalizedToTransactionPacket = (
 }
 
 export const convertNormalizedToChart = (
-  data: Partial<NormalizedData>, 
+  data: Partial<NormalizedData>,
   options?: ConversionOptions
 ): FrontEndChartPacket | null => {
   if (!data || !data.data) return null
@@ -120,16 +116,16 @@ export const convertAVtoNormalized = (
   const dateArray = Object.keys(requestDataByDate).reverse()
   const dataArray: any[] = Object.values(requestDataByDate).reverse()
 
-  if (!options.inputType || !options.inputSource || !options.originator) {
+  if (!options.requestType || !options.dataSource || !options.requestOriginator) {
     throw new Error('Missing required options for convertAVtoNormalized')
   }
 
   output.metaData = {
     tickerSymbol: requestMetaData['2. Symbol'],
     interval: requestMetaData['4. Interval'],
-    inputType: options.inputType,
-    inputSource: options.inputSource,
-    originator: options.originator,
+    requestType: options.requestType,
+    dataSource: options.dataSource,
+    requestOriginator: options.requestOriginator,
     historicalMeta: {
       datasetSize: requestMetaData['5. Output Size'] === 'Compact' ? 'compact' : 'full',
       endDate: requestMetaData['3. Last Refreshed'],
@@ -156,7 +152,7 @@ export const convertAVtoNormalized = (
 }
 
 export const convertTradierToNormalized = (
-  rawData: any, 
+  rawData: any,
   options: ConversionOptions
 ): Partial<NormalizedData> => {
   // Logger.info('DataAdapter convertTradierToNormalized')
@@ -173,19 +169,28 @@ export const convertTradierToNormalized = (
     creationMeta: { ...getTimestampMeta() },
   }
 
-  if (!options.tickerSymbol || !options.interval || !options.inputType || !options.inputSource || !options.originator || !options.start || !options.end) {
-    throw new Error('Missing required options for convertTraderToNormalized')
+  if (
+    !options.tickerSymbol ||
+    !options.interval ||
+    !options.requestType ||
+    !options.dataSource ||
+    !options.requestOriginator
+    // !options.start || // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
+    // !options.end // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
+  ) { // 
+    console.log(options)
+    throw new Error('Missing required options for convertTradierToNormalized')
   }
 
   output.metaData = {
     tickerSymbol: options.tickerSymbol,
     interval: options.interval,
-    inputType: options.inputType,
-    inputSource: options.inputSource,
-    originator: options.originator,
+    requestType: options.requestType,
+    dataSource: options.dataSource,
+    requestOriginator: options.requestOriginator,
     realTimeMeta: {
-      endDate: options.end,
-      beginDate: options.start,
+      endDate: options.end, // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
+      beginDate: options.start, // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
     },
   }
 

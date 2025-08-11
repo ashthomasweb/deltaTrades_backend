@@ -35,7 +35,7 @@ export class Queue {
           'id:',
           id,
           data.tickerSymbol,
-          data.inputType,
+          data.requestType,
           ...data.queue.slice(0, 2),
         )
         // TODO: build out realtime queue logic
@@ -53,7 +53,7 @@ export class Queue {
           'AlgoEngine received data\n',
           'id:',
           queueData.tickerSymbol,
-          queueData.inputType,
+          queueData.requestType,
           ...queueData.queue.slice(0, 2),
         )
         const algoResult = algoOutput(requestParams, queueData)

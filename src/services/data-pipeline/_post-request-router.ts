@@ -35,10 +35,10 @@ export default function postRequestRouter(
 ) {
   DebugService.trace()
 
-  const type = requestParams.type
+  const type = requestParams.requestType
 
   if (!type) {
-    DebugService.warn(`postRequestRouter called without valid param - 'requestParams.type': ${requestParams}`)
+    DebugService.warn(`postRequestRouter called without valid param - 'requestParams.requestType': ${requestParams}`)
     return
   }
 

@@ -13,7 +13,7 @@
 **/
 
 import { Logger } from '../../__core/logger'
-import { AlphaVantageResponse, ConversionOptions, DataSource, NormalizedData, OutputFormat, RequestParams, SourceType, TradierResponse } from '@/types'
+import { AlphaVantageResponse, ConversionOptions, DataSource, NormalizedData, OutputFormat, RequestParams, RequestType, TradierResponse } from '@/types'
 
 import {
   convertAVtoNormalized,
@@ -25,8 +25,8 @@ import {
 import DebugService from '../debug'
 
 class DataAdapter {
-  inputType!: SourceType | undefined
-  inputSource!: DataSource | undefined
+  requestType!: RequestType | undefined
+  dataSource!: DataSource | undefined
   outputType!: OutputFormat | undefined
   normalizedData: Partial<NormalizedData> | undefined
   requestParams: Partial<RequestParams>
@@ -37,8 +37,8 @@ class DataAdapter {
     data: AlphaVantageResponse | TradierResponse | NormalizedData, 
     options: Partial<ConversionOptions> | null = null
   ) {
-    this.inputType = requestParams.type
-    this.inputSource = requestParams.dataSource
+    this.requestType = requestParams.requestType
+    this.dataSource = requestParams.dataSource
     this.requestParams = requestParams
     this.normalizedData = undefined
     this.options = options
@@ -54,13 +54,13 @@ class DataAdapter {
     options: Partial<ConversionOptions> | null = null
   ) {
     DebugService.trace()
-    if (this.inputSource === 'alpha-vantage') {
+    if (this.dataSource === 'alpha-vantage') {
       this.alphaVantageToNormalized(data as AlphaVantageResponse, options)
     }
-    if (this.inputSource === 'tradier') {
+    if (this.dataSource === 'tradier') {
       this.tradierToNormalized(data as TradierResponse, options)
     }
-    if (this.inputSource === 'storedData') {
+    if (this.dataSource === 'storedData') {
       this.normalizedData = data as NormalizedData
     }
   }
@@ -73,9 +73,9 @@ class DataAdapter {
     options?: Partial<ConversionOptions> | null
   ) {
     this.normalizedData = convertAVtoNormalized(data, {
-      inputSource: this.inputSource,
-      inputType: this.inputType,
-      originator: this.requestParams.originator,
+      dataSource: this.dataSource,
+      requestType: this.requestType,
+      requestOriginator: this.requestParams.requestOriginator,
     })
   }
 
@@ -87,9 +87,9 @@ class DataAdapter {
     options?: Partial<ConversionOptions> | null
   ) {
     this.normalizedData = convertTradierToNormalized(data, {
-      inputSource: this.inputSource,
-      inputType: this.inputType,
-      originator: this.requestParams.originator,
+      dataSource: this.dataSource,
+      requestType: this.requestType,
+      requestOriginator: this.requestParams.requestOriginator,
       ...options,
     })
   }

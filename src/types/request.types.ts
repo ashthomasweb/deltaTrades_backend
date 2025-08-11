@@ -1,5 +1,7 @@
+import { RequestOriginator } from "./tick-data.types"
+
 export interface RequestParams {
-  type: SourceType
+  requestType: RequestType
   dataSource: DataSource
   symbol: string | undefined
   month: string | undefined
@@ -13,7 +15,7 @@ export interface RequestParams {
   enableTrading: string | undefined
   getPrevious: string | undefined
   beginDate: string | undefined
-  originator: string | undefined
+  requestOriginator: RequestOriginator
   returnToFE: boolean | undefined
   chartId: string | undefined
   algoParams: AlgoParams
@@ -50,8 +52,7 @@ export type AlgoParams = {
   bullExhThreshold: number
 }
 
-// TODO: new 'type' 'closeRequest' isn't exactly a SourceType. Need to think how this comes across from FE to BE
-export type SourceType = 'historical' | 'real-time' | 'closeRequest' | 'storedData' | 'analysis' | undefined
+export type RequestType = 'historical' | 'real-time' | 'closeRequest' | 'storedData' | 'analysis' | undefined
 export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData' | undefined
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
 
@@ -60,9 +61,9 @@ export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
  */
 export type ConversionOptions = {
   isTest?: boolean
-  inputType?: any // TODO: Check and refine this param
-  inputSource?: any // TODO: Check and refine this param
-  originator?: any // TODO: Check and refine this param
+  requestType?: RequestType
+  dataSource?: DataSource
+  requestOriginator?: RequestOriginator
   tickerSymbol?: string
   interval?: string
   start?: string

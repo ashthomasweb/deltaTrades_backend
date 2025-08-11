@@ -1,3 +1,6 @@
+import { DataSource } from "./request.types"
+import { RequestOriginator } from "./tick-data.types"
+
 export interface TransactionPacket {
   contractType: string | undefined
   tickerSymbol: string
@@ -12,12 +15,12 @@ export interface TransactionPacket {
   priceAtPurchase: number | undefined
   priceAtSale: number | undefined
   priceChange: number | undefined
-  inputType: 'real-time' | 'historical'
-  inputSource: 'AlphaVantage' | 'Tradier'
+  requestType: 'real-time' | 'historical'
+  dataSource: DataSource
   limited?: Record<string, boolean> | undefined
   orderInfo?: OrderInfo | undefined
   isTest: boolean
-  originator: 'frontend' | 'backend' | 'emergency'
+  requestOriginator: RequestOriginator
 }
 
 export interface OrderInfo {

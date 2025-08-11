@@ -1,4 +1,4 @@
-import { NumberValidateRequest } from "aws-sdk/clients/pinpoint"
+import { DataSource, RequestType } from "./request.types"
 
 export interface NormalizedData {
   id: number
@@ -16,9 +16,9 @@ export interface CreationMeta {
 export interface MetaData {
   tickerSymbol: string
   interval: string
-  inputType: InputType
-  inputSource: InputSource
-  originator: Originator
+  requestType: RequestType
+  dataSource: DataSource
+  requestOriginator: RequestOriginator
   historicalMeta?: {
     datasetSize: 'compact' | 'full'
     endDate: string
@@ -30,9 +30,7 @@ export interface MetaData {
   }
 }
 
-export type InputType = 'historical' | 'real-time'
-export type InputSource = 'AlphaVantage' | 'Tradier'
-export type Originator = 'frontend' | 'backend' | 'emergency'
+export type RequestOriginator = 'frontend' | 'backend' | 'emergency'
 
 export interface Tick {
   timestamp: string | undefined
