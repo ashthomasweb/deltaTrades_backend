@@ -4,7 +4,7 @@
  * 
  * This module handles:
  * - Loading environment variables via dotenv.
- * - Defining API endpoints for Tradier (real-time) and AlphaVantage (historical) data sources.
+ * - Defining API endpoints for Tradier (realTime) and AlphaVantage (historical) data sources.
  * - Storing API keys and connection URLs in a single, importable object.
 **/
 

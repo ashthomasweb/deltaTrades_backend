@@ -175,9 +175,9 @@ export const convertTradierToNormalized = (
     !options.requestType ||
     !options.dataSource ||
     !options.requestOriginator
-    // !options.start || // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
-    // !options.end // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
-  ) { // 
+    // !options.start || // TODO: STORAGE - These aren't being passed or generated ... Start is dynamic to the backfill option, end is dynamic based on websocket/session closure 
+    // !options.end // 
+  ) {
     console.log(options)
     throw new Error('Missing required options for convertTradierToNormalized')
   }
@@ -188,10 +188,10 @@ export const convertTradierToNormalized = (
     requestType: options.requestType,
     dataSource: options.dataSource,
     requestOriginator: options.requestOriginator,
-    realTimeMeta: {
-      endDate: options.end, // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
-      beginDate: options.start, // TODO: These aren't being passed or generated ... I think they are hold-overs from legacy solutions. Retire? Fill in?
-    },
+    // realTimeMeta: {
+    //   endDate: options.end,
+    //   beginDate: options.start,
+    // },
   }
 
   output.data = []

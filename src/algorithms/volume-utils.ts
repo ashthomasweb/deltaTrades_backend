@@ -59,7 +59,7 @@ export const calculateVWAP = (data: TickArray, index: number) => {
 //   ) return null
 
 //   const lookback = algoParams.volumeTrendLookback
-//   const minGrowthSteps = algoParams.volumeTrendMinGrowthSteps // TODO: Pass from FE if used
+//   const minGrowthSteps = algoParams.volumeTrendMinGrowthSteps // TODO: ALGO - Pass from FE if used
 
 //   if (index < lookback) return null
 

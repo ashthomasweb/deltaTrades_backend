@@ -1,11 +1,11 @@
 /**
- * @file src/services/brokerage/real-time-service.ts
- * @fileoverview Manages real-time streaming of market data via Tradier WebSocket.
+ * @file src/services/brokerage/realTime-service.ts
+ * @fileoverview Manages realTime streaming of market data via Tradier WebSocket.
  *
  * Responsibilities:
  * - Retrieves and authenticates session ID from Tradier.
  * - Initializes WebSocket connection and subscription payload.
- * - Routes real-time data to the EventBus for consumption by downstream modules.
+ * - Routes realTime data to the EventBus for consumption by downstream modules.
  */
 
 import { config, realTimeWebSocketSessionIdHeaders } from '../../__core/config'
@@ -26,7 +26,7 @@ export class RealTimeWebSocket {
 
   /**
    * @function startStream
-   * @description Starts the real-time stream by retrieving a session ID and initializing the WebSocket connection.
+   * @description Starts the realTime stream by retrieving a session ID and initializing the WebSocket connection.
    *
    * @param params - Request parameters, must include `symbol` used for Tradier subscription.
    * @returns A Promise that resolves after the WebSocket stream is initialized.
@@ -65,7 +65,7 @@ export class RealTimeWebSocket {
 
   /**
    * @function initTradierWS
-   * @description Initializes the WebSocket connection to Tradier, subscribes to real-time data, and 
+   * @description Initializes the WebSocket connection to Tradier, subscribes to realTime data, and 
    * routes incoming messages to the EventBus.
    * 
    * @returns A Promise that resolves after the WebSocket connection is established.
@@ -75,7 +75,7 @@ export class RealTimeWebSocket {
     
     const sessionid = this.sessionId
 
-    // TODO: These request specific params need to be controllable from the frontend, and persist after being set
+    // TODO: POSITION MONITOR? - These request specific params need to be controllable from the frontend, and persist after being set
     const symbols = [this.params.symbol]
     const linebreak = true
     const filter: string[] = ['summary']

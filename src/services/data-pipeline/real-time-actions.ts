@@ -1,6 +1,6 @@
 /**
- * @file src/services/brokerage/real-time-actions.ts
- * @fileoverview Manages real-time and previous-day request cycles for market data.
+ * @file src/services/brokerage/realTime-actions.ts
+ * @fileoverview Manages realTime and previous-day request cycles for market data.
  *
  * Defines handler classes to manage polling behavior, encapsulates timing logic,
  * and registers handlers per chart instance to allow independent updates.
@@ -12,22 +12,22 @@ import { marketDataFetcher } from './_market-data-fetcher'
 import { buildParamString } from '../../utils/api'
 import { RequestParams } from '@/types'
 import { getEastern930Timestamp, getEasternTimestamps } from '../../utils/date-time'
+import DebugService from '../debug'
 
 /**
  * @namespace realTimeActions
- * @description External interface for initiating mock or requested real-time polling cycles.
+ * @description External interface for initiating mock or requested realTime polling cycles.
  */
 export const realTimeActions = {
   sendMockIntervalTick: async (requestParams: Partial<RequestParams>) => {
+    DebugService.trace()
     Logger.info(`realTimeActions sendMockIntervalTick`, requestParams)
 
-    // TODO: normalize the id coming from FE and the registry expected type to string/number.
     RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams)
   },
   sendRequested: async (requestParams: Partial<RequestParams>) => {
     Logger.info('realTimeActions sendRequested', requestParams)
 
-    // TODO: normalize the id coming from FE and the registry expected type to string/number.
     RealTimeHandlerRegistry.start(requestParams.chartId?.toString()!, requestParams)
   },
 }
@@ -101,7 +101,7 @@ abstract class BaseRequestHandler implements RequestHandler {
       const data = await marketDataFetcher.fetchRealtime(this.paramString)
       postRequestRouter(data, this.requestParams, this.requestParams.chartId, this.getCount())
       if (this.getCount() === 0) {
-        this.setCount(data.series.data.length - 1)
+        this.setCount([data.series.data].length - 1) // TODO fix type // TODO check solution
       }
     } catch (error) {
       Logger.error(`Realtime fetch failed: ${error}`)
@@ -142,7 +142,7 @@ abstract class BaseRequestHandler implements RequestHandler {
 
 /**
  * @class RealTimeRequestHandler
- * @description Handles real-time polling using buffer-based scheduling around market ticks.
+ * @description Handles realTime polling using buffer-based scheduling around market ticks.
  */
 class RealTimeRequestHandler extends BaseRequestHandler {
   buildTimestamps() {
@@ -199,24 +199,23 @@ class PreviousDayRequestHandler extends BaseRequestHandler {
   }
 }
 
-// TODO: Across app standardize terms such as 'realTime vs. real-time', 'previousDay vs. getPrevious' ...
-type HandlerTypes = 'realTime' | 'previousDay' | undefined
+type HandlerTypes = 'realTime' | 'getPreviousDay' | undefined
 
 /**
  * @class RequestHandlerFactory
  * @description Factory for instantiating request handlers based on request type.
  */
 class RequestHandlerFactory {
-  static create(type: HandlerTypes, params: Partial<RequestParams>): RequestHandler {
-    switch (type) {
+  static create(realTimeRequestType: HandlerTypes, params: Partial<RequestParams>): RequestHandler {
+    switch (realTimeRequestType) {
       case 'realTime':
         return new RealTimeRequestHandler(params)
 
-      case 'previousDay':
+      case 'getPreviousDay':
         return new PreviousDayRequestHandler(params)
 
       default:
-        throw new Error(`Handler type: ${type} not defined.`)
+        throw new Error(`Handler realTimeRequestType: ${realTimeRequestType} not defined.`)
     }
   }
 }
@@ -235,6 +234,8 @@ export class RealTimeHandlerRegistry {
 
   // Start or replace a handler for a given chart ID
   static start(chartId: string, params: Partial<RequestParams>) {
+    DebugService.trace()
+
     // If existing → stop and remove it
     const existingHandler = this.handlers.get(chartId)
     if (existingHandler) {
@@ -244,17 +245,17 @@ export class RealTimeHandlerRegistry {
     }
 
     // Create new handler //
-    let type: HandlerTypes
-    if (params.getPrevious === 'on') {
-      type = 'previousDay'
-    } else if (params.getPrevious === null) {
-      type = 'realTime'
+    let realTimeRequestType: HandlerTypes
+    if (params.getPreviousDay === 'on') {
+      realTimeRequestType = 'getPreviousDay'
+    } else if (params.getPreviousDay === null) {
+      realTimeRequestType = 'realTime'
     } else {
-      Logger.error('Unable to determine handler type from request parameters:', params)
+      Logger.error('Unable to determine handler realTimeRequestType from request parameters:', params)
       return
     }
 
-    const handler = RequestHandlerFactory.create(type, params)
+    const handler = RequestHandlerFactory.create(realTimeRequestType, params)
     handler.startCycle()
 
     // Store in registry
@@ -263,6 +264,8 @@ export class RealTimeHandlerRegistry {
 
   // Stop and remove a handler by chart ID
   static stop(chartId: string) {
+    DebugService.trace()
+
     const handler = this.handlers.get(chartId)
     if (handler) {
       handler.stopCycle()
@@ -272,6 +275,8 @@ export class RealTimeHandlerRegistry {
 
   // Stop all handlers
   static stopAll() {
+    DebugService.trace()
+
     this.handlers.forEach((handler) => {
       handler.stopCycle()
     })

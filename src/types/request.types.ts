@@ -13,7 +13,7 @@ export interface RequestParams {
   algorithm: string | undefined
   sendToQueue: string | undefined
   enableTrading: string | undefined
-  getPrevious: string | undefined
+  getPreviousDay: string | undefined
   beginDate: string | undefined
   requestOriginator: RequestOriginator
   returnToFE: boolean | undefined
@@ -52,7 +52,7 @@ export type AlgoParams = {
   bullExhThreshold: number
 }
 
-export type RequestType = 'historical' | 'real-time' | 'closeRequest' | 'storedData' | 'analysis' | undefined
+export type RequestType = 'historical' | 'realTime' | 'closeRequest' | 'storedData' | 'analysis' | undefined
 export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData' | undefined
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
 

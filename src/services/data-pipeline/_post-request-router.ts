@@ -3,7 +3,7 @@
  * @fileoverview Routes processed data to appropriate EventBus channels after backend data fetching and formatting.
  * 
  * Responsibilities:
- * - Handles post-processing and distribution of historical, real-time, stored, and analysis data.
+ * - Handles post-processing and distribution of historical, realTime, stored, and analysis data.
  * - Formats incoming data using DataAdapter.
  * - Emits formatted data to EventBus channels for further processing or frontend delivery.
  * 
@@ -24,8 +24,8 @@ import DebugService from '../debug'
  * 
  * @param data - The raw or normalized data to be processed and routed.
  * @param requestParams - Request parameters specifying data type and routing options.
- * @param chartId - Optional chart ID, primarily used for real-time data identification.
- * @param count - Optional count, used for controlling pagination or intervals in real-time requests.
+ * @param chartId - Optional chart ID, primarily used for realTime data identification.
+ * @param count - Optional count, used for controlling pagination or intervals in realTime requests.
  */
 export default function postRequestRouter(
   data: any,
@@ -58,8 +58,8 @@ export default function postRequestRouter(
       break
     }
 
-    case 'real-time': {
-      DebugService.trace('Switch - real-time')
+    case 'realTime': {
+      DebugService.trace('Switch - realTime')
       Logger.info('count:', count)
 
       const options = {

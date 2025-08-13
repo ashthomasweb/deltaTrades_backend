@@ -3,15 +3,15 @@
  * @fileoverview Routes incoming request parameters to appropriate backend action handlers before data fetching.
  * 
  * Responsibilities:
- * - Dispatches requests to historical or real-time data fetchers based on request parameters.
- * - Handles special cases such as closing real-time streams or requesting stored/analysis data.
+ * - Dispatches requests to historical or realTime data fetchers based on request parameters.
+ * - Handles special cases such as closing realTime streams or requesting stored/analysis data.
  * 
  * Notes:
  * - This router directs requests before any data fetching or adaptation occurs.
 **/
 
 import DebugService from '../debug'
-import { RequestParams } from '@/types'
+import { AlgoParams, RequestParams } from '@/types'
 import { historicalActions } from './historical-actions'
 import { realTimeActions, RealTimeHandlerRegistry } from './real-time-actions'
 
@@ -30,10 +30,12 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     return
   }
 
-  for (const key in requestParams.algoParams) {
+  if (!requestParams.algoParams) return
+
+  for (const key of Object.keys(requestParams.algoParams) as Array<keyof AlgoParams>) {
     // ATTN: This may need additional handling if algoParams grows to include more complex data types
     if (!Object.prototype.hasOwnProperty.call(requestParams.algoParams, key)) continue // Defensively pass keys in the prototype chain
-    if (key.match(/^noiseWindow$|maAvgType/)) continue // Pass on these keys which need to remain as is from FE
+    if (key === 'noiseWindow' || key === 'maAvgType') continue // Pass on these keys which need to remain as is from FE
     requestParams.algoParams[key] = +requestParams.algoParams[key]
   }
 
@@ -45,10 +47,10 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       historicalActions.sendRequested(requestParams)
       break
 
-    case 'real-time':
-      DebugService.trace('Switch - real-time')
+    case 'realTime':
+      DebugService.trace('Switch - realTime')
 
-      if (requestParams.getPrevious === 'on') {
+      if (requestParams.getPreviousDay === 'on') {
         realTimeActions.sendMockIntervalTick(requestParams)
       } else {
         realTimeActions.sendRequested(requestParams)
@@ -58,7 +60,11 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     case 'closeRequest':
       DebugService.trace('Switch - closeRequest')
 
-      RealTimeHandlerRegistry.stop(requestParams.chartId!) // TODO: Handle case where no chartId is passed - Why would this happen? - What would I want to do?
+      if (!requestParams.chartId) {
+        RealTimeHandlerRegistry.stopAll() // TODO: SYSTEM DESIGN - Evaluate this 'emergency' measure. When would this happen? How would it affect existing positions/analysis?
+      }
+
+      RealTimeHandlerRegistry.stop(requestParams.chartId!)
       break
 
     case 'storedData':

@@ -1,6 +1,6 @@
 /**
  * @file src/websocket/server.ts
- * @fileoverview WebSocket server class for DeltaTrades backend, providing real-time 
+ * @fileoverview WebSocket server class for DeltaTrades backend, providing realTime 
  * communication between backend services and the frontend application.
  * 
  * Attention:
@@ -9,7 +9,7 @@
  * Features:
  * - Listens on port `8080` for incoming WebSocket client connections.
  * - Handles client message routing through a pre-request router service.
- * - Broadcasts backend data events (real-time, historical, analysis) to connected clients.
+ * - Broadcasts backend data events (realTime, historical, analysis) to connected clients.
  * - Listens to an internal EventBus for backend events and emits them over WebSocket.
  * - Manages connected clients with graceful cleanup and server shutdown controls.
  * 
@@ -21,7 +21,7 @@
  * const wsServer = new WebSocketServer()
  * 
  * Notes:
- * - Designed to act as a **real-time delivery layer** within the backend.
+ * - Designed to act as a **realTime delivery layer** within the backend.
  * - Couples tightly with the EventBus pattern for loose coupling between services and UI.
 **/
 
@@ -109,7 +109,7 @@ export class WebSocketServer {
    * @description Subscribes to internal EventBus events and forwards them to connected clients over WebSocket.
    * 
    * Broadcasts:
-   * - 'realTime:data' for real-time updates
+   * - 'realTime:data' for realTime updates
    * - 'historical:data' for historical data responses
    * - 'analysisResults:data' for analysis outputs
    * @private

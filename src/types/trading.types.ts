@@ -15,7 +15,7 @@ export interface TransactionPacket {
   priceAtPurchase: number | undefined
   priceAtSale: number | undefined
   priceChange: number | undefined
-  requestType: 'real-time' | 'historical'
+  requestType: 'realTime' | 'historical'
   dataSource: DataSource
   limited?: Record<string, boolean> | undefined
   orderInfo?: OrderInfo | undefined

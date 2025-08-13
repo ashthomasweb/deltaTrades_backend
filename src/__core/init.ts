@@ -4,7 +4,7 @@
  * 
  * This module handles the startup process for the backend application, including:
  * - Initializing database connections.
- * - Starting the WebSocket server for real-time communication with the frontend.
+ * - Starting the WebSocket server for realTime communication with the frontend.
  * - Preparing in-memory queue structures for daily data caching and analysis.
  * 
  * Usage:
@@ -28,16 +28,16 @@ export async function initApp() {
    * Database client for logs, transaction packets, and analysis data.
    */
   const dbClient = new DataBaseClient()
-  // await dbClient.initDB() // TODO: Create DT MongoDB instance - turning off for now during app cleanup
+  // await dbClient.initDB() // TODO: ARCHITECTURE - Create DT MongoDB instance - turning off for now during app cleanup
 
   /**
-   * WebSocket server for real-time frontend communication.
+   * WebSocket server for realTime frontend communication.
    */
   const wsServer = new WebSocketServer()
 
   /**
    * In-memory datastore for processing data; will evolve into DayCache for daily analysis.
-   * TODO: Convert into daily storage with sliding window.
+   * TODO: ARCHITECTURE - Convert into daily storage with sliding window.
    */
   const queue = new Queue()
 

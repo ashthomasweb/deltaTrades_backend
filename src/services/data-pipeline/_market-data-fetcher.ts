@@ -4,7 +4,7 @@
  * 
  * Responsibilities:
  * - Fetch historical market data from a remote API.
- * - Fetch real-time market data using an authenticated API request.
+ * - Fetch realTime market data using an authenticated API request.
  * - Read locally saved historical market data files for testing or offline analysis.
 **/
 
@@ -30,10 +30,10 @@ export const marketDataFetcher = {
 
   /**
    * @function fetchRealtime 
-   * @description Fetches real-time market data from the configured authenticated API.
+   * @description Fetches realTime market data from the configured authenticated API.
    * 
-   * @param paramString - Query string parameters for the real-time API request.
-   * @returns {Promise} Parsed response data from the real-time API.
+   * @param paramString - Query string parameters for the realTime API request.
+   * @returns {Promise} Parsed response data from the realTime API.
    */
   async fetchRealtime(paramString: string): Promise<TradierResponse> {
     const response = await axios.get(`${config.REALTIME_REQUEST_BASE_URL}${paramString}`, {
