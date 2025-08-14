@@ -30,13 +30,15 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
     return
   }
 
-  if (!requestParams.algoParams) return
-
-  for (const key of Object.keys(requestParams.algoParams) as Array<keyof AlgoParams>) {
-    // ATTN: This may need additional handling if algoParams grows to include more complex data types
-    if (!Object.prototype.hasOwnProperty.call(requestParams.algoParams, key)) continue // Defensively pass keys in the prototype chain
-    if (key === 'noiseWindow' || key === 'maAvgType') continue // Pass on these keys which need to remain as is from FE
-    requestParams.algoParams[key] = +requestParams.algoParams[key]
+  if (type === 'analysis') {
+    if (!requestParams.algoParams) return
+    
+    for (const key of Object.keys(requestParams.algoParams) as Array<keyof AlgoParams>) {
+      // ATTN: This may need additional handling if algoParams grows to include more complex data types
+      if (!Object.prototype.hasOwnProperty.call(requestParams.algoParams, key)) continue // Defensively pass keys in the prototype chain
+      if (key === 'noiseWindow' || key === 'maAvgType') continue // Pass on these keys which need to remain as is from FE
+      requestParams.algoParams[key] = +requestParams.algoParams[key]
+    }
   }
 
 
