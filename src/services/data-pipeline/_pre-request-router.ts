@@ -23,14 +23,14 @@ import { realTimeActions, RealTimeHandlerRegistry } from './real-time-actions'
  */
 export default function preRequestRouter(requestParams: Partial<RequestParams>) {
   DebugService.trace()
-  const type = requestParams.requestType
+  const requestType = requestParams.requestType
 
-  if (!type) {
+  if (!requestType) {
     DebugService.warn(`preRequestRouter called without valid param - 'requestParams.requestType': ${requestParams}`)
     return
   }
 
-  if (type === 'analysis') {
+  if (requestType === 'analysis') {
     if (!requestParams.algoParams) return
     
     for (const key of Object.keys(requestParams.algoParams) as Array<keyof AlgoParams>) {
@@ -42,7 +42,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
   }
 
 
-  switch (type) {
+  switch (requestType) {
     case 'historical':
       DebugService.trace('Switch - historical')
 
@@ -69,12 +69,6 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       RealTimeHandlerRegistry.stop(requestParams.chartId!)
       break
 
-    case 'storedData':
-      DebugService.trace('Switch - storedData')
-
-      historicalActions.sendStored(requestParams)
-      break
-
     case 'analysis':
       DebugService.trace('Switch - analysis')
 
@@ -82,7 +76,7 @@ export default function preRequestRouter(requestParams: Partial<RequestParams>) 
       break
 
     default:
-      DebugService.warn(`Unknown Param - 'type': ${type}`)
+      DebugService.warn(`Unknown Param - 'requestType': ${requestType}`)
       break
   }
 }

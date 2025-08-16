@@ -6,8 +6,8 @@ export interface RequestParams {
   symbol: string | undefined
   month: string | undefined
   interval: string | undefined
-  savedData: string | undefined
-  storeData: string | undefined
+  requestedStoredDataFilename: string | undefined
+  storeRequestedData: string | undefined
   backfill: string | undefined
   dataSize: string | undefined
   algorithm: string | undefined

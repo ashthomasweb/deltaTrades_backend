@@ -21,17 +21,17 @@ export const historicalActions = {
    * @description Sends historical data retrieved from local storage to the request router.
    * Logs the action, reads the stored data file, and passes it downstream.
    * 
-   * @param requestParams - Parameters including savedData identifier.
+   * @param requestParams - Parameters including requestedStoredDataFilename identifier.
    * @returns A Promise that resolves after routing the fetched data.
    */
   async sendStored(requestParams: Partial<RequestParams>) {
-    Logger.info(`historicalActions sendStored - ${requestParams.savedData}`)
+    Logger.info(`historicalActions sendStored - ${requestParams.requestedStoredDataFilename}`)
 
     const localStoredDataRootPath = './src/storedData/'
 
     try {
       const data = await marketDataFetcher.fetchHistoricalSavedData(
-        `${localStoredDataRootPath}${requestParams.savedData}`,
+        `${localStoredDataRootPath}${requestParams.requestedStoredDataFilename}`,
       )
       postRequestRouter(data, requestParams)
     } catch (error) {

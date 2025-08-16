@@ -52,7 +52,7 @@ export default function postRequestRouter(
         EventBus.emit('historical:data', historicalDataAdapter.returnFormattedData('chart'))
       }
 
-      if (requestParams.storeData === 'on') {
+      if (requestParams.storeRequestedData === 'on') {
         EventBus.emit('historical:data:db', historicalDataAdapter.returnFormattedData('normalized'))
       }
       break
@@ -77,7 +77,7 @@ export default function postRequestRouter(
         EventBus.emit('realTime:data:queue', realTimeDataAdapter.returnFormattedData('queue'), chartId)
       }
 
-      if (requestParams.storeData === 'on') {
+      if (requestParams.storeRequestedData === 'on') {
         EventBus.emit('realTime:data:db', realTimeDataAdapter.returnFormattedData('normalized'))
       }
       break
