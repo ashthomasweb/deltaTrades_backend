@@ -15,20 +15,19 @@
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
     "mongoose": "^8.13.2",
+    "save-dev": "^0.0.1-security",
     "tsx": "^4.19.3",
     "ws": "^8.13.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "@types/node": "^24.1.0",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.29.1",
     "@vitest/coverage-istanbul": "^3.1.1",
     "eslint": "^9.24.0",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.6",
     "globals": "^16.1.0",
     "husky": "^9.1.7",
-    "prettier": "^3.5.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3",
     "vitest": "^3.1.1"

@@ -1,6 +1,6 @@
 /* Multi-metric Utils */
 
-import { ExtTick, RequestParams } from '../../types/types'
+import { ExtTick, RequestParams } from '@/types'
 import { filterByConfirmed } from '../general-filters'
 import {
   isNoisyWindow1,
@@ -13,12 +13,21 @@ import {
 import { isBefore945am } from '../time-filters'
 
 export const detectMAConfirmedCrossing = (
-  data: ExtTick[],
+  tickArray: ExtTick[],
   requestParams: Partial<RequestParams>,
 ): (string | undefined)[] | undefined => {
-  console.log(requestParams)
-  if (!requestParams.algoParams) return
-  const algoParams = requestParams.algoParams
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    !algoParams.noiseWindow || 
+    typeof algoParams.minCandleBodyDist !== 'number' ||
+    typeof algoParams.noiseWindowLength !== 'number' ||
+    typeof algoParams.atrMultiplier !== 'number' ||
+    typeof algoParams.atrMultiplier !== 'number' ||
+    typeof algoParams.hugRatio !== 'number'
+  ) return undefined
+
   let result: any = []
   let windowArray = []
   let noiseWindows = []
@@ -32,14 +41,14 @@ export const detectMAConfirmedCrossing = (
     NW6: isNoisyWindow6,
   }
 
-  for (let i = 0; i < data.length - 1; i++) {
-    const tick = data[i]
-    if (tick.isBodyCrossing && tick.candleBodyDistPercentile! > +algoParams.minCandleBodyDist && !isBefore945am(tick)) {
-      windowArray = data.slice(i - (+algoParams.noiseWindowLength + 1), i - 1)
+  for (let i = 0; i < tickArray.length - 1; i++) {
+    const tick = tickArray[i]
+    if (tick.isBodyCrossing && tick.candleBodyDistPercentile! > algoParams.minCandleBodyDist && !isBefore945am(tick)) {
+      windowArray = tickArray.slice(i - (algoParams.noiseWindowLength + 1), i - 1)
       const options = {
-        atrMultiplier: +algoParams.atrMultiplier,
-        alternationThreshold: +algoParams.altThreshold,
-        huggingRatio: +algoParams.hugRatio, // Accepts range of [0 - 1]. Lower values result in more noise windows
+        atrMultiplier: algoParams.atrMultiplier,
+        alternationThreshold: algoParams.altThreshold,
+        huggingRatio: algoParams.hugRatio, // Accepts range of [0 - 1]. Lower values result in more noise windows
       }
       if (noiseFunction[noiseWindowKey](windowArray, options)) {
         noiseWindows.push(windowArray)
@@ -79,7 +88,7 @@ export const detectMAConfirmedCrossing = (
 
   // ATTN: At this time, this function must be the last filter run in the algo
   // refine by confirmed candles
-  result = filterByConfirmed(data, result)
+  result = filterByConfirmed(tickArray, result)
 
   return [result.map((entry: ExtTick) => entry.timestamp), negatingWindows]
 }

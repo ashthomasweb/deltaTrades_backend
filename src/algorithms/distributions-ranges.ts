@@ -1,6 +1,6 @@
 /* Candle Size Distributions */
 
-import { Tick, ExtTick, TickArray } from '../types/types'
+import { Tick, ExtTick, TickArray } from '@/types'
 
 export const findSingleTickWickDistribution = (tick: Tick | ExtTick, range: any, distributionBlock: number) => {
   return Math.floor(((tick.high - tick.low - range.low) * 1000) / (distributionBlock * 1000))

@@ -8,9 +8,9 @@
   "metaData": {
     "tickerSymbol": "MARA",
     "interval": "1min",
-    "inputType": "historical",
-    "inputSource": "alpha-vantage",
-    "originator": "frontend",
+    "requestType": "historical",
+    "dataSource": "alpha-vantage",
+    "requestOriginator": "frontend",
     "historicalMeta": {
       "datasetSize": "full",
       "endDate": "2025-01-31 15:59:00",

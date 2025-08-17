@@ -30,7 +30,7 @@ export default defineConfig([
     },
   },
   {
-    extends: compat.extends('eslint:recommended', 'plugin:prettier/recommended'),
+    extends: compat.extends('eslint:recommended'),
 
     files: ['**/*.ts'],
 
@@ -56,16 +56,16 @@ export default defineConfig([
       'no-undef': ['warn'],
       // 'max-len': ['warn', 120],
 
-      'prettier/prettier': [
-        'error',
-        {
-          semi: false,
-          tabWidth: 2,
-          singleQuote: true,
-          endOfLine: 'auto',
-          printWidth: 120,
-        },
-      ],
+      // 'prettier/prettier': [
+      //   'error',
+      //   {
+      //     semi: false,
+      //     tabWidth: 2,
+      //     singleQuote: true,
+      //     endOfLine: 'auto',
+      //     // printWidth: 120,
+      //   },
+      // ],
     },
   },
 ])

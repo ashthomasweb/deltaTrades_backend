@@ -1,4 +1,26 @@
-export const convertToEST = (date: Date) => {
+/**
+ * @file src/utils/date-time.ts
+ * @fileoverview Timestamp utility functions for handling Eastern Time (ET) conversions and formatting.
+ * 
+ * This module provides functions to:
+ * - Convert dates to EST/ET time strings.
+ * - Generate timestamp ranges relative to a given date.
+ * - Get market-open (9:30 AM ET) timestamps.
+ * - Retrieve timestamp metadata including UTC and local time representations.
+ * 
+ * Useful for stock trading systems and data pipelines requiring consistent Eastern Time handling.
+**/
+
+import { CreationMeta } from "@/types"
+
+/**
+ * @function convertToEST
+ * @description - Converts a given date to an EST (Eastern Time) string with time only.
+ *
+ * @param date - The date object to convert.
+ * @returns {string} Time string in Eastern Time (hh:mm:ss AM/PM).
+ */
+export const convertToEST = (date: Date): string => {
   return new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
     hour12: true,
@@ -8,11 +30,22 @@ export const convertToEST = (date: Date) => {
   }).format(date)
 }
 
+/**
+ * @function getEasternTimestamps
+ * @description - Returns two formatted timestamps in Eastern Time:
+ * - One minute ago from the requested time.
+ * - A future timestamp X minutes forward.
+ *
+ * @param requestedDate - Base date (can be Date, string, or timestamp).
+ * @param minutesForward - How many minutes forward the second timestamp should be.
+ * @param requestedIsEastern - Whether the provided date is already in Eastern Time.
+ * @returns {[string, string]} An array of [pastTimestamp, futureTimestamp].
+ */
 export const getEasternTimestamps = (
-  requestedDate: any,
+  requestedDate: Date | string | number,
   minutesForward: number = 0,
   requestedIsEastern: boolean = false,
-) => {
+): [string, string] => {
   const tickTime = new Date(requestedDate)
 
   const format = (date: Date) => {
@@ -38,7 +71,15 @@ export const getEasternTimestamps = (
   return [format(oneMinuteAgo), format(leadingInterval)]
 }
 
-export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string = '0') => {
+/**
+ * @function getEastern930Timestamp
+ * @description - Returns the 9:30 AM Eastern timestamp (market open) for the given base date, minus an optional number of days back.
+ *
+ * @param baseTimestamp - ISO or date string (e.g., '2024-10-10T15:23:00').
+ * @param daysBack - Number of days to subtract, or 'today' to stay on the same day.
+ * @returns {string} Formatted timestamp string for 9:30 AM ET (yyyy-mm-dd hh:mm).
+ */
+export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string = '0'): string => {
   const [datePart] = baseTimestamp.split('T')
 
   // Create a date object in Eastern Time (at midnight)
@@ -67,8 +108,25 @@ export const getEastern930Timestamp = (baseTimestamp: string, daysBack: string =
   date930.setDate(date930.getDate() - daysPrevious)
 
   // Format final timestamp
-  // eslint-disable-next-line max-len
   const formatted = `${date930.getFullYear()}-${String(date930.getMonth() + 1).padStart(2, '0')}-${String(date930.getDate()).padStart(2, '0')} ${String(date930.getHours()).padStart(2, '0')}:${String(date930.getMinutes()).padStart(2, '0')}`
 
   return formatted
+}
+
+/**
+ * @function getTimestampMeta
+ * @description - Generates metadata for the current timestamp including UTC and local time representations.
+ *
+ * @returns {CreationMeta} Timestamp metadata.
+ */
+export function getTimestampMeta(): CreationMeta {
+  const now = new Date()
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  return {
+    createdAtUTC: now.toISOString(),
+    createdAtLocal: now.toLocaleString('en-US', {
+      timeZone: localTimezone,
+    }),
+    localTimezone: localTimezone,
+  }
 }

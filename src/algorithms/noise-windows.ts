@@ -1,13 +1,13 @@
 /* Chop/Noise Utils */
 
-import { ExtTick, RequestParams } from '../types/types'
+import { ExtTick, RequestParams } from '@/types'
 
 type NoiseOptions = {
   atrMultiplier: number
   alternationThreshold: number
   huggingRatio: number
-  compBodyMult: number
-  compFullThresh: number
+  compBodyMult?: number | undefined
+  compFullThresh?: number | undefined
 }
 
 type NoiseGroup = {
@@ -28,19 +28,31 @@ type NoiseGroup = {
  * @returns An object grouping noisy windows by their starting timestamp
  */
 export function getAllNoiseWindows(data: ExtTick[], requestParams: Partial<RequestParams>) {
-  if (requestParams.algoParams === undefined) return
+  const { algoParams } = requestParams
+  if (
+    !data.length ||
+    !algoParams ||
+    !algoParams.noiseWindow || 
+    typeof algoParams.noiseWindowLength !== 'number' ||
+    typeof algoParams.atrMultiplier !== 'number' ||
+    typeof algoParams.altThreshold !== 'number' ||
+    typeof algoParams.hugRatio !== 'number' ||
+    algoParams.noiseWindow === 'NW6' && typeof algoParams.compBodyMult !== 'number' ||
+    algoParams.noiseWindow === 'NW6' && typeof algoParams.compFullThresh !== 'number'
+  ) return {}
+
   let noiseWindows: ExtTick[][] = []
   let windowArray = []
 
   const options: NoiseOptions = {
-    atrMultiplier: requestParams?.algoParams.atrMultiplier,
-    alternationThreshold: requestParams?.algoParams.altThreshold,
-    huggingRatio: requestParams?.algoParams.hugRatio,
-    compBodyMult: requestParams?.algoParams.compBodyMult,
-    compFullThresh: requestParams?.algoParams.compFullThresh,
+    atrMultiplier: algoParams.atrMultiplier,
+    alternationThreshold: algoParams.altThreshold,
+    huggingRatio: algoParams.hugRatio,
+    compBodyMult: algoParams.compBodyMult,
+    compFullThresh: algoParams.compFullThresh,
   }
 
-  const noiseWindowKey: string = requestParams.algoParams.noiseWindow
+  const noiseWindowKey = algoParams.noiseWindow
   const noiseFunction: Record<string, Function> = {
     NW1: isNoisyWindow1,
     NW2: isNoisyWindow2,
@@ -51,7 +63,7 @@ export function getAllNoiseWindows(data: ExtTick[], requestParams: Partial<Reque
   }
 
   for (let i = 10; i < data.length; i++) {
-    windowArray = data.slice(i - (+requestParams.algoParams.noiseWindowLength + 1), i - 1)
+    windowArray = data.slice(i - (algoParams.noiseWindowLength + 1), i - 1)
     if (noiseFunction[noiseWindowKey](windowArray, options)) {
       noiseWindows.push(windowArray)
     }
