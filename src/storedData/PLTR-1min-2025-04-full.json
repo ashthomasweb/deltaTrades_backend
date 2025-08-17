@@ -8,9 +8,9 @@
   "metaData": {
     "tickerSymbol": "PLTR",
     "interval": "1min",
-    "inputType": "historical",
-    "inputSource": "alpha-vantage",
-    "originator": "frontend",
+    "requestType": "historical",
+    "dataSource": "alpha-vantage",
+    "requestOriginator": "frontend",
     "historicalMeta": {
       "datasetSize": "full",
       "endDate": "2025-04-30 15:59:00",
