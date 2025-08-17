@@ -1,6 +1,6 @@
 /* Volume Utils */
 
-import { RequestParams, TickArray } from '../types/types'
+import { RequestParams, TickArray } from '@/types'
 import { findTickVolumeDistribution } from './distributions-ranges'
 import { isGreenCandle } from './general-utilities'
 
@@ -33,21 +33,40 @@ export const directionalBlockVolumeAnalysis = (directionalArray: any[], volumeDi
   return result
 }
 
+export const calculateVWAP = (data: TickArray, index: number) => {
+  let accumulatedPV: number = 0
+  let accumulatedVolume: number = 0
+
+  for (let i = 0; i <= index; i++) {
+    accumulatedVolume = accumulatedVolume + data[i].volume
+    accumulatedPV = accumulatedPV + ((data[i].high + data[i].low + data[i].close) / 3) * data[i].volume
+  }
+
+  return accumulatedVolume === 0 ? 0 : accumulatedPV / accumulatedVolume
+}
+
 // export const calculateVolumeStepTrend = (
-//   data: TickArray,
+//   tickArray: TickArray,
 //   index: number,
 //   requestParams: Partial<RequestParams>,
 // ): boolean | null => {
-//   if (!requestParams.algoParams) return null
-//   const lookback = +requestParams.algoParams.volumeTrendLookback
-//   const minGrowthSteps = +requestParams.algoParams.volumeTrendMinGrowthSteps
+//   const { algoParams } = requestParams
+//   if (
+//     !tickArray.length ||
+//     !algoParams ||
+//     typeof algoParams.volumeTrendLookback !== 'number' ||
+//     // typeof algoParams.volumeTrendMinGrowthSteps !== 'number'
+//   ) return null
+
+//   const lookback = algoParams.volumeTrendLookback
+//   const minGrowthSteps = algoParams.volumeTrendMinGrowthSteps // TODO: ALGO - Pass from FE if used
 
 //   if (index < lookback) return null
 
 //   let upCount = 0
 
 //   for (let j = index - lookback + 1; j <= index; j++) {
-//     if (data[j].volume > data[j - 1].volume) {
+//     if (tickArray[j].volume > tickArray[j - 1].volume) {
 //       upCount++
 //     }
 //   }
@@ -127,19 +146,26 @@ export const directionalBlockVolumeAnalysis = (directionalArray: any[], volumeDi
 // }
 
 export const calculateVolumeTrendScore = (
-  data: TickArray,
+  tickArray: TickArray,
   index: number,
   requestParams: Partial<RequestParams>,
 ): number | null => {
-  if (!requestParams.algoParams) return null
+  const { algoParams } = requestParams
+  if (
+    !tickArray.length ||
+    !algoParams ||
+    typeof algoParams.volumeTrendLookback !== 'number' ||
+    typeof algoParams.volumeTrendMinTrend !== 'number' ||
+    typeof algoParams.volumeTrendMinSurge !== 'number'
+  ) return null
 
-  const lookback = +requestParams.algoParams.volumeTrendLookback
-  const minUpTrendScore = +requestParams.algoParams.volumeTrendMinTrend || 0.65
-  const minSurgeMultiplier = +requestParams.algoParams.volumeTrendMinSurge || 1.2
+  const lookback = algoParams.volumeTrendLookback
+  const minUpTrendScore = algoParams.volumeTrendMinTrend || 0.65
+  const minSurgeMultiplier = algoParams.volumeTrendMinSurge || 1.2
 
   if (index < lookback - 1) return null
 
-  const slice = data.slice(index - lookback + 1, index + 1)
+  const slice = tickArray.slice(index - lookback + 1, index + 1)
   const volumes = slice.map((d) => d.volume)
 
   const lastVolume = volumes[volumes.length - 1]
@@ -170,3 +196,62 @@ export const calculateVolumeTrendScore = (
 
   return 0
 }
+
+/* EXPERIMENTAL VOLUME TREND ANALYSIS */
+
+// const myData = [null, null, null, null, null, null, null, null, null, 100, 101, 500, 110, 105, 99]
+
+// const valueTrend = (data, lookback, index) => {
+//   let upCount = 0
+//   let downCount = 0
+
+//   for (let i = index - lookback + 1; i < data.length; i++) {
+//     const window = data.slice(i)
+//     for (let j = 0; j < window.length; j++) {
+//       if (j === 0) continue
+
+//       if (window[0] <= window[j]) {
+//         upCount++
+//       } else {
+//         downCount++
+//       }
+//     }
+//     console.log(window, upCount, downCount)
+//   }
+// }
+
+// // valueTrend(myData, 6, 14)
+
+// const valueTrend2 = (data, lookback, index) => {
+//   let upCount = 0
+//   let downCount = 0
+//   let windowUpCount = 0
+//   let windowDownCount = 0
+
+//   for (let i = index - lookback + 1; i < data.length; i++) {
+//     const window = data.slice(i)
+//     for (let j = 0; j < window.length; j++) {
+//       if (j === 0) continue
+
+//       if (window[0] <= window[j]) {
+//         upCount++
+//       } else {
+//         downCount++
+//       }
+//     }
+
+//     if (upCount > downCount) {
+//       windowUpCount++
+//     } else {
+//       windowDownCount++
+//     }
+//     upCount = 0
+//     downCount = 0
+//   }
+//   console.log(windowUpCount, windowDownCount)
+// }
+
+// valueTrend2(myData, 6, 14)
+
+/* END */
+

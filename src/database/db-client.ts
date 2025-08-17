@@ -6,7 +6,7 @@ import mongoose from 'mongoose'
 import EventBus from '../__core/event-bus'
 import fs from 'fs'
 import path, { dirname } from 'path'
-import { NormalizedData } from '../types/types'
+import { NormalizedData } from '@/types'
 import { fileURLToPath } from 'url'
 import EventEmitter from 'events'
 

@@ -1,4 +1,4 @@
-import { Tick, ExtTick } from '../types/types'
+import { Tick, ExtTick } from '@/types'
 import { isGreenCandle, isRedCandle } from './general-utilities'
 
 export const findBodyCrossingPercent = (tick: Tick | ExtTick, avg: number) => {
