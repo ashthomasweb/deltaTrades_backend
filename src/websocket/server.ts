@@ -84,7 +84,8 @@ export class WebSocketServer {
           Logger.info('Websocket received message:', requestParams)
           preRequestRouter(requestParams)
         } catch (err) {
-          Logger.error('Error handling WS message:', err)
+          // Logger.error('Error handling WS message:', err)
+          console.error('Error handling WS message:', err)
         }
       })
 
