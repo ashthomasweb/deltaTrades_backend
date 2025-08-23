@@ -105,7 +105,7 @@ class DataAdapter {
   /**
    * Converts normalized data into a queue packet format
    */
-  normalizedToQueueFormat() {
+  normalizedToQueueFormat() { // TODO: There is no queue
     if (!this.normalizedData) return null
     return convertNormalizedToTransactionPacket(this.normalizedData)
   }
@@ -117,7 +117,7 @@ class DataAdapter {
   returnFormattedData(outputType: OutputFormat) {
     if (outputType === 'chart') {
       return this.normalizedToChartFormat()
-    } else if (outputType === 'queue') {
+    } else if (outputType === 'queue') { // TODO: There is no queue - and this function creates a TransactionPacket - bad name - out of order - non-existent data structure
       return this.normalizedToQueueFormat()
     } else if (outputType === 'normalized') {
       return this.normalizedData

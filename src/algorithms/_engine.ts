@@ -7,91 +7,125 @@ import {
   Tick as Tick,
   RequestParams,
   ChartData,
-  QueueType,
   ExtTick,
+  NormalizedData,
 } from '@/types'
 import { algoOutput } from './_output'
+import DebugService from '@/services/debug'
 
-export class Queue {
+export class AlgoEngine {
   private bus: EventEmitter
-  elements: Tick[] | ExtTick[] | null
-  head: number
-  tail: number
 
-  constructor(queue?: QueueType) {
-    this.elements = queue ? queue.elements : null
-    this.head = queue ? queue.head : 0
-    this.tail = queue ? queue.tail : 0
+  constructor() {
     this.bus = EventBus
     this.init()
   }
 
   init() {
-    this.bus.on(
-      'realTime:data:queue',
-      (data: TransactionPacket, id: RequestParams['chartId']) => {
-        Logger.info(
-          'AlgoEngine received data\n',
-          'id:',
-          id,
-          data.tickerSymbol,
-          data.requestType,
-          ...data.queue.slice(0, 2),
-        )
-        // TODO: SYSTEM DESIGN - build out realtime queue logic
-      },
-    )
+    DebugService.trace()
+    // console.log(this)
+    
+    // this.bus.on(
+    //   'realTime:data:queue',
+    //   (data: TransactionPacket, id: RequestParams['chartId']) => {
+    //     Logger.info(
+    //       'AlgoEngine received data\n',
+    //       'id:',
+    //       id,
+    //       data.tickerSymbol,
+    //       data.requestType,
+    //       ...data.queue.slice(0, 2),
+    //     )
+    //     // TODO: SYSTEM DESIGN - build out realtime queue logic
+    //   },
+    // )
 
-    this.bus.on(
-      'analysis:data:queue',
-      (
-        queueData: TransactionPacket,
-        chartData: ChartData,
-        requestParams: Partial<RequestParams>,
-      ) => {
-        Logger.info(
-          'AlgoEngine received data\n',
-          'id:',
-          queueData.tickerSymbol,
-          queueData.requestType,
-          ...queueData.queue.slice(0, 2),
-        )
-        const algoResult = algoOutput(requestParams, queueData)
-        this.bus.emit('analysisResults:data', algoResult, chartData)
-      },
-    )
+    // this.bus.on(
+    //   'analysis:data:queue',
+    //   (
+    //     dataWindow: NormalizedData,
+    //     chartData: ChartData,
+    //     requestParams: Partial<RequestParams>,
+    //   ) => {
+    //     Logger.info(
+    //       'AlgoEngine received data\n',
+    //       'id:',
+    //       dataWindow.metaData.tickerSymbol,
+    //       dataWindow.metaData.requestType,
+    //       ...dataWindow.data.slice(0, 2),
+    //     )
+    //     const algoResult = algoOutput(requestParams, dataWindow)
+    //     this.bus.emit('analysisResults:data', algoResult, chartData)
+    //   },
+    // )
   }
 
-  enqueue(element: Tick | ExtTick) {
-    if (this.elements) {
-      this.elements[this.head] = element
-    }
-    this.head++
+  dataProcessor() {
+    // synchronous flow of step by step process
+    // build...
+    // extend...
+    // runAlgo...
+    // conditional packaging (return to FE? Create transaction packet? Paper trade?)
+    // conditional output (return to FE? Send to brokerage pipeline? Store in DB?)
   }
 
-  dequeue() {
-    let item
-    if (this.elements) {
-      item = this.elements[this.tail]
-      delete this.elements[this.tail]
-    }
-    this.tail++
-    return item
+  buildSeriesMetrics() {
+    // Create analysis metrics that are independent series in the chart (SMA, EMA, BollingerBands)
   }
 
-  peek() {
-    if (this.elements) {
-      return this.elements[this.tail]
-    }
+  extendData() {
+    // Accept series metrics for tooltip
+    // if (analysis) loop through full batch and extend data
+    // if (realTime) accept dayCache data and extend based on latest tick by period // NOTE: future improvement - has many paths
   }
 
-  length(): number {
-    return this.head - this.tail
+  runAlgoActual() {
+    // Accept extended data
+    // Run selected Algo, looking for Buy signals
   }
 
-  isEmpty() {
-    return this.length() === 0
+  packageResults() {
+    // Accept extendedData and algo results
+    // if (buy) create TransactionPacket
+    // Package results based on conditions (return to FE, send to brokerage pipeline, paper/live/both, testing, storage)
   }
+
+  output() {
+    // Accepts packagedResult
+    // emits events based on conditions (return to FE, send to brokerage pipeline, paper/live/both, testing, storage)
+  }
+
+
+  // enqueue(element: Tick | ExtTick) {
+  //   if (this.elements) {
+  //     this.elements[this.head] = element
+  //   }
+  //   this.head++
+  // }
+
+  // dequeue() {
+  //   let item
+  //   if (this.elements) {
+  //     item = this.elements[this.tail]
+  //     delete this.elements[this.tail]
+  //   }
+  //   this.tail++
+  //   return item
+  // }
+
+  // peek() {
+  //   if (this.elements) {
+  //     return this.elements[this.tail]
+  //   }
+  // }
+
+  // length(): number {
+  //   return this.head - this.tail
+  // }
+
+  // isEmpty() {
+  //   return this.length() === 0
+  // }
 }
 
 export const queueDataFeeder = (data: unknown) => {

@@ -13,10 +13,11 @@
 **/
 
 import { WebSocketServer } from '../websocket/server'
-import { Queue } from '../algorithms/_engine'
+import { AlgoEngine } from '../algorithms/_engine'
 import { DataBaseClient } from '../database/db-client'
 import { Logger } from './logger'
 import { runOnInit } from '@/utils/run-on-init'
+import AlgoEngineManager from '../algorithms/_engine-manager'
 
 /**
  * Initializes the DeltaTrades backend application.
@@ -39,7 +40,9 @@ export async function initApp() {
    * In-memory datastore for processing data; will evolve into DayCache for daily analysis.
    * TODO: ARCHITECTURE - Convert into daily storage with sliding window.
    */
-  const queue = new Queue()
+  // const algoEngine = new AlgoEngine()
+  AlgoEngineManager.init()
+
 
   // runOnInit()
 

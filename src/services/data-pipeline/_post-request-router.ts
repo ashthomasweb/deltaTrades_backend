@@ -82,25 +82,25 @@ export default function postRequestRouter(
       }
       break
     }
+     
+    // case 'storedData': {
+    //   DebugService.trace('Switch - storedData', 'yellow')
 
-    case 'storedData': {
-      DebugService.trace('Switch - storedData')
+    //   const storedDataAdapter = new DataAdapter(requestParams, data)
 
-      const storedDataAdapter = new DataAdapter(requestParams, data)
-
-      if (requestParams.returnToFE) {
-        EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
-      }
-      break
-    }
+    //   if (requestParams.returnToFE) {
+    //     EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
+    //   }
+    //   break
+    // }
 
     case 'analysis': {
       DebugService.trace('Switch - analysis')
 
       const analysisDataAdapter = new DataAdapter(requestParams, data)
       EventBus.emit(
-        'analysis:data:queue',
-        analysisDataAdapter.returnFormattedData('queue'),
+        'analysis:data:queue', // TODO: There is no queue - bad name
+        analysisDataAdapter.returnFormattedData('normalized'), // TODO: There is no queue - needs to pass normalized data
         analysisDataAdapter.returnFormattedData('chart'),
         requestParams,
       )

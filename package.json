@@ -9,7 +9,9 @@
     "dev": "tsx watch src/index.ts",
     "lint": "eslint .",
     "test": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "predev": "node src/scripts/write-build-info.mjs",
+    "prebuild": "node scripts/write-build-info.mjs"
   },
   "dependencies": {
     "axios": "^1.8.4",

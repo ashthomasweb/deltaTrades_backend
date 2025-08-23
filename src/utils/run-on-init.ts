@@ -22,6 +22,7 @@ import { Logger } from '../__core/logger'
 import fs from 'fs'
 import path from 'path'
 import DebugService from '@/services/debug'
+import { BUILD_INFO } from '@/__core/build-info'
 
 export const runOnInit = async () => {
   Logger.info('DEV CYCLE runOnInit()')
@@ -59,7 +60,10 @@ export const runOnInit = async () => {
 
     // console.log('[PARAMS]: ', {value1, value2})
   }
-  myTestFunction('foo', 3)
+  // myTestFunction('foo', 3)
+
+  console.log(BUILD_INFO)
+
 
   //---------------------------------------------------------------------//
   Logger.info('END - DEV CYCLE runOnInit()')

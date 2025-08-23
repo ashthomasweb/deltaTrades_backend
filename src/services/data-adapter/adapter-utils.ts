@@ -31,7 +31,7 @@ import DebugService from '../debug'
 
 import { getTimestampMeta } from '@/utils/date-time'
 
-export const convertNormalizedToTransactionPacket = (
+export const convertNormalizedToTransactionPacket = ( // TODO: This isn't converting anything - its a factory method, creating a packet and inserting data
   data: Partial<NormalizedData>,
   options?: Partial<ConversionOptions>
 ) => {

@@ -1,5 +1,5 @@
 import { Logger } from '../__core/logger'
-import { RequestParams, TransactionPacket } from '@/types'
+import { NormalizedData, RequestParams, TransactionPacket } from '@/types'
 import { extendTickData } from './data-extension'
 import { detectSingleDirection } from './direction-analysis'
 import {
@@ -20,25 +20,32 @@ import { calculateRSI, generateBollingerSeries } from './volatility-analysis'
 
 export function algoOutput(
   requestParams: Partial<RequestParams>,
-  passedData?: TransactionPacket,
+  passedData?: NormalizedData,
 ) {
   /* Early returns */
   if (passedData === undefined) return
   if (requestParams.algoParams === undefined) return
 
-  /* Runtime measurement and log */
-  console.time('Algo runtime')
-  Logger.info(
-    'Packet retrieved and parsed!\n',
-    passedData.tickerSymbol,
-    passedData.queue.length > 0
-      ? `\nData present with ${passedData.queue.length - 1} entries`
-      : '\nNo data present',
-    '\n',
-  )
+  // Logger.info(
+  //   'Packet retrieved and parsed!\n',
+  //   passedData.tickerSymbol,
+  //   passedData.queue.length > 0
+  //     ? `\nData present with ${passedData.queue.length - 1} entries`
+  //     : '\nNo data present',
+  //   '\n',
+  // )
+  // Logger.info(passedData)
+
+
+
+
+
+
+
+  /*** BUILD METRICS ***/
 
   /* Param destructuring */
-  const data = passedData.queue
+  const data = passedData.data
 
   /* Output declarations */
   let singleDirectionBlocks = undefined
@@ -77,6 +84,18 @@ export function algoOutput(
   /* MACD */
   MACD = calculateMACD(data, requestParams)
 
+  /*** END METRICS ***/
+
+
+
+
+
+
+
+
+
+  /*** EXTEND DATA ***/
+
   /* Create ExtendedTick Data */
   let extendedTickData
   if (SMA1 && EMA1 && EMA2) {
@@ -91,6 +110,17 @@ export function algoOutput(
     )
   }
 
+  /*** END EXTEND DATA ***/
+
+
+
+
+
+
+
+
+  /*** ALGORITHM ACTUAL ***/
+
   /* CrossingSignal (BuySignal) */
   // returns array of crossingSignals, and associated noiseWindows
   let confirmedCrossingDetectionOutput
@@ -103,15 +133,33 @@ export function algoOutput(
       confirmedCrossingDetectionOutput && confirmedCrossingDetectionOutput[0]
   }
 
+  /*** ALGORITHM ACTUAL ***/
+
+
+
+
+
+
+
+  /*** BUILD SECONDARY METRICS ***/
+
   /* All Noise Windows In Dataset */
   if (extendedTickData) {
     noiseWindows = getAllNoiseWindows(extendedTickData, requestParams)
   }
 
-  /* Completion of algorithm runtime measurement */
-  console.timeEnd('Algo runtime')
+  /*** END SECONDARY METRICS ***/
 
-  /* Output */
+
+
+
+
+
+
+
+
+  /*** OUTPUT ***/
+
   return {
     analysis: {
       singleDirBlocks: singleDirectionBlocks,
@@ -127,6 +175,8 @@ export function algoOutput(
     },
     extTickData: extendedTickData,
   }
+
+  /*** END OUTPUT ***/
 }
 
 /* There seems to be a pattern (still unidentified) surrounding the following times/conditions */
