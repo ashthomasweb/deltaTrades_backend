@@ -8,7 +8,7 @@ function gitSha() {
 }
 
 const full = gitSha()
-const short = full.slice(0, 12)
+const short = full.slice(0, 7)
 const builtAt = new Date().toISOString()
 const out = `export const BUILD_INFO = { gitSha: '${full}', shortSha: '${short}', builtAt: '${builtAt}' } as const;\n`
 

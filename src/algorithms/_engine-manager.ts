@@ -58,8 +58,8 @@ class AlgoEngineManager {
           ...dataWindow.data.slice(0, 1),
         )
 
-        this.createEngineId(requestParams)
-
+        const engineId = this.createEngineId(requestParams)
+        this.startAlgoEngine(engineId, requestParams)
         // const algoResult = algoOutput(requestParams, dataWindow)
         // this.bus.emit('analysisResults:data', algoResult, chartData)
       },
@@ -67,15 +67,24 @@ class AlgoEngineManager {
   }
 
   createEngineId(requestParams: Partial<RequestParams>) {
-    DebugService.trace(null, 'yellow')
-    console.log(requestParams.requestType)
-    console.log(requestParams.chartId)
-    console.log(BUILD_INFO)
-    const codeId = ``
-    console.log(`${requestParams.requestType}:${requestParams.symbol}:${requestParams.chartId}`)
+    DebugService.trace()
+    const engineId = `${requestParams.requestType}:${requestParams.symbol || requestParams.requestedStoredDataFilename}:${requestParams.algorithm}@${BUILD_INFO.shortSha}:${requestParams.chartId || 'n/a'}`
+    Logger.info('EngineId:', engineId)
+    return engineId
   }
 
   startAlgoEngine(engineId, requestParams) {
+    DebugService.trace(null, 'yellow')
+
+    // check to see if existing - clean up if so
+
+    // check requestType - create lookback window flag (realtime vs. analysis = most recent vs. batch)
+
+    // create engine via factory
+
+    // run init on new engine
+
+    // store in registry
 
   }
 
