@@ -20,18 +20,22 @@ export class AlgoEngine {
   private processType: ProcessType
   private data: NormalizedData
   private requestParams: Partial<RequestParams>
-
+  private chartData: any
 
   constructor(processType: ProcessType, requestParams: Partial<RequestParams>, data: NormalizedData, chartData: any) {
     this.bus = EventBus
     this.processType = processType
     this.data = data
+    this.chartData = chartData
     this.requestParams = requestParams
   }
 
   init() {
-    DebugService.trace(null, 'cyan')
-    console.log(this.processType, this.data.data.length > 0, this.requestParams)
+    DebugService.trace(null, 'red')
+    console.log('processType', this.processType)
+    console.log('data', this.data.data.length > 0)
+    console.log('params', this.requestParams)
+    console.log('chartData', this.chartData)
     
     // this.bus.on(
     //   'realTime:data:queue',

@@ -100,6 +100,9 @@ class AlgoEngineManager {
 
     // store in registry
     AlgoEngineManager.engines.set(engineId, engine)
+
+    // log current AlgoEngines
+    Logger.info(`Current Engines:\n`, AlgoEngineManager.engines)
   }
 
   stopEngine(engineId: string) {
@@ -108,6 +111,7 @@ class AlgoEngineManager {
 
   stopAllEngines() {
 
+    
   }
 }
 
