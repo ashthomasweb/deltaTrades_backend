@@ -53,7 +53,7 @@ export type AlgoParams = {
 }
 
 export type RequestType = 'historical' | 'realTime' | 'closeRequest' | 'storedData' | 'analysis' | undefined
-export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData' | undefined
+export type DataSource = 'alpha-vantage' | 'tradier' | 'storedData'
 export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
 
 /**
@@ -62,7 +62,7 @@ export type OutputFormat = 'chart' | 'queue' | 'normalized' | undefined
 export type ConversionOptions = {
   isTest?: boolean
   requestType?: RequestType
-  dataSource?: DataSource
+  dataSource: DataSource
   requestOriginator?: RequestOriginator
   tickerSymbol?: string
   interval?: string

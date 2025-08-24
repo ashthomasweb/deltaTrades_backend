@@ -15,8 +15,9 @@
 import DataAdapter from '../data-adapter/data-adapter'
 import EventBus from '../../__core/event-bus'
 import { Logger } from '../../__core/logger'
-import { RequestParams } from '@/types'
+import { NormalizedData, RequestParams } from '@/types'
 import DebugService from '../debug'
+import DataCache from '@/__core/data-cache'
 
 /**
  * @function postRequestRouter
@@ -97,7 +98,16 @@ export default function postRequestRouter(
     case 'analysis': {
       DebugService.trace('Switch - analysis')
 
+
+
       const analysisDataAdapter = new DataAdapter(requestParams, data)
+
+      const normalizedData = analysisDataAdapter.returnNormalizedData() as NormalizedData
+      const chartData = analysisDataAdapter.returnFormattedData('chart')
+
+      const datasetId = DataCache.createDatasetId('batch', normalizedData.metaData.dataSource, normalizedData.metaData.tickerSymbol, new Date().toDateString())
+      DataCache.storeDataset(datasetId, normalizedData)
+
       EventBus.emit(
         'analysis:data:queue', // TODO: There is no queue - bad name
         analysisDataAdapter.returnFormattedData('normalized'), // TODO: There is no queue - needs to pass normalized data

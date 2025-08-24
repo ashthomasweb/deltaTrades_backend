@@ -25,11 +25,11 @@ import {
 import DebugService from '../debug'
 
 class DataAdapter {
-  requestType!: RequestType | undefined
-  dataSource!: DataSource | undefined
-  outputType!: OutputFormat | undefined
+  readonly requestType: RequestType
+  readonly dataSource: DataSource
+  readonly outputType: OutputFormat
   normalizedData: Partial<NormalizedData> | undefined
-  requestParams: Partial<RequestParams>
+  readonly requestParams: Partial<RequestParams>
   options: any
 
   constructor(requestParams: 
@@ -37,6 +37,9 @@ class DataAdapter {
     data: AlphaVantageResponse | TradierResponse | NormalizedData, 
     options: Partial<ConversionOptions> | null = null
   ) {
+    if (!requestParams || !requestParams.dataSource || !requestParams.requestType) {
+      throw Error('No requestParams available')
+    }
     this.requestType = requestParams.requestType
     this.dataSource = requestParams.dataSource
     this.requestParams = requestParams
@@ -53,6 +56,7 @@ class DataAdapter {
     data: AlphaVantageResponse | TradierResponse | NormalizedData, 
     options: Partial<ConversionOptions> | null = null
   ) {
+    
     DebugService.trace()
     if (this.dataSource === 'alpha-vantage') {
       this.alphaVantageToNormalized(data as AlphaVantageResponse, options)
@@ -115,6 +119,7 @@ class DataAdapter {
    * Available formats: 'chart', 'queue', or 'normalized'.
    */
   returnFormattedData(outputType: OutputFormat) {
+    if (this.normalizedData === undefined) throw Error('No data to normalize')
     if (outputType === 'chart') {
       return this.normalizedToChartFormat()
     } else if (outputType === 'queue') { // TODO: There is no queue - and this function creates a TransactionPacket - bad name - out of order - non-existent data structure
@@ -122,6 +127,12 @@ class DataAdapter {
     } else if (outputType === 'normalized') {
       return this.normalizedData
     }
+  }
+
+  returnNormalizedData(): Partial<NormalizedData> {
+    if (this.normalizedData === undefined) throw Error('No data to normalize')
+
+    return this.normalizedData
   }
 }
 

@@ -9,7 +9,7 @@ import {
   ChartData,
   ExtTick,
   NormalizedData,
-  ProcessType,
+  AlgoProcessType,
 } from '@/types'
 import { algoOutput } from './_output'
 import DebugService from '@/services/debug'
@@ -17,12 +17,12 @@ import { request } from 'http'
 
 export class AlgoEngine {
   private bus: EventEmitter
-  private processType: ProcessType
+  private processType: AlgoProcessType
   private data: NormalizedData
   private requestParams: Partial<RequestParams>
   private chartData: any
 
-  constructor(processType: ProcessType, requestParams: Partial<RequestParams>, data: NormalizedData, chartData: any) {
+  constructor(processType: AlgoProcessType, requestParams: Partial<RequestParams>, data: NormalizedData, chartData: any) {
     this.bus = EventBus
     this.processType = processType
     this.data = data
@@ -32,44 +32,10 @@ export class AlgoEngine {
 
   init() {
     DebugService.trace(null, 'red')
-    console.log('processType', this.processType)
-    console.log('data', this.data.data.length > 0)
-    console.log('params', this.requestParams)
-    console.log('chartData', this.chartData)
-    
-    // this.bus.on(
-    //   'realTime:data:queue',
-    //   (data: TransactionPacket, id: RequestParams['chartId']) => {
-    //     Logger.info(
-    //       'AlgoEngine received data\n',
-    //       'id:',
-    //       id,
-    //       data.tickerSymbol,
-    //       data.requestType,
-    //       ...data.queue.slice(0, 2),
-    //     )
-    //     // TODO: SYSTEM DESIGN - build out realtime queue logic
-    //   },
-    // )
-
-    // this.bus.on(
-    //   'analysis:data:queue',
-    //   (
-    //     dataWindow: NormalizedData,
-    //     chartData: ChartData,
-    //     requestParams: Partial<RequestParams>,
-    //   ) => {
-    //     Logger.info(
-    //       'AlgoEngine received data\n',
-    //       'id:',
-    //       dataWindow.metaData.tickerSymbol,
-    //       dataWindow.metaData.requestType,
-    //       ...dataWindow.data.slice(0, 2),
-    //     )
-    //     const algoResult = algoOutput(requestParams, dataWindow)
-    //     this.bus.emit('analysisResults:data', algoResult, chartData)
-    //   },
-    // )
+    // console.log('processType', this.processType)
+    // console.log('data', this.data.data.length > 0)
+    // console.log('params', this.requestParams)
+    // console.log('chartData', this.chartData)
   }
 
   dataProcessor() {
@@ -111,7 +77,7 @@ export class AlgoEngine {
 
   }
 
-
+  /* Retired? */
   // enqueue(element: Tick | ExtTick) {
   //   if (this.elements) {
   //     this.elements[this.head] = element
@@ -142,6 +108,8 @@ export class AlgoEngine {
   // isEmpty() {
   //   return this.length() === 0
   // }
+
+  /* END */
 }
 
 export const queueDataFeeder = (data: unknown) => {

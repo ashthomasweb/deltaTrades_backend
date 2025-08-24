@@ -244,7 +244,7 @@ export class RealTimeHandlerRegistry {
       this.handlers.delete(chartId)
     }
 
-    // Create new handler //
+    // Create new handler
     let realTimeRequestType: HandlerTypes
     if (params.getPreviousDay === 'on') {
       realTimeRequestType = 'getPreviousDay'

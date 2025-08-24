@@ -1,5 +1,5 @@
 import { Logger } from '@/__core/logger'
-import { TransactionPacket, RequestParams, NormalizedData, ChartData, AlgoProcessType } from '@/types'
+import { TransactionPacket, RequestParams, NormalizedData, ChartData, AlgoProcessType, MetaData } from '@/types'
 import DebugService from '../services/debug'
 import { algoOutput } from './_output'
 import { EventEmitter } from 'events'
@@ -11,18 +11,13 @@ class AlgoEngineManager {
   private bus: EventEmitter
   private static engines: Map<string, AlgoEngine> = new Map()
 
-
   constructor() {
     this.bus = EventBus
-
-    // this.init()
-    // console.log('aem init')
   }
 
   init() {
     DebugService.trace(null, 'red')
 
-    // console.log(this)
     // this.bus.on(
     //   'realTime:data:queue',
     //   (data: TransactionPacket, id: RequestParams['chartId']) => {
@@ -56,7 +51,7 @@ class AlgoEngineManager {
           ...dataWindow.data.slice(0, 1),
         )
 
-        const engineId = this.createEngineId(requestParams)
+        const engineId = this.createEngineId(requestParams, dataWindow.metaData)
         this.startAlgoEngine(engineId, requestParams, dataWindow, chartData)
         // const algoResult = algoOutput(requestParams, dataWindow)
         // this.bus.emit('analysisResults:data', algoResult, chartData)
@@ -64,10 +59,10 @@ class AlgoEngineManager {
     )
   }
 
-  createEngineId(requestParams: Partial<RequestParams>): string {
+  createEngineId(requestParams: Partial<RequestParams>, requestMetaData: MetaData): string {
     DebugService.trace()
-    const engineId = `${requestParams.requestType}:${requestParams.symbol || requestParams.requestedStoredDataFilename}:${requestParams.algorithm}@${BUILD_INFO.shortSha}:${requestParams.chartId || 'n/a'}`
-    Logger.info('EngineId:', engineId)
+    const engineId = `${requestParams.requestType}:${requestMetaData.tickerSymbol}:${requestParams.dataSource === 'storedData' ? `storedData@${requestParams.requestedStoredDataFilename}` : requestParams.dataSource }:${requestParams.algorithm}@${BUILD_INFO.shortSha}:${requestParams.chartId || 'n/a'}`
+    Logger.info('EngineId:', engineId) 
     return engineId
   }
 
@@ -94,7 +89,7 @@ class AlgoEngineManager {
 
     // create engine via factory
     const engine = AlgoEngineFactory.create(algoProcessType, requestParams, dataWindow, chartData)
-    
+
     // run init on new engine
     engine.init()
 
@@ -102,16 +97,29 @@ class AlgoEngineManager {
     AlgoEngineManager.engines.set(engineId, engine)
 
     // log current AlgoEngines
-    Logger.info(`Current Engines:\n`, AlgoEngineManager.engines)
+    // Logger.info(`Current Engines:\n`, AlgoEngineManager.engines)
   }
 
   stopEngine(engineId: string) {
+    // TODO: Determine when and why this needs to occur? Auto-garbage collected when server restarts... when to do manually? ever?
+    DebugService.trace()
 
+    const engine = AlgoEngineManager.engines.get(engineId)
+    if (engine) {
+      engine.stopProcess()
+      AlgoEngineManager.engines.delete(engineId)
+    }
   }
 
   stopAllEngines() {
+    // TODO: Determine when and why this needs to occur? Auto-garbage collected when server restarts... when to do manually? ever?
+    DebugService.trace()
 
-    
+    AlgoEngineManager.engines.forEach((engine) => {
+      engine.stopProcess()
+    })
+
+    AlgoEngineManager.engines.clear()
   }
 }
 
