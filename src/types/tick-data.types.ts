@@ -125,3 +125,5 @@ type TradierTickData = {
   volume: number
   vwap: number
 }
+
+export type AlgoProcessType = 'most-recent' | 'batch'

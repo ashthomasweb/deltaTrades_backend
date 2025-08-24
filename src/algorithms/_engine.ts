@@ -9,21 +9,29 @@ import {
   ChartData,
   ExtTick,
   NormalizedData,
+  ProcessType,
 } from '@/types'
 import { algoOutput } from './_output'
 import DebugService from '@/services/debug'
+import { request } from 'http'
 
 export class AlgoEngine {
   private bus: EventEmitter
+  private processType: ProcessType
+  private data: NormalizedData
+  private requestParams: Partial<RequestParams>
 
-  constructor() {
+
+  constructor(processType: ProcessType, requestParams: Partial<RequestParams>, data: NormalizedData, chartData: any) {
     this.bus = EventBus
-    this.init()
+    this.processType = processType
+    this.data = data
+    this.requestParams = requestParams
   }
 
   init() {
-    DebugService.trace()
-    // console.log(this)
+    DebugService.trace(null, 'cyan')
+    console.log(this.processType, this.data.data.length > 0, this.requestParams)
     
     // this.bus.on(
     //   'realTime:data:queue',
@@ -93,6 +101,10 @@ export class AlgoEngine {
   output() {
     // Accepts packagedResult
     // emits events based on conditions (return to FE, send to brokerage pipeline, paper/live/both, testing, storage)
+  }
+
+  stopProcess() {
+
   }
 
 
