@@ -96,7 +96,10 @@ export default function postRequestRouter(
     // }
 
     case 'analysis': {
+      if (!requestParams.requestedStoredDataFilename) throw Error('No filename passed')
+      
       DebugService.trace('Switch - analysis')
+
 
 
 
@@ -105,7 +108,7 @@ export default function postRequestRouter(
       const normalizedData = analysisDataAdapter.returnNormalizedData() as NormalizedData
       const chartData = analysisDataAdapter.returnFormattedData('chart')
 
-      const datasetId = DataCache.createDatasetId('batch', normalizedData.metaData.dataSource, normalizedData.metaData.tickerSymbol, new Date().toDateString())
+      const datasetId = DataCache.createDatasetId('batch', normalizedData.metaData.dataSource, normalizedData.metaData.tickerSymbol, new Date().toDateString(), normalizedData.metaData.interval, requestParams.requestedStoredDataFilename)
       DataCache.storeDataset(datasetId, normalizedData)
 
       EventBus.emit(

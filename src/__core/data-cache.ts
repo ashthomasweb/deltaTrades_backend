@@ -9,8 +9,9 @@ class DataCache {
 
   }
 
-  createDatasetId(processType: AlgoProcessType, dataSource: string, tickerSymbol: string, date: string) {
-    return `${processType}:${dataSource}:${tickerSymbol}:${date}`
+  // TODO: Needs interval - and to distinguish from the same ticker but different stored data - Do I need the dataSource??
+  createDatasetId(processType: AlgoProcessType, dataSource: string, tickerSymbol: string, date: string, interval: string, storedDataFilename?: string) { 
+    return `${date}:${processType}:${interval}:${processType === 'batch' ? storedDataFilename : tickerSymbol}:${dataSource}`
   }
 
   storeDataset(datasetId: string, data: any) {
@@ -34,13 +35,6 @@ class DataCache {
     } else {
       DataCache.datasets.set(datasetId, data)
     }
-
-
-
-
-
-
-
 
     Logger.info(DataCache.datasets)
   }

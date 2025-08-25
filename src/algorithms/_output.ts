@@ -79,7 +79,7 @@ export function algoOutput(
   RSI = calculateRSI(data, requestParams)
 
   /* Bollinger Bands */
-  bollingerBands = generateBollingerSeries(data, 20, 2)
+  bollingerBands = generateBollingerSeries(data, 20, 2) // TODO: Create params
 
   /* MACD */
   MACD = calculateMACD(data, requestParams)

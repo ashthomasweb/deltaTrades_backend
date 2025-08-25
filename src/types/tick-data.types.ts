@@ -41,14 +41,20 @@ export interface Tick {
   volume: number
 }
 
-export interface ExtTick extends Tick {
-  percentChange?: number | null
-  absoluteChange?: number | null
-  vwap?: number | null
-  originalIndex: number | undefined
-  isPrevGreen: boolean | null
-  isGreen: boolean
-  isNextGreen: boolean | null
+export interface BaseExtTick extends Tick {
+  percentChange?: number | null // No params required - compute upfront
+  absoluteChange?: number | null // No params required - compute upfront
+  vwap?: number | null // No params required - compute upfront
+  originalIndex: number | undefined // No params required - compute upfront
+  isPrevGreen: boolean | null // No params required - compute upfront
+  isGreen: boolean // No params required - compute upfront
+  isNextGreen: boolean | null // No params required - compute upfront
+  candleBodyFullness: number // No params required - compute upfront
+  candleBodyDistPercentile: number | undefined // No params required - compute upfront
+  candleVolumeDistPercentile: number | undefined // No params required - compute upfront
+}
+
+export interface ExtTick extends BaseExtTick {
   movingAvg: number | undefined
   shortEmaAvg: number | undefined
   longEmaAvg: number | undefined
@@ -63,9 +69,6 @@ export interface ExtTick extends Tick {
   isBullishExhaustion: boolean | null
   crossesBodyAtPercent?: number | null
   isCandleFull80: boolean
-  candleBodyFullness: number
-  candleBodyDistPercentile: number | undefined
-  candleVolumeDistPercentile: number | undefined
   volumeTrendIncreasing: number | null
   value: [string | undefined, null]
   percSlopeByPeriod: number | null
@@ -74,7 +77,7 @@ export interface ExtTick extends Tick {
   emaSlopeByPeriod: number | null
 }
 
-export type TickArray = Tick[] | ExtTick[]
+export type TickArray = Tick[] | BaseExtTick[] | ExtTick[]
 
 // export type Tick = {
 //   timestamp: string

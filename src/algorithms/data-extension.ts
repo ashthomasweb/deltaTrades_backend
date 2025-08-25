@@ -1,5 +1,7 @@
-import { TickArray, ExtTick, Tick, RequestParams } from '@/types'
+import { TickArray, ExtTick, Tick, RequestParams, BaseExtTick } from '@/types'
 import {
+  buildDailyDistributions,
+  DailyDataGroups,
   findSingleTickBodyDistribution,
   findTickVolumeDistribution,
   getPreviousDayDistributions,
@@ -11,6 +13,7 @@ import {
   getCandleBodyFullness,
   findAbsoluteChange,
   findPercentChange,
+  groupByDays,
 } from './general-utilities'
 import {
   bollingerBreakout,
@@ -21,6 +24,48 @@ import {
   MACrossover,
 } from './trend-analysis'
 import { calculateVolumeTrendScore, calculateVWAP } from './volume-utils'
+
+
+export const baseTickExtension = (
+  data: Tick[]
+) => {
+  const dayDataGroups: DailyDataGroups | undefined = groupByDays(data)
+  const dailyDistributions = buildDailyDistributions(dayDataGroups)
+
+  const baseExtendedData = data.map((tick: Tick, index: number) => {
+    let currentDay = ''
+    let previousDayDistributions: any = null
+
+    if (tick.timestamp?.substring(0, 10) !== currentDay) {
+      currentDay = tick.timestamp?.substring(0, 10)!
+      previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
+    }
+
+    const result: BaseExtTick = {
+      ...tick,
+      percentChange: index > 0 ? findPercentChange(data[index].close, data[index - 1].close) : null,
+      absoluteChange: index > 0 ? findAbsoluteChange(data[index].close, data[index - 1].close) : null,
+      vwap: calculateVWAP(data, index), // TODO: ALGO - what window should this be calculated by? Intraday only?
+      originalIndex: index,
+      isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
+      isGreen: isGreenCandle(tick),
+      isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
+      candleBodyFullness: getCandleBodyFullness(tick),
+      candleBodyDistPercentile: findSingleTickBodyDistribution(
+        tick,
+        previousDayDistributions.candleSize.body.range,
+        previousDayDistributions.candleSize.body.distBlock,
+      ),
+       candleVolumeDistPercentile: findTickVolumeDistribution(
+        tick,
+        previousDayDistributions.volume.volLow,
+        previousDayDistributions.volume.distributionBlock,
+      ),
+    }
+  })
+
+  return baseExtendedData
+}
 
 export const extendTickData = (
   data: TickArray,
@@ -40,25 +85,21 @@ export const extendTickData = (
     typeof algoParams.slopePeriodBySMA !== 'number'
   ) return null
 
-  let currentDay = ''
-  let previousDayDistributions: any = null
+  // let currentDay = ''
+  // let previousDayDistributions: any = null
 
   return data.map((tick: Tick, index: number) => {
-    if (tick.timestamp?.substring(0, 10) !== currentDay) {
-      currentDay = tick.timestamp?.substring(0, 10)!
-      previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
-    }
+    // if (tick.timestamp?.substring(0, 10) !== currentDay) {
+    //   currentDay = tick.timestamp?.substring(0, 10)!
+    //   previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
+    // }
 
+    // Needs to be precalculated as another key depends on the result
     const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])
 
     const result: ExtTick = {
       ...tick,
-      originalIndex: index,
-      isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
-      isGreen: isGreenCandle(tick),
-      isNextGreen: index < data.length - 1 ? isGreenCandle(data[index + 1]) : null,
-      percentChange: index > 0 ? findPercentChange(data[index].close, data[index - 1].close) : null,
-      absoluteChange: index > 0 ? findAbsoluteChange(data[index].close, data[index - 1].close) : null,
+      value: [tick.timestamp, null], // WHAT IS THIS? I think it's for a hidden display point? Verify or Retire.
       movingAvg: maAvgArrayShort[index],
       shortEmaAvg: emaAvgArrayShort[index],
       longEmaAvg: emaAvgArrayLong[index],
@@ -69,20 +110,8 @@ export const extendTickData = (
       isWickCrossing: isCandleWickCrossingAvg(tick, maAvgArrayShort[index]),
       isBodyCrossing: isBodyCrossing,
       crossesBodyAtPercent: isBodyCrossing ? findBodyCrossingPercent(tick, maAvgArrayShort[index]) : null,
-      isCandleFull80: isCandleFullByPercentage(tick, 0.8),
-      candleBodyFullness: getCandleBodyFullness(tick),
-      candleBodyDistPercentile: findSingleTickBodyDistribution(
-        tick,
-        previousDayDistributions.candleSize.body.range,
-        previousDayDistributions.candleSize.body.distBlock,
-      ),
-      candleVolumeDistPercentile: findTickVolumeDistribution(
-        tick,
-        previousDayDistributions.volume.volLow,
-        previousDayDistributions.volume.distributionBlock,
-      ),
+      isCandleFull80: isCandleFullByPercentage(tick, 0.8), // TODO Create params
       volumeTrendIncreasing: calculateVolumeTrendScore(data, index, requestParams),
-      value: [tick.timestamp, null], // WHAT IS THIS? I think it's for a hidden display point? Verify or Retire.
       percSlopeByPeriod:
         index >= algoParams?.slopePeriodByRawPrice
           ? getPercentSlopeByPeriod(data, index, requestParams, 'close')
@@ -99,7 +128,6 @@ export const extendTickData = (
         index >= algoParams?.slopePeriodByEMA
           ? getPercentSlopeByPeriod(emaAvgArrayShort, index, requestParams, 'ema')
           : null,
-      vwap: calculateVWAP(data, index) // TODO: ALGO - what window should this be calculated by? Intraday only?
     }
 
     return result
