@@ -81,7 +81,7 @@ export class WebSocketServer {
       ws.on('message', (message) => {
         try {
           const requestParams: Partial<RequestParams> = JSON.parse(message.toString())
-          Logger.info('Websocket received message:', requestParams)
+          Logger.info('Websocket received message of type:', requestParams)
           preRequestRouter(requestParams)
         } catch (err) {
           // Logger.error('Error handling WS message:', err) // TODO: 'Logger' class causes test to fail...

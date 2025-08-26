@@ -106,16 +106,20 @@ export default function postRequestRouter(
       const analysisDataAdapter = new DataAdapter(requestParams, data)
 
       const normalizedData = analysisDataAdapter.returnNormalizedData() as NormalizedData
+      const metaData = normalizedData.metaData
       const chartData = analysisDataAdapter.returnFormattedData('chart')
+      const algoProcessType = requestParams.requestType === 'analysis' ? 'batch' : 'most-recent'
 
-      const datasetId = DataCache.createDatasetId('batch', normalizedData.metaData.dataSource, normalizedData.metaData.tickerSymbol, new Date().toDateString(), normalizedData.metaData.interval, requestParams.requestedStoredDataFilename)
-      DataCache.storeDataset(datasetId, normalizedData)
+
+      const datasetId = DataCache.createDatasetId(algoProcessType, metaData.dataSource, metaData.tickerSymbol, new Date().toDateString(), metaData.interval, requestParams.requestedStoredDataFilename)
+      DataCache.handleNewData(normalizedData, requestParams, algoProcessType, datasetId)
 
       EventBus.emit(
-        'analysis:data:queue', // TODO: There is no queue - bad name
-        analysisDataAdapter.returnFormattedData('normalized'), // TODO: There is no queue - needs to pass normalized data
-        analysisDataAdapter.returnFormattedData('chart'),
+        'algoEngineManager:analysis', // TODO: There is no queue - bad name
+        metaData, // TODO: There is no queue - needs to pass normalized data
+        chartData,
         requestParams,
+        datasetId
       )
       break
     }

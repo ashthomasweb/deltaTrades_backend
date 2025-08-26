@@ -86,7 +86,7 @@ export const buildDailyDistributions = (dailyDataGroups: DailyDataGroups | undef
 
 // Will need adaptation for realTime
 export const getPreviousDayDistributions = (currentDay: string, dailyDistributions: any) => {
-  return dailyDistributions[currentDay]
+  return dailyDistributions[currentDay] // TODO: Get Previous... returns current?? 
 }
 
 export const getVolumeRange = (data: TickArray) => {
@@ -123,6 +123,7 @@ export const createVolumeDistributionMap = (data: TickArray) => {
     map: distributionArray,
   }
 }
+
 export const findTickVolumeDistribution = (tick: Tick | ExtTick, low: number, distributionBlock: number) => {
   return Math.floor((tick.volume - low) / distributionBlock)
 }

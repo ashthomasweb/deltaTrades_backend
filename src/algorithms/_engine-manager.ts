@@ -1,11 +1,12 @@
 import { Logger } from '@/__core/logger'
-import { TransactionPacket, RequestParams, NormalizedData, ChartData, AlgoProcessType, MetaData } from '@/types'
+import { TransactionPacket, RequestParams, NormalizedData, ChartData, AlgoProcessType, MetaData, ChartDataShape } from '@/types'
 import DebugService from '../services/debug'
 import { algoOutput } from './_output'
 import { EventEmitter } from 'events'
 import EventBus from '../__core/event-bus'
 import { AlgoEngine } from './_engine'
 import { BUILD_INFO } from '@/__core/build-info'
+import DataCache from '@/__core/data-cache'
 
 class AlgoEngineManager {
   private bus: EventEmitter
@@ -37,22 +38,24 @@ class AlgoEngineManager {
     // )
 
     this.bus.on(
-      'analysis:data:queue',
+      'algoEngineManager:analysis',
       (
-        dataWindow: NormalizedData,
-        chartData: ChartData,
+        metaData: MetaData,
+        chartData: ChartDataShape,
         requestParams: Partial<RequestParams>,
+        datasetId: string
       ) => {
         Logger.info(
           'AlgoEngine received data\n',
           'id:',
-          dataWindow.metaData.tickerSymbol,
-          dataWindow.metaData.requestType,
-          ...dataWindow.data.slice(0, 1),
+          metaData.tickerSymbol,
+          metaData.requestType,
         )
 
-        const engineId = this.createEngineId(requestParams, dataWindow.metaData)
-        this.startAlgoEngine(engineId, requestParams, dataWindow, chartData)
+        // DataCache.handleNewData(normalizedData, requestParams)
+        
+        const engineId = this.createEngineId(requestParams, metaData)
+        this.startAlgoEngine(engineId, requestParams, datasetId, chartData)
         // const algoResult = algoOutput(requestParams, dataWindow)
         // this.bus.emit('analysisResults:data', algoResult, chartData)
       },
@@ -66,7 +69,7 @@ class AlgoEngineManager {
     return engineId
   }
 
-  startAlgoEngine(engineId: string, requestParams: Partial<RequestParams>, dataWindow: NormalizedData, chartData?: any) {
+  startAlgoEngine(engineId: string, requestParams: Partial<RequestParams>, datasetId: string, chartData?: ChartDataShape,) {
     DebugService.trace(null, 'yellow')
 
     // check to see if existing - clean up if so
@@ -88,7 +91,7 @@ class AlgoEngineManager {
     }
 
     // create engine via factory
-    const engine = AlgoEngineFactory.create(algoProcessType, requestParams, dataWindow, chartData)
+    const engine = AlgoEngineFactory.create(algoProcessType, requestParams, chartData, datasetId, engineId)
 
     // run init on new engine
     engine.init()
@@ -97,7 +100,7 @@ class AlgoEngineManager {
     AlgoEngineManager.engines.set(engineId, engine)
 
     // log current AlgoEngines
-    // Logger.info(`Current Engines:\n`, AlgoEngineManager.engines)
+    Logger.info(`Current Engines:\n`, AlgoEngineManager.engines)
   }
 
   stopEngine(engineId: string) {
@@ -124,8 +127,8 @@ class AlgoEngineManager {
 }
 
 class AlgoEngineFactory {
-  static create(processType: AlgoProcessType, requestParams: Partial<RequestParams>, dataWindow: NormalizedData, chartData: any) {
-    return new AlgoEngine(processType, requestParams, dataWindow, chartData)
+  static create(processType: AlgoProcessType, requestParams: Partial<RequestParams>, chartData: ChartDataShape, datasetId: string, engineId: string) {
+    return new AlgoEngine(processType, requestParams, chartData, datasetId, engineId)
   }
 }
 

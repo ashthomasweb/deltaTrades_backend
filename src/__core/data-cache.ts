@@ -1,6 +1,7 @@
-import { AlgoProcessType } from "@/types"
+import { AlgoProcessType, NormalizedData, RequestParams } from "@/types"
 import { Logger } from "./logger"
 import DebugService from "@/services/debug"
+import { baseTickExtension } from "@/algorithms/data-extension"
 
 class DataCache {
   private static datasets: Map<string, any> = new Map()
@@ -9,7 +10,16 @@ class DataCache {
 
   }
 
-  // TODO: Needs interval - and to distinguish from the same ticker but different stored data - Do I need the dataSource??
+  handleNewData(normalizedData: NormalizedData, requestParams: Partial<RequestParams>, algoProcessType: AlgoProcessType, datasetId: string) {
+    const data = normalizedData.data
+
+    // Perform basic data extension
+    const baseExtendedData = baseTickExtension(data, algoProcessType)
+
+    // Store data in registry
+    this.storeDataset(datasetId, baseExtendedData)
+  }
+
   createDatasetId(processType: AlgoProcessType, dataSource: string, tickerSymbol: string, date: string, interval: string, storedDataFilename?: string) { 
     return `${date}:${processType}:${interval}:${processType === 'batch' ? storedDataFilename : tickerSymbol}:${dataSource}`
   }
@@ -36,7 +46,7 @@ class DataCache {
       DataCache.datasets.set(datasetId, data)
     }
 
-    Logger.info(DataCache.datasets)
+    Logger.info('DataCache current datasets\n', Array.from(DataCache.datasets))
   }
 
   clearDataset() {

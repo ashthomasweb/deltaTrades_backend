@@ -1,4 +1,4 @@
-import { TickArray, ExtTick, Tick, RequestParams, BaseExtTick } from '@/types'
+import { TickArray, ExtTick, Tick, RequestParams, BaseExtTick, AlgoProcessType } from '@/types'
 import {
   buildDailyDistributions,
   DailyDataGroups,
@@ -27,7 +27,8 @@ import { calculateVolumeTrendScore, calculateVWAP } from './volume-utils'
 
 
 export const baseTickExtension = (
-  data: Tick[]
+  data: Tick[],
+  algoProcessType: AlgoProcessType
 ) => {
   const dayDataGroups: DailyDataGroups | undefined = groupByDays(data)
   const dailyDistributions = buildDailyDistributions(dayDataGroups)
@@ -45,7 +46,7 @@ export const baseTickExtension = (
       ...tick,
       percentChange: index > 0 ? findPercentChange(data[index].close, data[index - 1].close) : null,
       absoluteChange: index > 0 ? findAbsoluteChange(data[index].close, data[index - 1].close) : null,
-      vwap: calculateVWAP(data, index), // TODO: ALGO - what window should this be calculated by? Intraday only?
+      vwap: calculateVWAP(data, index), // TODO: what window should this be calculated by? Intraday only?
       originalIndex: index,
       isPrevGreen: index > 0 ? isGreenCandle(data[index - 1]) : null,
       isGreen: isGreenCandle(tick),
@@ -62,13 +63,15 @@ export const baseTickExtension = (
         previousDayDistributions.volume.distributionBlock,
       ),
     }
+
+    return result
   })
 
   return baseExtendedData
 }
 
 export const extendTickData = (
-  data: TickArray,
+  data: BaseExtTick[],
   maAvgArrayShort: number[],
   emaAvgArrayShort: number[],
   emaAvgArrayLong: number[],
@@ -88,7 +91,7 @@ export const extendTickData = (
   // let currentDay = ''
   // let previousDayDistributions: any = null
 
-  return data.map((tick: Tick, index: number) => {
+  return data.map((tick: BaseExtTick, index: number) => {
     // if (tick.timestamp?.substring(0, 10) !== currentDay) {
     //   currentDay = tick.timestamp?.substring(0, 10)!
     //   previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)

@@ -10,36 +10,45 @@ import {
   ExtTick,
   NormalizedData,
   AlgoProcessType,
+  ChartDataShape,
 } from '@/types'
 import { algoOutput } from './_output'
 import DebugService from '@/services/debug'
 import { request } from 'http'
+import dataCache from '@/__core/data-cache'
 
 export class AlgoEngine {
   private bus: EventEmitter
   private processType: AlgoProcessType
-  private data: NormalizedData
+  // private data: NormalizedData
   private requestParams: Partial<RequestParams>
   private chartData: any
+  private datasetId: string
+  private engineId: string
 
-  constructor(processType: AlgoProcessType, requestParams: Partial<RequestParams>, data: NormalizedData, chartData: any) {
+  constructor(processType: AlgoProcessType, requestParams: Partial<RequestParams>, chartData: ChartDataShape, datasetId: string, engineId: string) {
     this.bus = EventBus
     this.processType = processType
-    this.data = data
     this.chartData = chartData
     this.requestParams = requestParams
+    this.datasetId = datasetId
+    this.engineId = engineId
   }
 
   init() {
     DebugService.trace(null, 'red')
-    // console.log('processType', this.processType)
-    // console.log('data', this.data.data.length > 0)
-    // console.log('params', this.requestParams)
-    // console.log('chartData', this.chartData)
+    console.log('processType', this.processType)
+    console.log('params', this.requestParams)
+    console.log('chartData', this.chartData)
+    console.log('datasetId', this.datasetId)
+    console.log('engineId', this.engineId)
+    this.dataProcessor()
   }
 
   dataProcessor() {
     // synchronous flow of step by step process
+    // get from DataCache...
+    // const dataWindow = DataCache.datasets.get
     // build...
     // extend...
     // runAlgo...
