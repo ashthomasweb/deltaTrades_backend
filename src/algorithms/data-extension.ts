@@ -1,4 +1,4 @@
-import { TickArray, ExtTick, Tick, RequestParams, BaseExtTick, AlgoProcessType } from '@/types'
+import { ExtTick, Tick, RequestParams, BaseExtTick, AlgoProcessType } from '@/types'
 import {
   buildDailyDistributions,
   DailyDataGroups,
@@ -6,7 +6,11 @@ import {
   findTickVolumeDistribution,
   getPreviousDayDistributions,
 } from './distributions-ranges'
-import { isCandleWickCrossingAvg, isCandleBodyCrossingAvg, findBodyCrossingPercent } from './entry-triggers'
+import { 
+  isCandleWickCrossingAvg, 
+  isCandleBodyCrossingAvg, 
+  findBodyCrossingPercent 
+} from './entry-triggers'
 import {
   isGreenCandle,
   isCandleFullByPercentage,
@@ -25,10 +29,9 @@ import {
 } from './trend-analysis'
 import { calculateVolumeTrendScore, calculateVWAP } from './volume-utils'
 
-
 export const baseTickExtension = (
   data: Tick[],
-  algoProcessType: AlgoProcessType
+  algoProcessType: AlgoProcessType // TODO: Future-Proof: Create basic conditional for batch vs most-recent
 ) => {
   const dayDataGroups: DailyDataGroups | undefined = groupByDays(data)
   const dailyDistributions = buildDailyDistributions(dayDataGroups)
@@ -71,12 +74,11 @@ export const baseTickExtension = (
 }
 
 export const extendTickData = (
-  data: BaseExtTick[],
+  data: any, // TODO: Fix once new data pipeline in place
   maAvgArrayShort: number[],
   emaAvgArrayShort: number[],
   emaAvgArrayLong: number[],
   bollingerSeries: any,
-  dailyDistributions: any,
   requestParams: Partial<RequestParams>,
 ): ExtTick[] | null => {
   const { algoParams } = requestParams
@@ -88,14 +90,7 @@ export const extendTickData = (
     typeof algoParams.slopePeriodBySMA !== 'number'
   ) return null
 
-  // let currentDay = ''
-  // let previousDayDistributions: any = null
-
   return data.map((tick: BaseExtTick, index: number) => {
-    // if (tick.timestamp?.substring(0, 10) !== currentDay) {
-    //   currentDay = tick.timestamp?.substring(0, 10)!
-    //   previousDayDistributions = getPreviousDayDistributions(currentDay, dailyDistributions)
-    // }
 
     // Needs to be precalculated as another key depends on the result
     const isBodyCrossing = isCandleBodyCrossingAvg(tick, maAvgArrayShort[index])

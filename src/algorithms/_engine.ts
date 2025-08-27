@@ -3,26 +3,18 @@ import { EventEmitter } from 'events'
 import EventBus from '../__core/event-bus'
 import { Logger } from '../__core/logger'
 import {
-  TransactionPacket,
-  Tick as Tick,
   RequestParams,
-  ChartData,
-  ExtTick,
-  NormalizedData,
   AlgoProcessType,
   ChartDataShape,
 } from '@/types'
-import { algoOutput } from './_output'
 import DebugService from '@/services/debug'
-import { request } from 'http'
-import dataCache from '@/__core/data-cache'
+import DataCache from '@/__core/data-cache'
 
 export class AlgoEngine {
   private bus: EventEmitter
   private processType: AlgoProcessType
-  // private data: NormalizedData
   private requestParams: Partial<RequestParams>
-  private chartData: any
+  private chartData: ChartDataShape
   private datasetId: string
   private engineId: string
 
@@ -39,21 +31,34 @@ export class AlgoEngine {
     DebugService.trace(null, 'red')
     console.log('processType', this.processType)
     console.log('params', this.requestParams)
-    console.log('chartData', this.chartData)
+    console.log('chartData ', this.chartData ? 'present' : 'missing')
     console.log('datasetId', this.datasetId)
     console.log('engineId', this.engineId)
     this.dataProcessor()
   }
 
+  // synchronous flow of step by step process
   dataProcessor() {
-    // synchronous flow of step by step process
+    DebugService.trace()
+
     // get from DataCache...
-    // const dataWindow = DataCache.datasets.get
+    const data = DataCache.provideDataset(this.datasetId)
+    Logger.info(data)
+
     // build...
+    this.buildSeriesMetrics()
+
     // extend...
+    this.extendData()
+
     // runAlgo...
+    this.runAlgoActual()
+
     // conditional packaging (return to FE? Create transaction packet? Paper trade?)
+    this.packageResults()
+
     // conditional output (return to FE? Send to brokerage pipeline? Store in DB?)
+    this.output()
   }
 
   buildSeriesMetrics() {
@@ -86,47 +91,54 @@ export class AlgoEngine {
 
   }
 
-  /* Retired? */
-  // enqueue(element: Tick | ExtTick) {
-  //   if (this.elements) {
-  //     this.elements[this.head] = element
-  //   }
-  //   this.head++
-  // }
 
-  // dequeue() {
-  //   let item
-  //   if (this.elements) {
-  //     item = this.elements[this.tail]
-  //     delete this.elements[this.tail]
-  //   }
-  //   this.tail++
-  //   return item
-  // }
-
-  // peek() {
-  //   if (this.elements) {
-  //     return this.elements[this.tail]
-  //   }
-  // }
-
-  // length(): number {
-  //   return this.head - this.tail
-  // }
-
-  // isEmpty() {
-  //   return this.length() === 0
-  // }
-
-  /* END */
 }
 
-export const queueDataFeeder = (data: unknown) => {
-  // if (data.length > 1) {
-  // feed(data[0])
-  // } else {
-  // setInterval(() => {
-  // feed(data)
-  // }, 300)
-  // }
-}
+
+
+
+
+/* Retired? */
+// enqueue(element: Tick | ExtTick) {
+//   if (this.elements) {
+//     this.elements[this.head] = element
+//   }
+//   this.head++
+// }
+
+// dequeue() {
+//   let item
+//   if (this.elements) {
+//     item = this.elements[this.tail]
+//     delete this.elements[this.tail]
+//   }
+//   this.tail++
+//   return item
+// }
+
+// peek() {
+//   if (this.elements) {
+//     return this.elements[this.tail]
+//   }
+// }
+
+// length(): number {
+//   return this.head - this.tail
+// }
+
+// isEmpty() {
+//   return this.length() === 0
+// }  
+
+// export const queueDataFeeder = (data: unknown) => {
+//   if (data.length > 1) {
+//     feed(data[0])
+//   } else {
+//     setInterval(() => {
+//       feed(data)
+//     }, 300)
+//   }
+// }
+
+/* END */
+

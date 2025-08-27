@@ -14,6 +14,7 @@ import { marketDataFetcher } from './_market-data-fetcher'
 import postRequestRouter from './_post-request-router'
 import { buildParamString } from '../../utils/api'
 import { RequestParams } from '@/types'
+import DebugService from '@/services/debug'
 
 export const historicalActions = {
   /**
@@ -25,7 +26,8 @@ export const historicalActions = {
    * @returns A Promise that resolves after routing the fetched data.
    */
   async sendStored(requestParams: Partial<RequestParams>) {
-    Logger.info(`historicalActions sendStored - ${requestParams.requestedStoredDataFilename}`)
+    DebugService.trace()
+    Logger.info('Stored Filename:', requestParams.requestedStoredDataFilename)
 
     const localStoredDataRootPath = './src/storedData/'
 

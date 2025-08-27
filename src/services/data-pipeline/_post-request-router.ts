@@ -29,9 +29,9 @@ import DataCache from '@/__core/data-cache'
  * @param count - Optional count, used for controlling pagination or intervals in realTime requests.
  */
 export default function postRequestRouter(
-  data: any,
+  data: any, // TODO: Alpha | Tradier | Normalized ??
   requestParams: Partial<RequestParams>,
-  chartId?: number | string,
+  chartId?: number | string, // Isn't this normalized to a type now?
   count?: number,
 ) {
   DebugService.trace()
@@ -74,7 +74,7 @@ export default function postRequestRouter(
         EventBus.emit('realTime:data', realTimeDataAdapter.returnFormattedData('chart'), chartId)
       }
 
-      if (requestParams.sendToQueue === 'on') {
+      if (requestParams.sendToQueue === 'on') { // TODO: Rename - not a Queue!
         EventBus.emit('realTime:data:queue', realTimeDataAdapter.returnFormattedData('queue'), chartId)
       }
 
@@ -83,40 +83,28 @@ export default function postRequestRouter(
       }
       break
     }
-     
-    // case 'storedData': {
-    //   DebugService.trace('Switch - storedData', 'yellow')
-
-    //   const storedDataAdapter = new DataAdapter(requestParams, data)
-
-    //   if (requestParams.returnToFE) {
-    //     EventBus.emit('historical:data', storedDataAdapter.returnFormattedData('chart'))
-    //   }
-    //   break
-    // }
 
     case 'analysis': {
       if (!requestParams.requestedStoredDataFilename) throw Error('No filename passed')
-      
       DebugService.trace('Switch - analysis')
 
-
-
-
       const analysisDataAdapter = new DataAdapter(requestParams, data)
-
       const normalizedData = analysisDataAdapter.returnNormalizedData() as NormalizedData
-      const metaData = normalizedData.metaData
       const chartData = analysisDataAdapter.returnFormattedData('chart')
+      
+      const metaData = normalizedData.metaData
       const algoProcessType = requestParams.requestType === 'analysis' ? 'batch' : 'most-recent'
-
-
-      const datasetId = DataCache.createDatasetId(algoProcessType, metaData.dataSource, metaData.tickerSymbol, new Date().toDateString(), metaData.interval, requestParams.requestedStoredDataFilename)
-      DataCache.handleNewData(normalizedData, requestParams, algoProcessType, datasetId)
+      
+      const datasetId = DataCache.createDatasetId(
+        algoProcessType,
+        metaData,
+        requestParams.requestedStoredDataFilename
+      )
+      DataCache.handleNewData(normalizedData, algoProcessType, datasetId)
 
       EventBus.emit(
-        'algoEngineManager:analysis', // TODO: There is no queue - bad name
-        metaData, // TODO: There is no queue - needs to pass normalized data
+        'algoEngineManager:analysis',
+        metaData,
         chartData,
         requestParams,
         datasetId

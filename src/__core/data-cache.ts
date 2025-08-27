@@ -1,4 +1,4 @@
-import { AlgoProcessType, NormalizedData, RequestParams } from "@/types"
+import { AlgoProcessType, MetaData, NormalizedData } from "@/types"
 import { Logger } from "./logger"
 import DebugService from "@/services/debug"
 import { baseTickExtension } from "@/algorithms/data-extension"
@@ -6,11 +6,9 @@ import { baseTickExtension } from "@/algorithms/data-extension"
 class DataCache {
   private static datasets: Map<string, any> = new Map()
 
-  constructor() {
+  constructor() {}
 
-  }
-
-  handleNewData(normalizedData: NormalizedData, requestParams: Partial<RequestParams>, algoProcessType: AlgoProcessType, datasetId: string) {
+  handleNewData(normalizedData: NormalizedData, algoProcessType: AlgoProcessType, datasetId: string) {
     const data = normalizedData.data
 
     // Perform basic data extension
@@ -20,14 +18,14 @@ class DataCache {
     this.storeDataset(datasetId, baseExtendedData)
   }
 
-  createDatasetId(processType: AlgoProcessType, dataSource: string, tickerSymbol: string, date: string, interval: string, storedDataFilename?: string) { 
-    return `${date}:${processType}:${interval}:${processType === 'batch' ? storedDataFilename : tickerSymbol}:${dataSource}`
+  createDatasetId(processType: AlgoProcessType, metaData: MetaData, storedDataFilename?: string) { 
+    return `${new Date().toDateString()}:${processType}:${metaData.interval}:${processType === 'batch' ? storedDataFilename : metaData.tickerSymbol}:${metaData.dataSource}`
   }
 
   storeDataset(datasetId: string, data: any) {
     DebugService.trace(null, 'red', 'italic')
 
-    const processType = datasetId.split(':')[0]
+    const processType = datasetId.split(':')[1] // TODO: Refactor so that id parts can be looked up by key
     let existingDataset = DataCache.datasets.get(datasetId)
     if (existingDataset) {
       switch (processType) {
@@ -36,7 +34,7 @@ class DataCache {
           break
 
         case 'batch':
-          existingDataset = data
+          DataCache.datasets.set(datasetId, data)
           break
 
         default:
@@ -46,23 +44,19 @@ class DataCache {
       DataCache.datasets.set(datasetId, data)
     }
 
-    Logger.info('DataCache current datasets\n', Array.from(DataCache.datasets))
+    Logger.info('DataCache current datasets\n', DataCache.datasets.keys())
   }
 
-  clearDataset() {
-
+  clearDataset(datasetId: string) {
+    DataCache.datasets.delete(datasetId)
   }
 
   clearAllDatasets() {
-
+    DataCache.datasets.clear()
   }
 
-  createBaseExtension() {
-
-  }
-
-  provideDataset() {
-
+  provideDataset(datasetId: string) {
+    return DataCache.datasets.get(datasetId)
   }
 }
 

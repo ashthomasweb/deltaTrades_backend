@@ -105,7 +105,6 @@ export function algoOutput(
       EMA1.data,
       EMA2.data,
       bollingerBands,
-      dailyDistributions,
       requestParams,
     )
   }

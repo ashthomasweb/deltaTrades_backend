@@ -1,12 +1,10 @@
 import { Logger } from '@/__core/logger'
-import { TransactionPacket, RequestParams, NormalizedData, ChartData, AlgoProcessType, MetaData, ChartDataShape } from '@/types'
+import { RequestParams, AlgoProcessType, MetaData, ChartDataShape } from '@/types'
 import DebugService from '../services/debug'
-import { algoOutput } from './_output'
 import { EventEmitter } from 'events'
 import EventBus from '../__core/event-bus'
 import { AlgoEngine } from './_engine'
 import { BUILD_INFO } from '@/__core/build-info'
-import DataCache from '@/__core/data-cache'
 
 class AlgoEngineManager {
   private bus: EventEmitter
@@ -51,13 +49,9 @@ class AlgoEngineManager {
           metaData.tickerSymbol,
           metaData.requestType,
         )
-
-        // DataCache.handleNewData(normalizedData, requestParams)
         
         const engineId = this.createEngineId(requestParams, metaData)
         this.startAlgoEngine(engineId, requestParams, datasetId, chartData)
-        // const algoResult = algoOutput(requestParams, dataWindow)
-        // this.bus.emit('analysisResults:data', algoResult, chartData)
       },
     )
   }
@@ -65,7 +59,6 @@ class AlgoEngineManager {
   createEngineId(requestParams: Partial<RequestParams>, requestMetaData: MetaData): string {
     DebugService.trace()
     const engineId = `${requestParams.requestType}:${requestMetaData.tickerSymbol}:${requestParams.dataSource === 'storedData' ? `storedData@${requestParams.requestedStoredDataFilename}` : requestParams.dataSource }:${requestParams.algorithm}@${BUILD_INFO.shortSha}:${requestParams.chartId || 'n/a'}`
-    Logger.info('EngineId:', engineId) 
     return engineId
   }
 
